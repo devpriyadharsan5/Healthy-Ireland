@@ -40,7 +40,7 @@ suppressWarnings(library(plyr))
 ```{r}
 library(haven)
 data <- read_sav("0021-04_healthy_ireland_2018.sav")
-View(data)
+#View(data)
 ```
 
 
@@ -363,6 +363,80 @@ ggplot(n2, aes(x=ageclass, y = perc, fill =q6)) +
   geom_bar(stat="identity", position="dodge")+ 
   scale_fill_discrete(name = "Do you smoke tobacco products?")+
   facet_wrap(~$q52)
+```
+
+
+
+```{r}
+# load necessary packages
+library(dplyr)
+library(ggplot2)
+
+n2= n1|> group_by(ageclass,q6) |> 
+  dplyr::summarise(count=n()) |> 
+  ungroup() |> group_by(ageclass) |> 
+  dplyr::summarise(perc=count/sum(count)*100, q6=q6) |>
+  drop_na()
+
+n3= n1|> group_by(q6,q52) |> 
+  dplyr::summarise(count=n()) |> 
+  ungroup() |> group_by(q6) |> 
+  dplyr::summarise(perc=sum(q6 == "Yes,")/n()*100, q52=q52) |>
+  drop_na()
+
+# create a new dataframe with smoking and gender variables only
+#smoking_gender <- n1 |> select(q6, q52)|> drop_na()
+
+# calculate the percentage of smokers by gender
+#smoking_gender_perc <- smoking_gender %>% group_by(q52) %>% 
+                       #summarize(smokers_perc = sum(q6 == "Daily")/n()) 
+
+
+# create a bar plot
+ggplot(data = n3, aes(x = q52, y = perc, fill =q6)) + 
+  geom_bar(stat = "identity", position="dodge") +
+  labs(x = "Gender", y = "Percentage of smokers", title = "Smoking prevalence by gender")
+
+```
+
+
+
+
+```{r}
+# Select the required variables
+df_smoking <- n1[c("q6", "q52")]
+
+# Group the data by smoking and gender, and count the number of observations in each group
+grouped_data <- df_smoking |>
+  group_by(q6, q52) |>
+  dplyr::summarise(count = n()) |>
+  ungroup()
+
+# Calculate the total number of observations (excluding missing values)
+total_obs <- sum(grouped_data$count)
+
+# Calculate the percentage of the population that smokes, by gender
+smoking_perc <- grouped_data |>
+  mutate(perc = count / total_obs * 100) 
+
+# Plot the results
+library(ggplot2)
+
+ggplot(smoking_perc, aes(x = q52, y = perc, fill = q6)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Gender", y = "Percentage", fill = "Smoking") +
+  ggtitle("Percentage of population that smokes, by gender")
+```
+
+
+
+
+```{r}
+ggplot(data=n3, aes(x=q52, y=perc, fill=q6)) + 
+  geom_bar(stat="identity", position="dodge") +
+  labs(x="Gender", y="Percentage", fill="Smoking") + 
+  scale_fill_manual(values=c("gray80", "gray30"), labels=c("No", "Yes,")) +
+  ggtitle("Percentage of Smokers by Gender and Age") 
 ```
 
 
