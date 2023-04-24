@@ -1,6 +1,6 @@
 
 ```{r}
-file_path <- "~/Major Project/0021-04_healthy_ireland_2018.sav"
+file_path <- "~/Final Project/0021-04_healthy_ireland_2018.sav"
 ```
 
 
@@ -38,7 +38,14 @@ suppressWarnings(library(plyr))
 
 
 ```{r}
-data <- haven::read_sav(file_path)
+library(haven)
+data <- read_sav("0021-04_healthy_ireland_2018.sav")
+View(data)
+```
+
+
+```{r}
+#data <- haven::read_sav(file_path)
 #data1 <- read_sav(file_path, to.data.frame = TRUE)
 ```
 
@@ -57,9 +64,9 @@ df5 <- data[c("q63b","lho","key1","ageclass","countbirth")]
 
 
 ```{r}
-df1new <- data[c("q6","q10")]
+#df1new <- data[c("q6","q10")]
 
-df2new <- data[c("q14")]
+#df2new <- data[c("q14")]
 ```
 
 
@@ -76,7 +83,7 @@ table(newdata$q7, exclude = NULL)
 
 newdata <- cbind(df1, df2,df3,df4,df5) 
 
-n <- cbind(df1new, df2new,df3,df4,df5) 
+#n <- cbind(df1new, df2new,df3,df4,df5) 
 
 #write_sav(newdata, "newdata.sav") 
 
@@ -84,7 +91,7 @@ n <- cbind(df1new, df2new,df3,df4,df5)
 
 
 ```{r}
-class(n)
+#class(n)
 ```
 
 
@@ -139,13 +146,13 @@ table(df2new)
 
 #always use n1
 
-n1<- to_factor((n), drop_unused_labels=TRUE, ordered=TRUE)
+n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE)
 
 table(n1$q6,exclude = NULL)
 ```
 
 ```{r}
-table(newdata$q7,exclude = NULL)
+table(n1$q7,exclude = NULL)
 ```
 
 ```{r}
@@ -168,7 +175,7 @@ data %>% count(ageclass)
 
 ```{r}
 #count
-ggplot(n1, aes(x=ageclass, y=n$q6, fill=q6)) + 
+ggplot(n1, aes(x=ageclass, y=newdata$q6, fill=q6)) + 
   geom_text(aes(label=n1$q6))+ 
   geom_col()
 ```
@@ -287,7 +294,7 @@ dictionary %>%
 
 
 ```{r}
-ggplot(data=n, aes(x=q6,q14)) +
+ggplot(data=newdata, aes(x=q6,q14)) +
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=q14),color="black")+
   theme_minimal()
@@ -296,7 +303,7 @@ ggplot(data=n, aes(x=q6,q14)) +
 
 ```{r}
 par(mfrow=c(1,2))
-hist(n$q6, col="dodgerblue3",labels=TRUE)
+hist(n1$q6, col="dodgerblue3",labels=TRUE)
 hist(df1$q6, col="red",labels=TRUE)
 
 ```
@@ -332,6 +339,7 @@ names(df1)
 
 
 ```{r}
+# 1. What percentage of the population smokes and how does this vary by age
 
 n2= n1|> group_by(ageclass,q6) |> 
   dplyr::summarise(count=n()) |> 
@@ -341,8 +349,20 @@ n2= n1|> group_by(ageclass,q6) |>
 
 
 ggplot(n2, aes(x=ageclass, y = perc, fill =q6)) + 
-  geom_bar(stat="identity", position="dodge")
+  geom_bar(stat="identity", position="dodge")+
+  scale_fill_discrete(name = "Do you smoke tobacco products?")
+
+
+# The graph shows, in all age groups, people who doesn't smoke are more (more than 75%)
+#
+
 ```
 
+```{r}
+ggplot(n2, aes(x=ageclass, y = perc, fill =q6)) + 
+  geom_bar(stat="identity", position="dodge")+ 
+  scale_fill_discrete(name = "Do you smoke tobacco products?")+
+  facet_wrap(~$q52)
+```
 
 
