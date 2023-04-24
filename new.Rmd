@@ -1,0 +1,348 @@
+
+```{r}
+file_path <- "~/Major Project/0021-04_healthy_ireland_2018.sav"
+```
+
+
+```{r}
+suppressWarnings(library(haven))
+suppressWarnings(library(dplyr))
+suppressWarnings(library(magrittr))
+suppressWarnings(library(knitr))
+suppressWarnings(library(lattice))
+suppressWarnings(library(tidyverse))
+suppressWarnings(library(likert))
+suppressWarnings(library(MASS))
+suppressWarnings(library(psych))
+suppressWarnings(library(viridis))
+suppressWarnings(library(ggplot2))
+suppressWarnings(library(here))
+suppressWarnings(library(flextable))
+suppressWarnings(library(devtools))
+suppressWarnings(library(dplyr))
+suppressWarnings(library(labelled))
+suppressWarnings(library(foreign))
+suppressWarnings(library(questionr))
+suppressWarnings(library(survey))
+
+
+suppressWarnings(library(tibble))
+suppressWarnings(library(psych)) #masks ggpplot2:: %+%, alpha
+suppressWarnings(library(GGally)) #masks dbplyr::nasa
+suppressWarnings(library(kableExtra)) #masks dplyr::group_rows
+suppressWarnings(library(MVN))
+suppressWarnings(library(likert))
+suppressWarnings(library(plyr))
+```
+
+
+
+```{r}
+data <- haven::read_sav(file_path)
+#data1 <- read_sav(file_path, to.data.frame = TRUE)
+```
+
+```{r}
+df1 <- data[c("q6","q7","q8","slq9b","q10","q11","q13","q340","q348","q349")]
+
+df2 <- data[c("q14","exq15","exq18")]
+
+df3 <- data[c("spq1","q52","q55","q58","q120","q205","q208","q308")]
+
+df4 <- data[c("q229","q230","q231","q232","q233","q330_1","q330_2","q330_3")]
+
+df5 <- data[c("q63b","lho","key1","ageclass","countbirth")]
+```
+
+
+
+```{r}
+df1new <- data[c("q6","q10")]
+
+df2new <- data[c("q14")]
+```
+
+
+```{r}
+table(newdata$q6, exclude = NULL)
+
+table(newdata$q7, exclude = NULL)
+```
+
+```{r}
+#write.table(df1, file = "df1.csv",sep = "\t", row.names = F)
+
+#write_sav(df1, "df1.sav")  
+
+newdata <- cbind(df1, df2,df3,df4,df5) 
+
+n <- cbind(df1new, df2new,df3,df4,df5) 
+
+#write_sav(newdata, "newdata.sav") 
+
+```
+
+
+```{r}
+class(n)
+```
+
+
+
+```{r}
+look_for(df2)
+
+#df1$q6 %>% "c('haven_labelled', 'vctrs_vctr', 'double')"
+```
+
+```{r}
+val_labels(df2) #gives options
+```
+
+
+```{r}
+var_label(df2) #gives questions
+```
+
+```{r}
+glimpse(df2new)
+```
+
+```{r}
+(pairsPlot = GGally::ggpairs(data = df2,
+                    upper = "blank",
+                    diag = list(continuous = wrap("densityDiag")),
+                    lower = list(continuous = wrap(ggally_smooth_lm))
+                    ))
+```
+
+```{r}
+# Continuous variables
+summary(df2)
+```
+
+
+```{r}
+df2
+```
+
+
+```{r}
+#dat$allow.f<-to_factor(dat$eimpcnt, drop_unused_labels=TRUE, ordered=TRUE)
+#table(dat$allow.f, dat$cntry)
+
+df2new<- to_factor((df2$exq15), drop_unused_labels=TRUE, ordered=TRUE)
+table(df2new)
+```
+
+```{r}
+
+#always use n1
+
+n1<- to_factor((n), drop_unused_labels=TRUE, ordered=TRUE)
+
+table(n1$q6,exclude = NULL)
+```
+
+```{r}
+table(newdata$q7,exclude = NULL)
+```
+
+```{r}
+barplot(table(n1$q52, n1$ageclass, exclude = NULL))
+```
+
+```{r}
+
+#proportions
+
+ggplot(data = n1) +
+  geom_bar(mapping = aes(x = ageclass, fill=q52) , position = "fill") +
+  scale_fill_brewer(palette="Paired")+
+  theme_minimal()
+table(data$ageclass )
+table(data$agecls2 )
+table(data$agecls3 )
+data %>% count(ageclass)
+```
+
+```{r}
+#count
+ggplot(n1, aes(x=ageclass, y=n$q6, fill=q6)) + 
+  geom_text(aes(label=n1$q6))+ 
+  geom_col()
+```
+
+```{r}
+
+n1|> group_by(ageclass,q6) |> dplyr::summarise(count=n()) |> ungroup() |> group_by(ageclass) |> dplyr::summarise(perc=count/sum(count)*100)
+```
+
+
+
+```{r}
+
+n1|> group_by(ageclass) |> dplyr::summarise(N=n(),q6=q6) |> group_by(ageclass,q6) |> dplyr::summarise(n(),N = N)
+
+
+n1|> group_by(ageclass,q6) |> dplyr::summarise(count=n()) |> ungroup() |> group_by(ageclass) |> dplyr::summarise(perc=count/sum(count))
+
+ggplot(data = n1) +
+  geom_bar(mapping = aes(x = ageclass, fill=q6)) 
+
+```
+
+
+```{r}
+ggplot(data = n1,na.rm=TRUE) +
+  geom_bar(aes(x = ageclass, fill=q6), position="dodge") +
+  scale_fill_manual(values=c("#B6300C",
+                             "#20A220",
+                             "#2C8EE5"))+
+  scale_fill_discrete(name = "Do you smoke tobacco products?")+
+  facet_wrap(~q52) 
+ 
+```
+
+
+```{r}
+
+b <- n %>%
+  count(n1$q52, n1$q6) %>%
+  mutate(pct = n / sum(n),
+         pct_label = scales::percent(pct))
+n1 <- n1 |> mutate(q6 = str_replace(q6,"Yes, ",""))
+n1$q6 <- as.factor(n1$q6)
+b <- n1 %>% group_by(q52,ageclass,q6) |> count(q6) |> mutate(Percent =n/sum(n)*100)
+head(b)
+levels(n1$q6)
+ggplot(b, aes(x= q52, fill = q6, y = pct)) +
+  geom_col() +
+  geom_text(aes(label = paste(pct_label, n, sep = "\n")), 
+                lineheight = 0.8,
+                position = position_stack(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent)
+```
+
+
+```{r}
+count(n1$q6)
+```
+
+
+```{r}
+table(n1$q6)
+```
+
+
+
+```{r}
+plot(table(n1$q6),plot.percents = TRUE,
+     # Plot the total percentage for negative responses
+     plot.percent.low = FALSE,
+     # Plot the total percentage for positive responses
+     plot.percent.high = FALSE)
+
+barplot(table(n1$q10))
+```
+
+```{r}
+ggplot(n1, aes(x=q6, fill=n1$q52))+
+  geom_bar(position="fill")
+```
+
+```{r}
+ggplot(data = n1) +
+  geom_bar(mapping = aes(x = "", fill=q52),position = "fill", width=1)  + 
+  coord_polar("y")+
+  theme( axis.title=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank())
+```
+
+```{r}
+hist(n$q6, col="dodgerblue3",labels=TRUE)
+```
+
+```{r}
+
+```
+
+
+
+```{r}
+newdata %>% sjPlot::view_df()
+```
+
+
+```{r}
+dictionary <- labelled::generate_dictionary(newdata)
+```
+
+```{r}
+dictionary %>% 
+  dplyr::filter(variable %in% c("q6", "q7")) %>% 
+  dplyr::select(variable, label, value_labels) 
+```
+
+
+```{r}
+ggplot(data=n, aes(x=q6,q14)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=q14),color="black")+
+  theme_minimal()
+```
+
+
+```{r}
+par(mfrow=c(1,2))
+hist(n$q6, col="dodgerblue3",labels=TRUE)
+hist(df1$q6, col="red",labels=TRUE)
+
+```
+
+
+```{r}
+attributes(newdata$q6)
+```
+
+```{r}
+attributes(df1$q6)$labels
+```
+
+
+
+```{r}
+str(df1$q6)
+```
+
+
+
+```{r}
+unclass(df1)
+```
+
+
+
+
+```{r}
+names(df1)
+```
+
+
+
+```{r}
+
+n2= n1|> group_by(ageclass,q6) |> 
+  dplyr::summarise(count=n()) |> 
+  ungroup() |> group_by(ageclass) |> 
+  dplyr::summarise(perc=count/sum(count)*100, q6=q6) |>
+  drop_na()
+
+
+ggplot(n2, aes(x=ageclass, y = perc, fill =q6)) + 
+  geom_bar(stat="identity", position="dodge")
+```
+
+
+
