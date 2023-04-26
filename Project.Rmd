@@ -204,8 +204,6 @@ library(haven)
 library(dplyr)
 library(ggplot2)
 
-
-
 s <- n1 %>% 
   dplyr::group_by(q6, ageclass) %>% 
   dplyr::summarise(count = n()) |>
