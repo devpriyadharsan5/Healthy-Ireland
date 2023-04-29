@@ -198,11 +198,8 @@ ggplot(smoking_by_age, aes(x=ageclass, y=perc, fill=q6)) +
 ```
 
 
-
+##1. What percentage of the population smokes and how does this vary by age
 ```{r}
-library(haven)
-library(dplyr)
-library(ggplot2)
 
 s <- n1 %>% 
   dplyr::group_by(q6, ageclass) %>% 
@@ -211,24 +208,24 @@ s <- n1 %>%
   ungroup() %>%
   group_by(ageclass) %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(ageclass, q6, count, perc)
+  dplyr::select(ageclass, q6, count)
 
 # Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
-s$q6 <- ifelse(s$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+#s$q6 <- ifelse(s$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 # Group by ageclass and smoking status, and summarize the count of individuals in each group
 smoking_by_age <- s %>% 
   group_by(ageclass, q6) %>% 
-  dplyr::summarise(count = n())
+  dplyr::summarise(count = n(),ageclass=ageclass)
 
 # Calculate the percentage of individuals in each group
 smoking_by_age <- 
-  smoking_by_age %>% 
+  s %>% 
   group_by(ageclass) %>% 
   mutate(perc = count/sum(count)*100)
 
 # Plot the results
-ggplot(s, aes(x = ageclass, y = perc, fill = q6)) +
+ggplot(smoking_by_age, aes(x = ageclass, y = perc, fill = q6)) +
   geom_bar(stat = "identity", position = "dodge") +
   labs(x = "Age", y = "Percentage of population", fill = "Smoking status") +
   ggtitle("Smoking by Age") +
@@ -236,9 +233,11 @@ ggplot(s, aes(x = ageclass, y = perc, fill = q6)) +
 
 ```
 
+In all the 4 age categories, majority of them don't smoke. majority ofthe smokers are in 25-44 years (7.76%) followed by 45-64 years (6.31%). looks like teenagers and people over 65 are more health conscious.
 
 
-##1. What percentage of the population smokes and how does this vary by age
+
+
 
 ```{r}
 
@@ -258,6 +257,15 @@ ggplot(n2, aes(x=ageclass, y = perc, fill =d1)) +
   scale_fill_discrete(name = "Do you smoke tobacco products?")
 
 
+n2= n1|> group_by(ageclass,q6) |> 
+  dplyr::summarise(count=n()) |> 
+  ungroup() |> group_by(ageclass) |> 
+  dplyr::summarise(perc=count/sum(count)*100, q6=q6) |>
+  drop_na()
+
+
+ggplot(n2, aes(x=ageclass, y = perc, fill =q6)) + 
+  geom_bar(stat="identity", position="dodge")
 
 # This will create a bar chart that shows the percentage of people who smoke and do not smoke, by age group.
 
