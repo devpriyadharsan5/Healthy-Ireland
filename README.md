@@ -8,11 +8,15 @@
 
 <li>What percentage of the population smokes, and how does this vary by socioeconomic status?</li>
 
+<li> people from which region smoke the most? <?li>
+
 <li>What percentage of the population consumes alcohol, and how does this vary by age</li>
 
 <li>What percentage of the population consumes alcohol, and how does this vary by gender</li>
 
 <li>What percentage of the population consumes alcohol, and how does this vary by socioeconomic status?</li>
+
+<li> people from which region drink the most? <?li>
 
 <li>What factors are associated with excessive alcohol consumption, and how do these vary by age, gender, and socioeconomic status?</li>
 
