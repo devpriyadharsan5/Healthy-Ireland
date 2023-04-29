@@ -10,6 +10,8 @@
 
 <li> people from which region smoke the most? <?li>
 
+<li> smokers from various countries <?li>
+
 <li>What percentage of the population consumes alcohol, and how does this vary by age</li>
 
 <li>What percentage of the population consumes alcohol, and how does this vary by gender</li>
