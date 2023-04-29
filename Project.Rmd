@@ -331,10 +331,54 @@ ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
 
 ```
 
+##4 people from which region smoke the most?
+```{r}
+d4 <- n1[c("q6", "lho")]
+
+# Calculate the percentage of alcoholic by 
+smoke_region <- d4 %>%
+  group_by(lho,q6) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  group_by(q6) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+# Create a bar plot
+ggplot(smoke_region, aes(x = lho, y = perc, fill = q6)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Do you Smoke?") +
+  labs(x = "County", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 90))+
+  ggtitle ( "Region (Smokers)")
+```
+
+
+##5 smokers from various countries
+```{r}
+
+d5 <- n1[c("q6", "countbirth")]
+
+# Calculate the percentage of alcoholic by 
+smoke_country <- d5 %>%
+  group_by(countbirth,q6) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  group_by(q6) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+# Create a bar plot
+ggplot(smoke_country, aes(x = countbirth, y = perc, fill = q6)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Do you Smoke?") +
+  labs(x = "County", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+
+  ggtitle ( "Smokers from different countries")
+```
 
 
 
-##4 
+
+##6 What percentage of the population consumes alcohol, and how does this vary by age
 ```{r}
 d3 <- n1[c("q14", "ageclass")]
 
@@ -356,3 +400,24 @@ ggplot(alcohol_age, aes(x = ageclass, y = perc, fill = q14)) +
 
 
 majority of people are consuming alcohol than smoking. people from age 25-44 are leading consumers with 28.13 % followed by age 45-64 with 26.61%. it is shocking that people above 65 (19.21%) also consume alcohol.
+
+
+```{r}
+d6 <- n1[c("q6", "ageclass", "q52", "spq1")]
+
+# Calculate the percentage of alcoholic by 
+h <- d6 %>%
+  group_by(ageclass,q6,q52,spq1) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+# Create a bar plot
+ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Health condition") +
+  labs(x = "Age", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+
+  facet_wrap(~q52)
+```
+
