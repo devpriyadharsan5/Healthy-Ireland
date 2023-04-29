@@ -417,7 +417,9 @@ ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
   geom_bar(stat = "identity", position="dodge") +
   scale_fill_discrete(name = "Health condition") +
   labs(x = "Age", y = "Percentage")+
+  ggtitle("Health Condition of people who smoke and who doesnt")+
+  guides(color = guide_legend(reverse = TRUE))+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_wrap(~q52)
+  facet_grid(vars(q6), vars(q52))
 ```
 
