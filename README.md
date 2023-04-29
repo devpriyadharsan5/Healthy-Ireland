@@ -20,8 +20,6 @@
 
 <li> people from which region drink the most? <?li>
 
-<li>What factors are associated with excessive alcohol consumption, and how do these vary by age, gender, and socioeconomic status?</li>
-
 <li>What percentage of the population consumes a healthy diet, and how does this vary by age, gender, and socioeconomic status?</li>
 
 <li>What factors are associated with a healthy diet, and how do these vary by age, gender, and socioeconomic status?</li>
