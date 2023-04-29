@@ -1,4 +1,9 @@
-
+---
+title: "Healthy Ireland Project"
+author: "Devpriyadharsan Balan Saravanan 22250355"
+output:
+  html_document: default
+---
 
 ```{r}
 suppressWarnings(library(haven))
@@ -31,7 +36,6 @@ suppressWarnings(library(plyr))
 
 
 ```{r}
-library(haven)
 data <- read_sav("0021-04_healthy_ireland_2018.sav")
 #View(data)
 ```
@@ -50,13 +54,6 @@ df5 <- data[c("q63b","lho","key1","ageclass","countbirth")]
 ```
 
 
-
-```{r}
-table(newdata$q6, exclude = NULL)
-
-table(newdata$q7, exclude = NULL)
-```
-
 ```{r}
 #write.table(df1, file = "df1.csv",sep = "\t", row.names = F)
 
@@ -71,12 +68,6 @@ newdata <- cbind(df1, df2,df3,df4,df5)
 ```
 
 
-
-```{r}
-look_for(df2)
-
-#df1$q6 %>% "c('haven_labelled', 'vctrs_vctr', 'double')"
-```
 
 ```{r}
 val_labels(df2) #gives options
@@ -167,37 +158,6 @@ ggplot(n1, aes(x=q6, fill=n1$q52))+
 ```
 
 
-```{r}
-d1= n1|> group_by(q6,q52) |> 
-  dplyr::summarise(count=n()) |> 
-  ungroup() |> group_by(q6) |> 
-  dplyr::summarise(perc=count/sum(count)*100, q52=q52) |>
-  drop_na()
-
-# Combine "Yes, daily" with "Yes, occasionally"
-n1$q6 <- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
-
-# Calculate percentage of smokers by age
-smoking_by_age <- d1 %>%
-  group_by(ageclass, q6) %>%
-  dplyr::summarise(count=n()) |>
-  ungroup() |>
-  group_by(ageclass) %>%
-  dplyr::mutate(perc=count/sum(count)*100) %>%
-  filter(q6 == "Yes") %>%
-  dplyr::arrange(ageclass)
-
-# Plot the results
-ggplot(smoking_by_age, aes(x=ageclass, y=perc, fill=q6)) +
-  geom_bar(stat="identity", position="dodge") +
-  scale_fill_discrete(name = "Do you smoke tobacco products?") +
-  labs(title="Percentage of the population that smokes, by age",
-       x="Age",
-       y="Percentage")
-
-```
-
-
 ##1. What percentage of the population smokes and how does this vary by age
 ```{r}
 
@@ -211,7 +171,7 @@ s <- n1 %>%
   dplyr::select(ageclass, q6, count)
 
 # Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
-#s$q6 <- ifelse(s$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+s$q6 <- ifelse(s$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 # Group by ageclass and smoking status, and summarize the count of individuals in each group
 smoking_by_age <- s %>% 
@@ -267,6 +227,11 @@ grouped_data <- df_smoking |>
   dplyr::summarise(count = n()) |>
   ungroup()
 
+df_smoking$q6 <- ifelse(df_smoking$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+
+# Calculate the total number of observations (excluding missing values)
+total_obs <- sum(grouped_data$count)
+
 # Calculate the percentage of the population that smokes, by gender
 smoking_perc <- grouped_data |>
   mutate(perc = count / total_obs * 100) 
@@ -303,7 +268,7 @@ ggplot(n22, aes(x = key1, y = perc,fill = q6)) +
 
 
 ```{r}
-d1|>dplyr::select(q6, ageclass)
+#d1|>dplyr::select(q6, ageclass)
 ```
 
 
@@ -322,7 +287,7 @@ smoking_by_ses <- d2 %>%
 # Create a bar plot
 ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
   geom_bar(stat = "identity", position="dodge") +
-  scale_fill_discrete(name = "Socioeconomic Status") +
+  scale_fill_discrete(name = "Do You smoke?") +
   labs(x = "Socioeconomic Status", y = "Percentage of Smokers")+
   theme(axis.text.x = element_text(angle = 90))+scale_x_discrete(labels = function(x) 
     stringr::str_wrap(x, width = 15))+
@@ -402,9 +367,78 @@ ggplot(alcohol_age, aes(x = ageclass, y = perc, fill = q14)) +
 majority of people are consuming alcohol than smoking. people from age 25-44 are leading consumers with 28.13 % followed by age 45-64 with 26.61%. it is shocking that people above 65 (19.21%) also consume alcohol.
 
 
+##7 What percentage of the population consumes alcohol, and how does this vary by gender
+```{r}
+d7 <- n1[c("q14", "q52")]
+
+# Calculate the percentage of alcoholic by 
+alcohol_gender <- d7 %>%
+  group_by(q14,q52) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  group_by(q52) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+# Create a bar plot
+ggplot(alcohol_gender, aes(x = q52, y = perc, fill = q14)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Do you consume alcohol?") +
+  labs(x = "Age", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 20,hjust=1))+
+  ggtitle ( "Alcohol consumption by gender")
+```
+
+there are more female drinkers(42.11%) than male drinkers(37.42%)
 
 
-##7 health condition
+##8 What percentage of the population consumes alcohol, and how does this vary by socioeconomic
+```{r}
+d8 <- n1[c("q14", "key1")]
+
+# Calculate the percentage of alcoholic by 
+alcohol_soc <- d8 %>%
+  group_by(q14,key1) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  group_by(key1) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+# Create a bar plot
+ggplot(alcohol_soc, aes(x = key1, y = perc, fill = q14)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Do you consume alcohol?") +
+  labs(x = "Age", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  ggtitle ( "Alcohol consumption by socioeconomic status")
+```
+
+##9 people from which region drink the most?
+
+```{r}
+d9 <- n1[c("q14", "lho","q52")]
+
+# Calculate the percentage of alcoholic by region
+alcohol_r <- d9 %>%
+  group_by(q14,lho,q52) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  group_by(lho) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+# Create a bar plot
+ggplot(alcohol_r, aes(x = lho, y = perc, fill = q14)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Do you consume alcohol?") +
+  labs(x = "Age", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  ggtitle ( "Alcohol consumption by region")
+```
+
+people in galway drink the most
+
+
+
+##10 health condition
 ```{r}
 d6 <- n1[c("q6", "ageclass", "q52", "spq1")]
 
@@ -427,4 +461,83 @@ ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
 ```
 
 
-It is evident that people who doesnt smoke have a
+It is evident that people who doesnt smoke have a better health.
+females from age 25-44 (9.44%), 45-64 (6.93%) and males from age 25-44 (5.96%), 45-64 (4.54%) are the healthy ones who doesnt smoke.
+
+
+
+##11 In the last 12 months, how often have you consumed alcoholic beverages and have a smoking habit, and do you have private health insurance?
+
+```{r}
+d11 <- n1[c("q6", "q14", "q55", "q52")]
+
+# Calculate the percentage of alcoholic by 
+health_ins <- d11 %>%
+  group_by(q14,q6,q52,q55) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+# Create a bar plot
+ggplot(health_ins, aes(x = q52, y = perc, fill = q55)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Do you have private health insurance?") +
+  labs(x = "Age", y = "Percentage")+
+  ggtitle("Health Insurance for smokers and alcoholics")+
+  guides(color = guide_legend(reverse = TRUE))+
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+
+  facet_grid(vars(q6), vars(q14))
+```
+
+this categorizes people who smoke and consume alcohol with whether they own a private health insurance or not. people who drink and doesnt smoke have a private health insurance
+
+
+##12 How would you describe your current employment status, and are you currently taking a folic acid supplement?
+
+```{r}
+d12 <- n1[c("lho","q120")]
+
+# Calculate the percentage by region
+suppl <- d12 %>%
+  group_by(lho,q120) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  group_by(lho) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+suppl$q120 <- ifelse(suppl$q120 %in% c("No", "Don’t know/refused"), "No", "Yes")
+
+# Create a bar plot
+ggplot(suppl, aes(x = lho, y = perc, fill = q120)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Do you take folicacid suppliments?") +
+  labs(x = "Age", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  ggtitle ( "Folic acid consumption by region")
+```
+
+
+
+#13 Are you the Chief Income Earner in your household, and what is the name or code number of the Local Health Office (LHO) region where you reside?
+
+```{r}
+d13 <- n1[c("q6", "q14", "ageclass", "q63b")]
+
+# Calculate the percentage of alcoholic by 
+income <- d13 %>%
+  group_by(q14,q6,ageclass,q63b) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  mutate(perc = count / sum(count) * 100) 
+
+# Create a bar plot
+ggplot(income, aes(x = ageclass, y = perc, fill = q63b)) +
+  geom_bar(stat = "identity", position="dodge") +
+  scale_fill_discrete(name = "Chief Income Earner") +
+  labs(x = "Age", y = "Percentage")+
+  ggtitle("Chief Income Earner")+
+  guides(color = guide_legend(reverse = TRUE))+
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+
+  facet_grid(vars(q6), vars(q14))
+```
+
