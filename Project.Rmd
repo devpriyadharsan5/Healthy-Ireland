@@ -402,6 +402,9 @@ ggplot(alcohol_age, aes(x = ageclass, y = perc, fill = q14)) +
 majority of people are consuming alcohol than smoking. people from age 25-44 are leading consumers with 28.13 % followed by age 45-64 with 26.61%. it is shocking that people above 65 (19.21%) also consume alcohol.
 
 
+
+
+##7 health condition
 ```{r}
 d6 <- n1[c("q6", "ageclass", "q52", "spq1")]
 
@@ -417,7 +420,11 @@ ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
   geom_bar(stat = "identity", position="dodge") +
   scale_fill_discrete(name = "Health condition") +
   labs(x = "Age", y = "Percentage")+
+  ggtitle("Health Condition of people who smoke and who doesnt")+
+  guides(color = guide_legend(reverse = TRUE))+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_wrap(~q52)
+  facet_grid(vars(q6), vars(q52))
 ```
 
+
+It is evident that people who doesnt smoke have a
