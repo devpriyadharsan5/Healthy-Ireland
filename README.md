@@ -28,6 +28,3 @@
 
 <li>Are you the Chief Income Earner in your household, and what is the name or code number of the Local Health Office (LHO) region where you reside?</li>
 
-<li>Based on your age and country of birth, what is your Social Economic Group value according to Table 1?</li>
-
-

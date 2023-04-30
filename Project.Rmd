@@ -152,14 +152,11 @@ ggplot(data = n1,na.rm=TRUE) +
 ```
 
 
-```{r}
-ggplot(n1, aes(x=q6, fill=n1$q52))+
-  geom_bar(position="fill")
-```
-
 
 ##1. What percentage of the population smokes and how does this vary by age
 ```{r}
+# Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
+
 
 s <- n1 %>% 
   dplyr::group_by(q6, ageclass) %>% 
@@ -170,7 +167,7 @@ s <- n1 %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
   dplyr::select(ageclass, q6, count)
 
-# Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
+
 s$q6 <- ifelse(s$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 # Group by ageclass and smoking status, and summarize the count of individuals in each group
@@ -197,27 +194,12 @@ In all the 4 age categories, majority of them don't smoke. majority ofthe smoker
 
 
 
-```{r}
-
-```
-
-```{r}
-n33= n1|> group_by(q6,q52) |> 
-  dplyr::summarise(count=n()) |> 
-  ungroup() |> group_by(q6) |> 
-  dplyr::summarise(perc=count/sum(count)*100, q52=q52) |>
-  drop_na()
-
-
-ggplot(n33, aes(x=q52, y = perc, fill =q6)) + 
-  geom_bar(stat="identity", position="dodge")+
-  scale_fill_discrete(name = "Do you smoke tobacco products?")
-```
-
-
 ##2. What percentage of the population smokes and how does this vary by gender
 
 ```{r}
+
+n1$q6<- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+
 # Select the required variables
 df_smoking <- n1[c("q6", "q52")]
 
@@ -227,7 +209,6 @@ grouped_data <- df_smoking |>
   dplyr::summarise(count = n()) |>
   ungroup()
 
-df_smoking$q6 <- ifelse(df_smoking$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 # Calculate the total number of observations (excluding missing values)
 total_obs <- sum(grouped_data$count)
@@ -245,31 +226,6 @@ ggplot(smoking_perc, aes(x = q52, y = perc, fill = q6)) +
 as we said earlier, most of them dont smoke. percentage of male who smoke (9.47%) is almost equal to those with women (9.05%)
 
 
-
-```{r}
-n22 <- n1 |>
-  group_by(key1, q6) %>%
-  dplyr::summarise(count = n()) %>%
-  ungroup() %>%
-  group_by(key1) %>%
-  mutate(perc = count / sum(count) * 100) 
-
-ggplot(n22, aes(x = key1, y = perc,fill = q6)) +
-  geom_bar(stat = "identity",position = "dodge") +
-    
-  scale_x_discrete(labels = function(x) 
-    stringr::str_wrap(x, width = 25))+
-  labs(x = "Socioeconomic Status", y = "Percentage of smokers") +
-  theme(axis.text.x = element_text(angle = 90,hjust=1))+
-  ggtitle("Smoking prevalence by socioeconomic status")
-
-```
-
-
-
-```{r}
-#d1|>dplyr::select(q6, ageclass)
-```
 
 
 ##3. What percentage of the population smokes and how does this vary by socioeconomic status?
