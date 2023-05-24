@@ -154,7 +154,7 @@ ggplot(data = n1,na.rm=TRUE) +
 
 
 ##1. What percentage of the population smokes and how does this vary by age
-```{r}
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
 # Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
 
 
@@ -171,23 +171,36 @@ s <- n1 %>%
 s$q6 <- ifelse(s$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 # Group by ageclass and smoking status, and summarize the count of individuals in each group
-smoking_by_age <- s %>% 
-  group_by(ageclass, q6) %>% 
-  dplyr::summarise(count = n(),ageclass=ageclass)
+# smoking_by_age <- s %>%
+#   group_by(ageclass, q6) %>%
+#   dplyr::summarise(count = n(),ageclass=ageclass)
 
-# Calculate the percentage of individuals in each group
+# Calculate the percentage of individuals in each group ## Code modified by NC
 smoking_by_age <- 
   s %>% 
+  group_by(ageclass, q6) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
   group_by(ageclass) %>% 
-  mutate(perc = count/sum(count)*100)
+  dplyr::summarise(perc = count*100/sum(count),
+                   q6 = q6) %>% 
+  arrange(ageclass)
 
 # Plot the results
 ggplot(smoking_by_age, aes(x = ageclass, y = perc, fill = q6)) +
-  geom_bar(stat = "identity", position = "dodge") +
+  geom_bar(stat = "identity") +
   labs(x = "Age", y = "Percentage of population", fill = "Smoking status") +
   ggtitle("Smoking by Age") +
   theme(plot.title = element_text(hjust = 0.5))
 
+### calculating relative risk and an odds ratio for 25-44 year olds compared to 65 +
+
+## relative risk = 0.2383/0.1056 = 2.25
+
+## odds for 25-44 = 0.2383/(1-0.2383) = 0.31
+## odds for 65+ = 0.1056/(1-0.1056) = 0.12
+
+## odds ratio = 0.31/0.12 = 2.58
 ```
 
 In all the 4 age categories, majority of them don't smoke. majority ofthe smokers are in 25-44 years (7.76%) followed by 45-64 years (6.31%). looks like teenagers and people over 65 are more health conscious.
