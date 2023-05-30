@@ -18,7 +18,7 @@
 
 <li>What percentage of the population consumes alcohol, and how does this vary by socioeconomic status?</li>
 
-<li> people from which region drink the most? <?li>
+<li> people from which region consume alcohol the most? <?li>
 
 <li> health condition </li>
 
