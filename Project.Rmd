@@ -5,7 +5,7 @@ output:
   html_document: default
 ---
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 suppressWarnings(library(haven))
 suppressWarnings(library(dplyr))
 suppressWarnings(library(magrittr))
@@ -55,18 +55,12 @@ df5 <- data[c("q63b","lho","key1","ageclass","countbirth")]
 
 
 ```{r}
-#write.table(df1, file = "df1.csv",sep = "\t", row.names = F)
-
-#write_sav(df1, "df1.sav")  
-
+#combines the previously created data frames
 newdata <- cbind(df1, df2,df3,df4,df5) 
-
-#n <- cbind(df1new, df2new,df3,df4,df5) 
 
 #write_sav(newdata, "newdata.sav") 
 
 ```
-
 
 
 ```{r}
@@ -78,10 +72,6 @@ val_labels(df2) #gives options
 var_label(df2) #gives questions
 ```
 
-```{r}
-glimpse(df2)
-```
-
 
 ```{r}
 # Continuous variables
@@ -90,9 +80,9 @@ summary(df2)
 
 
 ```{r}
-#always use n1
+#converting to factors
 
-n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE)
+n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
 
 table(n1$q6,exclude = NULL)
 ```
@@ -101,24 +91,8 @@ table(n1$q6,exclude = NULL)
 table(n1$q7,exclude = NULL)
 ```
 
-```{r}
-barplot(table(n1$q52, n1$ageclass, exclude = NULL))
-```
-
-```{r}
-#proportions
-
-ggplot(data = n1) +
-  geom_bar(mapping = aes(x = ageclass, fill=q52) , position = "fill") +
-  scale_fill_brewer(palette="Paired")+
-  theme_minimal()
-table(data$ageclass )
-table(data$agecls2 )
-table(data$agecls3 )
-
-
-n1 %>% dplyr::count(ageclass)
-```
+<<<<<<< HEAD
+=======
 
 
 ```{r}
@@ -150,15 +124,15 @@ ggplot(data = n1,na.rm=TRUE) +
   facet_wrap(~q52) 
  
 ```
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 
 
 
 ##1. What percentage of the population smokes and how does this vary by age
+
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-# Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
 
-
-s <- n1 %>% 
+s1 <- n1 %>% 
   dplyr::group_by(q6, ageclass) %>% 
   dplyr::summarise(count = n()) |>
   drop_na() |>
@@ -167,17 +141,22 @@ s <- n1 %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
   dplyr::select(ageclass, q6, count)
 
+# Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
+s1$q6 <- ifelse(s1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
-s$q6 <- ifelse(s$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+<<<<<<< HEAD
+=======
+s1$q6 <- ifelse(s1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 # Group by ageclass and smoking status, and summarize the count of individuals in each group
 # smoking_by_age <- s %>%
 #   group_by(ageclass, q6) %>%
 #   dplyr::summarise(count = n(),ageclass=ageclass)
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 
 # Calculate the percentage of individuals in each group ## Code modified by NC
 smoking_by_age <- 
-  s %>% 
+  s1 %>% 
   group_by(ageclass, q6) %>% 
   dplyr::summarise(count = sum(count)) %>% 
   ungroup() %>% 
@@ -193,245 +172,831 @@ ggplot(smoking_by_age, aes(x = ageclass, y = perc, fill = q6)) +
   ggtitle("Smoking by Age") +
   theme(plot.title = element_text(hjust = 0.5))
 
+<<<<<<< HEAD
+```
+
+This output provides insights into the prevalence of smoking among different age groups. 
+
+For the age group "15-24 years", the percentage of non-smokers is approximately 80.06% and the percentage of smokers is 19.94%.
+
+For the age group "25-44 years", the percentage of non-smokers is approximately 76.17% and the percentage of smokers is 23.83%.
+
+For the age group "45-64 years", the percentage of non-smokers is approximately 80.58% and the percentage of smokers is 19.42%.
+
+For the age group "65 and over", the percentage of non-smokers is approximately 89.44% and the percentage of smokers is 10.56%.
+
+
+--The highest percentage of smokers is observed in the age group "25-44 years" with approximately 23.83% of individuals being smokers. This age group has a higher smoking prevalence compared to other age groups.
+
+--The age group "65 and over" has the lowest smoking prevalence, with only approximately 10.56% of individuals being smokers. This age group has the lowest percentage of smokers among all the age groups analyzed.
+
+--The age groups "15-24 years" and "45-64 years" show relatively similar smoking prevalence, with approximately 19.94% and 19.42% of individuals being smokers, respectively.
+
+
+Overall, the analysis indicates that smoking prevalence varies across different age groups. 
+=======
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
+
+
 ### calculating relative risk and an odds ratio for 25-44 year olds compared to 65 +
 
 ## relative risk = 0.2383/0.1056 = 2.25
 
 ## odds for 25-44 = 0.2383/(1-0.2383) = 0.31
+
 ## odds for 65+ = 0.1056/(1-0.1056) = 0.12
 
 ## odds ratio = 0.31/0.12 = 2.58
-```
 
-In all the 4 age categories, majority of them don't smoke. majority ofthe smokers are in 25-44 years (7.76%) followed by 45-64 years (6.31%). looks like teenagers and people over 65 are more health conscious.
+<<<<<<< HEAD
+The relative risk compares the risk of smoking between the two age groups. A relative risk of 2.25 means that individuals in the 25-44 age group have a 2.25 times higher risk of smoking compared to individuals aged 65 and above. This indicates that the younger age group has a significantly higher likelihood of being smokers compared to the older age group.
+
+The odds ratio compares the odds of smoking between the two age groups. An odds ratio of 2.58 means that the odds of smoking in the 25-44 age group are 2.58 times higher than the odds of smoking in the 65+ age group. This suggests that individuals in the younger age group are more likely to smoke than individuals in the older age group.
+
+This finding highlights the importance of targeted interventions and prevention efforts to reduce smoking prevalence among younger individuals. It suggests that specific strategies and policies should be implemented to address the higher smoking rates observed in the 25-44 age group. These measures could include education, awareness campaigns, smoking cessation programs, and policies aimed at reducing tobacco accessibility and promoting healthier behaviors.
+=======
+This output provides insights into the prevalence of smoking among different age groups. 
+
+For the age group "15-24 years", the percentage of non-smokers is approximately 80.06% and the percentage of smokers is 19.94%.
+
+For the age group "25-44 years", the percentage of non-smokers is approximately 76.17% and the percentage of smokers is 23.83%.
+
+For the age group "45-64 years", the percentage of non-smokers is approximately 80.58% and the percentage of smokers is 19.42%.
+
+For the age group "65 and over", the percentage of non-smokers is approximately 89.44% and the percentage of smokers is 10.56%.
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 
 
+--The highest percentage of smokers is observed in the age group "25-44 years" with approximately 23.83% of individuals being smokers. This age group has a higher smoking prevalence compared to other age groups.
+
+--The age group "65 and over" has the lowest smoking prevalence, with only approximately 10.56% of individuals being smokers. This age group has the lowest percentage of smokers among all the age groups analyzed.
+
+--The age groups "15-24 years" and "45-64 years" show relatively similar smoking prevalence, with approximately 19.94% and 19.42% of individuals being smokers, respectively.
+
+
+Overall, the analysis indicates that smoking prevalence varies across different age groups. These findings highlight the importance of targeted smoking prevention and cessation efforts, particularly among the younger age groups where smoking rates are relatively higher.
 
 ##2. What percentage of the population smokes and how does this vary by gender
 
 ```{r}
 
-n1$q6<- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
-
-# Select the required variables
-df_smoking <- n1[c("q6", "q52")]
-
-# Group the data by smoking and gender, and count the number of observations in each group
-grouped_data <- df_smoking |>
-  group_by(q6, q52) |>
+s2 <- n1 %>% 
+  dplyr::group_by(q6, q52) %>% 
   dplyr::summarise(count = n()) |>
-  ungroup()
+  drop_na() |>
+  ungroup() %>%
+  group_by(q52) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(q52, q6, count)
 
 
-# Calculate the total number of observations (excluding missing values)
-total_obs <- sum(grouped_data$count)
+s2$q6 <- ifelse(s2$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+
+
+smoking_by_gender <- 
+  s2 %>% 
+  group_by(q52, q6) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(q52) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q6 = q6) %>% 
+  arrange(q52)
+
 
 # Calculate the percentage of the population that smokes, by gender
-smoking_perc <- grouped_data |>
-  mutate(perc = count / total_obs * 100) 
-
-ggplot(smoking_perc, aes(x = q52, y = perc, fill = q6)) +
-  geom_bar(stat = "identity", position = "dodge") +
+ggplot(smoking_by_gender, aes(x = q52, y = perc, fill = q6)) +
+  geom_bar(stat = "identity") +
   labs(x = "Gender", y = "Percentage", fill = "Smoking") +
   ggtitle("Percentage of population that smokes, by gender")
+
+<<<<<<< HEAD
 ```
 
-as we said earlier, most of them dont smoke. percentage of male who smoke (9.47%) is almost equal to those with women (9.05%)
+=======
 
 
+### calculating relative risk and an odds ratio for males compared to females
+
+## relative risk = 0.2119/0.1637 = 1.29
+
+
+## odds for males = 0.2119/(1-0.2119) = 0.26  yes/no
+
+## odds for females = 0.1637/(1-0.1637) = 0.19
+
+## odds ratio = 0.31/0.12 = 1.36
+```
+
+
+The output provides a clear breakdown of the percentage of population that smokes, categorized by gender.
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
+
+The output provides a clear breakdown of the percentage of population that smokes, categorized by gender.
+
+For males, 21.19% of them reported smoking, while the majority (78.81%) do not smoke. On the other hand, among females, only 16.38% reported smoking, while the majority (83.62%) do not smoke.
+
+This indicates that both males and females have a higher percentage of non-smokers compared to smokers. However, there is a slightly higher prevalence of smoking among males compared to females.
+
+This information can be useful for public health interventions and targeted smoking cessation programs, taking into account the gender-specific patterns of smoking behavior.
+
+
+
+### calculating relative risk and an odds ratio for males compared to females
+
+## relative risk = 0.2119/0.1637 = 1.29
+
+## odds for males = 0.2119/(1-0.2119) = 0.26  yes/no
+
+## odds for females = 0.1637/(1-0.1637) = 0.19
+
+## odds ratio = 0.31/0.12 = 1.36
+
+
+The relative risk compares the risk of smoking between males and females. A relative risk of 1.29 means that males have a 1.29 times higher risk of smoking compared to females. This suggests that males are slightly more likely to be smokers than females.
+
+The odds ratio compares the odds of smoking between males and females. An odds ratio of 1.36 means that the odds of smoking in males are 1.36 times higher than the odds of smoking in females. This indicates that males have slightly higher odds of being smokers compared to females.
+
+It's important to note that while the relative risk and odds ratio indicate a small difference in smoking prevalence between males and females, the effect size is relatively modest. Other factors such as socio-cultural influences, socioeconomic status, and individual behaviors can also play a significant role in smoking patterns.
+
+Efforts to reduce smoking rates should consider the gender-specific factors that contribute to smoking behavior. Tailored interventions and targeted strategies may be beneficial to address the higher smoking rates observed among males. These may include gender-specific smoking cessation programs, awareness campaigns, and policy measures to reduce smoking prevalence and promote healthier lifestyles for all genders.
+
+For males, 21.19% of them reported smoking, while the majority (78.81%) do not smoke. On the other hand, among females, only 16.38% reported smoking, while the majority (83.62%) do not smoke.
+
+This indicates that both males and females have a higher percentage of non-smokers compared to smokers. However, there is a slightly higher prevalence of smoking among males compared to females.
+
+This information can be useful for public health interventions and targeted smoking cessation programs, taking into account the gender-specific patterns of smoking behavior.
 
 
 ##3. What percentage of the population smokes and how does this vary by socioeconomic status?
 ```{r}
 
-d2 <- n1[c("q6", "key1")]
+n1$q6 <- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
-# Calculate the percentage of smokers by socioeconomic status
-smoking_by_ses <- d2 %>%
-  group_by(key1, q6) %>%
-  dplyr::summarize(count = n()) %>%
+s3 <- n1 %>% 
+  dplyr::group_by(q6, key1) %>% 
+  dplyr::summarise(count = n()) |>
+  drop_na() |>
+  ungroup() %>%
   group_by(key1) %>%
-  mutate(perc = count / sum(count) * 100) 
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(key1, q6, count)
+
+
+smoking_by_ses <- 
+  s3 %>% 
+  group_by(key1, q6) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(key1) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q6 = q6) %>% 
+  arrange(key1)
+
 
 # Create a bar plot
 ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
-  geom_bar(stat = "identity", position="dodge") +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do You smoke?") +
   labs(x = "Socioeconomic Status", y = "Percentage of Smokers")+
   theme(axis.text.x = element_text(angle = 90))+scale_x_discrete(labels = function(x) 
     stringr::str_wrap(x, width = 15))+
        ggtitle ( "Smoking Rates by Socioeconomic Status")
 
+<<<<<<< HEAD
+=======
 
+
+### calculating relative risk and an odds ratio for Unskilled compared to Employers and Managers
+
+## relative risk = 0.2991/0.1301 = 2.99
+
+
+## odds for Unskilled = 0.2991/(1-0.2991) = 0.43
+
+## odds for Employers and Managers = 0.1301/(1-0.1301) = 0.15  
+
+## odds ratio = 0.43/0.15 = 2.87
+
+
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 ```
 
+
+The data reveals interesting patterns in smoking rates across different socioeconomic groups. 
+
+1. Smoking Rates: The percentage of smokers varies among the socioeconomic groups. For example, the "A Employers and Managers" group has a smoking rate of 1.99%, while the "G Unskilled" group has a smoking rate of 0.87%. This indicates that smoking behavior differs among socioeconomic categories.
+
+2. Socioeconomic Disparities: There are notable disparities in smoking rates across socioeconomic groups. Some groups, such as "A Employers and Managers" and "B Higher Professional," have relatively lower smoking rates compared to others. On the other hand, groups like "J Agricultural Workers" and "G Unskilled" have higher smoking rates. These disparities may be influenced by various socioeconomic factors, including education, income, and occupation.
+
+3. Socioeconomic Influence: The data suggests that socioeconomic status plays a role in smoking behavior. Higher socioeconomic groups tend to have lower smoking rates, possibly due to better access to healthcare, higher awareness of health risks, and stronger social norms against smoking. Conversely, lower socioeconomic groups may face more challenges in quitting smoking, such as limited resources for smoking cessation programs and higher exposure to smoking triggers.
+
+In conclusion, the analysis highlights the relationship between smoking rates and socioeconomic status. The data indicates that smoking rates vary significantly across different socioeconomic groups, suggesting a link between socioeconomic factors and smoking behavior. These findings emphasize the importance of considering socioeconomic disparities when designing smoking cessation programs, tobacco control policies, and public health campaigns.
+
+Targeted interventions should focus on addressing the specific needs and challenges faced by different socioeconomic groups. Efforts should be made to provide accessible and affordable smoking cessation resources, education on the health risks of smoking, and supportive environments to help individuals quit smoking, particularly in higher-risk groups with higher smoking rates.
+
+By understanding the relationship between smoking and socioeconomic status, policymakers, healthcare professionals, and public health advocates can develop comprehensive strategies to reduce smoking prevalence, promote healthier behaviors, and improve overall population health.
+
+
+
+<<<<<<< HEAD
+
+### calculating relative risk and an odds ratio for Unskilled compared to Employers and Managers
+
+## relative risk = 0.2991/0.1301 = 2.99
+
+
+## odds for Unskilled = 0.2991/(1-0.2991) = 0.43
+
+## odds for Employers and Managers = 0.1301/(1-0.1301) = 0.15  
+
+## odds ratio = 0.43/0.15 = 2.87
+
+
+The relative risk compares the risk of smoking between Unskilled workers and Employers/Managers. A relative risk of 2.99 means that Unskilled workers have a 2.99 times higher risk of smoking compared to Employers/Managers. This suggests that Unskilled workers are almost three times more likely to be smokers compared to Employers/Managers.
+
+The odds ratio compares the odds of smoking between Unskilled workers and Employers/Managers. An odds ratio of 2.87 means that the odds of smoking in Unskilled workers are 2.87 times higher than the odds of smoking in Employers/Managers. This indicates that Unskilled workers have significantly higher odds of being smokers compared to Employers/Managers.
+
+These findings highlight the importance of considering occupational factors when developing tobacco control and smoking cessation strategies. Unskilled workers may face unique challenges and higher levels of stress, which can contribute to higher smoking rates. Tailored interventions, workplace-based smoking cessation programs, and policies promoting smoke-free environments may be beneficial for reducing smoking prevalence among Unskilled workers.
+
+It is important to address health disparities and provide support and resources for individuals in different occupational categories. By understanding the specific needs and challenges faced by Unskilled workers, targeted interventions can be developed to help reduce smoking rates and improve overall health outcomes.
+
+
+
+=======
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 ##4 people from which region smoke the most?
 ```{r}
-d4 <- n1[c("q6", "lho")]
 
-# Calculate the percentage of alcoholic by 
-smoke_region <- d4 %>%
-  group_by(lho,q6) %>%
+s4 <- n1 %>% 
+  dplyr::group_by(q6, lho) %>% 
+  dplyr::summarise(count = n()) |>
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
-  group_by(q6) %>%
-  mutate(perc = count / sum(count) * 100) 
+  ungroup() %>%
+  group_by(lho) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(lho, q6, count)
+
+
+smoking_by_region <- 
+  s4 %>% 
+  group_by(lho, q6) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(lho) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q6 = q6) %>% 
+  arrange(lho)
+
 
 # Create a bar plot
-ggplot(smoke_region, aes(x = lho, y = perc, fill = q6)) +
-  geom_bar(stat = "identity", position="dodge") +
+ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you Smoke?") +
   labs(x = "County", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 90))+
   ggtitle ( "Region (Smokers)")
+
+
+
+<<<<<<< HEAD
+
+
+=======
+### calculating relative risk and an odds ratio for Roscommon compared to Dun Laoghaire
+
+## relative risk = 0.2488/0.0615 = 4.04
+
+
+## odds for Roscommon = 0.2488/(1-0.2488) = 0.33
+
+## odds for Dun Laoghaire = 0.0615/(1-0.0615) = 0.06  
+
+## odds ratio = 0.43/0.15 = 5.5
+
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 ```
+
+
+
+The provided table displays the smoking rates in different local health offices (LHOs) across various counties. It includes the LHO names (lho), the percentage of smokers or non-smokers (perc), and the smoking status (q6: "Yes" indicates smokers, "No" indicates non-smokers).
+
+Here is an explanation of the data and key findings:
+
+1. Smoking Rates by LHO: The table presents the smoking rates within each LHO. For example, in Carlow/Kilkenny, 17.32% of the population are smokers, while in Cavan/Monaghan, the smoking rate is 17.82%. These rates differ across LHOs, indicating variations in smoking behaviors between different areas.
+
+2. Variation in Smoking Rates: The data highlights significant differences in smoking rates across LHOs. For instance, Dun Laoghaire exhibits a low smoking rate of 6.15%, while Dublin South East has a relatively higher rate of 88.29%. These disparities emphasize the importance of considering regional factors and implementing targeted smoking cessation programs.
+
+3. Regional Comparison: The table allows for a comparison of smoking rates among different counties. For example, some counties like Kerry and Meath have relatively balanced smoking rates, with percentages close to 50% for smokers and non-smokers. In contrast, Dun Laoghaire stands out with a significantly lower smoking rate compared to other counties.
+
+Understanding these variations can aid in developing targeted interventions and public health campaigns to reduce smoking prevalence in specific regions.
+
+
+<<<<<<< HEAD
+### calculating relative risk and an odds ratio for Roscommon compared to Dun Laoghaire
+
+## relative risk = 0.2488/0.0615 = 4.04
+
+
+## odds for Roscommon = 0.2488/(1-0.2488) = 0.33
+
+## odds for Dun Laoghaire = 0.0615/(1-0.0615) = 0.06  
+
+## odds ratio = 0.43/0.15 = 5.5
+
+
+
+The relative risk compares the risk of smoking between Roscommon and Dun Laoghaire. A relative risk of 4.04 means that individuals from Roscommon have a 4.04 times higher risk of smoking compared to individuals from Dun Laoghaire. This suggests that smoking prevalence is significantly higher in Roscommon compared to Dun Laoghaire.
+
+The odds ratio compares the odds of smoking between Roscommon and Dun Laoghaire. An odds ratio of 5.5 means that the odds of smoking in Roscommon are 5.5 times higher than the odds of smoking in Dun Laoghaire. This indicates that individuals from Roscommon have significantly higher odds of being smokers compared to individuals from Dun Laoghaire.
+
+
+These findings highlight regional disparities in smoking prevalence and suggest that there may be regional-specific factors influencing smoking behavior. Understanding the underlying determinants of higher smoking rates in Roscommon can help inform targeted interventions and policies to reduce smoking prevalence in that region. Such interventions may include community-based smoking cessation programs, increased access to tobacco cessation resources, and targeted public health campaigns.
+
+It is important to address these regional disparities in smoking rates to promote equitable health outcomes and reduce the burden of smoking-related diseases. By identifying and targeting the unique challenges and risk factors in regions with higher smoking prevalence, effective strategies can be implemented to reduce smoking rates and improve the overall health of the population.
+=======
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 
 
 ##5 smokers from various countries
 ```{r}
 
-d5 <- n1[c("q6", "countbirth")]
-
-# Calculate the percentage of alcoholic by 
-smoke_country <- d5 %>%
-  group_by(countbirth,q6) %>%
+s5 <- n1 %>% 
+  dplyr::group_by(q6, countbirth) %>% 
+  dplyr::summarise(count = n()) |>
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
-  group_by(q6) %>%
-  mutate(perc = count / sum(count) * 100) 
+  ungroup() %>%
+  group_by(countbirth) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(countbirth, q6, count)
+
+
+smoking_by_country <- 
+  s5 %>% 
+  group_by(countbirth, q6) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(countbirth) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q6 = q6) %>% 
+  arrange(countbirth)
+
 
 # Create a bar plot
-ggplot(smoke_country, aes(x = countbirth, y = perc, fill = q6)) +
-  geom_bar(stat = "identity", position="dodge") +
+ggplot(smoking_by_country, aes(x = countbirth, y = perc, fill = q6)) +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you Smoke?") +
   labs(x = "County", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
   ggtitle ( "Smokers from different countries")
+
+<<<<<<< HEAD
+=======
+
+### calculating relative risk and an odds ratio for Ireland compared to Rest of EU
+
+## relative risk = 0.1765/0.3446 = 0.51
+
+
+## odds for Roscommon = 0.1765/(1-0.1765) = 0.21
+
+## odds for Dun Laoghaire = 0.3446/(1-0.3446) = 0.52 
+
+## odds ratio = 0.43/0.15 = 0.41
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 ```
+
+The graph displays the smoking rates based on the country of birth. 
+
+1. Smoking Rates by Country of Birth: The table presents the smoking rates among individuals based on their country of birth. For example, among individuals born in Ireland, 17.66% are smokers, while among those born in the UK, the smoking rate is 22.25%. These rates differ based on the country of birth, indicating variations in smoking behaviors among different populations.
+
+2. Variation in Smoking Rates: The data highlights significant differences in smoking rates based on the country of birth. For instance, individuals born in the Rest of the World have a lower smoking rate of 11.05%, while those born in the Rest of EU have a higher rate of 34.46%. These disparities suggest that cultural and demographic factors associated with the country of birth may influence smoking behaviors.
+
+3. Comparison by Country of Birth: The table allows for a comparison of smoking rates among individuals from different countries. For example, individuals born in Ireland have a relatively balanced smoking rate, with 17.66% being smokers. In contrast, individuals born in the Rest of the World exhibit a significantly lower smoking rate of 11.05%.
+
+Understanding these variations can help in developing targeted interventions and tailored smoking cessation programs for specific populations. It emphasizes the importance of considering cultural and demographic factors associated with the country of birth when addressing smoking behaviors.
+
+
+
+### calculating relative risk and an odds ratio for Ireland compared to Rest of EU
+
+## relative risk = 0.1765/0.3446 = 0.51
+
+
+## odds for Ireland = 0.1765/(1-0.1765) = 0.21
+
+## odds for Rest of EU = 0.3446/(1-0.3446) = 0.52 
+
+## odds ratio = 0.43/0.15 = 0.41
+
+
+The relative risk compares the risk of smoking between Ireland and the Rest of the EU. A relative risk of 0.51 suggests that individuals in Ireland have a 0.51 times lower risk of smoking compared to individuals in the Rest of the EU. This indicates that smoking prevalence is lower in Ireland compared to the Rest of the EU.
+
+The odds ratio compares the odds of smoking between Ireland and the Rest of the EU. An odds ratio of 0.41 means that the odds of smoking in Ireland are 0.41 times lower than the odds of smoking in the Rest of the EU. This further supports the finding that individuals in Ireland have lower odds of being smokers compared to individuals in the Rest of the EU.
+
+
+These findings reflect the effectiveness of tobacco control measures and public health campaigns in Ireland, which have contributed to a lower prevalence of smoking. The implementation of comprehensive tobacco control policies, including smoking bans, increased taxation on tobacco products, and public health education, has played a crucial role in reducing smoking rates in Ireland.
+
+Continued efforts and investments in comprehensive tobacco control strategies are necessary to maintain and further reduce smoking rates, not only in Ireland but also in the Rest of the EU. By prioritizing evidence-based interventions and adopting best practices, public health authorities can contribute to improving population health and reducing the burden of smoking-related diseases.
+
+The graph displays the smoking rates based on the country of birth. 
+
+1. Smoking Rates by Country of Birth: The table presents the smoking rates among individuals based on their country of birth. For example, among individuals born in Ireland, 17.66% are smokers, while among those born in the UK, the smoking rate is 22.25%. These rates differ based on the country of birth, indicating variations in smoking behaviors among different populations.
+
+2. Variation in Smoking Rates: The data highlights significant differences in smoking rates based on the country of birth. For instance, individuals born in the Rest of the World have a lower smoking rate of 11.05%, while those born in the Rest of EU have a higher rate of 34.46%. These disparities suggest that cultural and demographic factors associated with the country of birth may influence smoking behaviors.
+
+3. Comparison by Country of Birth: The table allows for a comparison of smoking rates among individuals from different countries. For example, individuals born in Ireland have a relatively balanced smoking rate, with 17.66% being smokers. In contrast, individuals born in the Rest of the World exhibit a significantly lower smoking rate of 11.05%.
+
+Understanding these variations can help in developing targeted interventions and tailored smoking cessation programs for specific populations. It emphasizes the importance of considering cultural and demographic factors associated with the country of birth when addressing smoking behaviors.
 
 
 
 
 ##6 What percentage of the population consumes alcohol, and how does this vary by age
 ```{r}
-d3 <- n1[c("q14", "ageclass")]
+n1$q14 <- ifelse(n1$q14 %in% c("Yes", "Have only had a few sips of alcohol in my lifetime"), "Yes", "No")
 
-# Calculate the percentage of alcoholic by 
-alcohol_age <- d3 %>%
-  group_by(ageclass,q14) %>%
+s6 <- n1 %>% 
+  dplyr::group_by(q14, ageclass) %>% 
+  dplyr::summarise(count = n()) |>
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
-  group_by(q14) %>%
-  mutate(perc = count / sum(count) * 100) 
+  ungroup() %>%
+  group_by(ageclass) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(ageclass, q14, count)
+
+
+drinking_by_age <- 
+  s6 %>% 
+  group_by(ageclass, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(ageclass) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(ageclass)
 
 # Create a bar plot
-ggplot(alcohol_age, aes(x = ageclass, y = perc, fill = q14)) +
-  geom_bar(stat = "identity", position="dodge") +
+ggplot(drinking_by_age, aes(x = ageclass, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
   labs(x = "Age", y = "Percentage")+
   ggtitle ( "Alcohol consumption by age")
+
+<<<<<<< HEAD
+=======
+
+### calculating relative risk and an odds ratio for 25-44 year olds compared to 65 +
+
+## relative risk = 0.9107/0.8048 = 1.13
+
+## odds for 25-44 = 0.9107/(1-0.9107) = 10.19
+
+## odds for 65+ = 0.8048/(1-0.8048) = 4.12
+
+## odds ratio = 0.31/0.12 = 2.47
+
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 ```
 
 
-majority of people are consuming alcohol than smoking. people from age 25-44 are leading consumers with 28.13 % followed by age 45-64 with 26.61%. it is shocking that people above 65 (19.21%) also consume alcohol.
+Age Group "15-24 years": The majority of individuals in this age group (77.33%) consume alcohol, while a smaller percentage (22.67%) do not consume alcohol.
+
+Age Group "25-44 years": A significant majority of individuals in this age group (91.07%) consume alcohol, with only a small percentage (8.93%) not consuming alcohol.
+
+Age Group "45-64 years": A high percentage of individuals in this age group (87.50%) consume alcohol, while a relatively smaller percentage (12.50%) do not consume alcohol.
+
+Age Group "65 and over": The majority of individuals in this age group (80.48%) consume alcohol, while a smaller percentage (19.52%) do not consume alcohol.
+
+Overall, the data suggests that alcohol consumption tends to be more prevalent among younger age groups (15-24 years and 25-44 years) compared to older age groups (45-64 years and 65 and over).
+
+
+<<<<<<< HEAD
+### calculating relative risk and an odds ratio for 25-44 year olds compared to 65 +
+
+## relative risk = 0.9107/0.8048 = 1.13
+
+## odds for 25-44 = 0.9107/(1-0.9107) = 10.19
+
+## odds for 65+ = 0.8048/(1-0.8048) = 4.12
+
+## odds ratio = 0.31/0.12 = 2.47
+
+
+The relative risk of 1.13 indicates that individuals in the 25-44 age group have a 1.13 times higher risk of consuming alcohol compared to those in the 65 and over age group. This suggests a slightly higher prevalence of alcohol consumption in the younger age group.
+
+The odds ratio of 2.47 implies that the odds of alcohol consumption are 2.47 times higher in the 25-44 age group compared to the 65 and over age group. This indicates a significant difference in alcohol consumption patterns between the two age groups, with a higher likelihood of alcohol consumption in the younger age group.
+
+
+These findings align with general trends in alcohol consumption, where younger individuals tend to have higher rates of alcohol use. It is important to address alcohol consumption behaviors, particularly among younger age groups, through education, awareness campaigns, and targeted interventions to promote responsible and healthy alcohol consumption habits. Additionally, efforts to prevent alcohol-related harm should also be focused on older age groups, as a significant proportion of individuals in these age groups still consume alcohol.
+
+=======
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 
 
 ##7 What percentage of the population consumes alcohol, and how does this vary by gender
 ```{r}
-d7 <- n1[c("q14", "q52")]
 
-# Calculate the percentage of alcoholic by 
-alcohol_gender <- d7 %>%
-  group_by(q14,q52) %>%
+s7 <- n1 %>% 
+  dplyr::group_by(q14, q52) %>% 
+  dplyr::summarise(count = n()) |>
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  ungroup() %>%
   group_by(q52) %>%
-  mutate(perc = count / sum(count) * 100) 
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(q52, q14, count)
+
+
+drinking_by_gender <- 
+  s7 %>% 
+  group_by(q52, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(q52) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(q52)
 
 # Create a bar plot
-ggplot(alcohol_gender, aes(x = q52, y = perc, fill = q14)) +
-  geom_bar(stat = "identity", position="dodge") +
+ggplot(drinking_by_gender, aes(x = q52, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
   labs(x = "Age", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 20,hjust=1))+
+  theme(axis.text.x = element_text(hjust=1))+
   ggtitle ( "Alcohol consumption by gender")
 ```
 
-there are more female drinkers(42.11%) than male drinkers(37.42%)
+Males: Among males, a significant majority (88.88%) consume alcohol, while a relatively smaller percentage (11.12%) do not consume alcohol.
+
+Females: Among females, the majority (83.60%) consume alcohol, while a smaller percentage (16.40%) do not consume alcohol.
+
+Based on the provided data, it appears that both males and females have a substantial proportion of individuals who consume alcohol. 
+<<<<<<< HEAD
+
+
+
+### calculating relative risk and an odds ratio for males compared to females
+
+## relative risk = 0.8888/0.8359 = 1.06
+
+## odds for males = 0.8888/(1-0.8888) = 7.99
+
+## odds for females = 0.8359/(1-0.8359) = 5.09
+
+## odds ratio = 7.99/5.09 = 1.56
+
+The calculated relative risk of 1.06 suggests that males have a 1.06 times higher risk of consuming alcohol compared to females. This indicates a slightly higher prevalence of alcohol consumption among males, although the difference is not substantial.
+
+The odds ratio is 1.56, indicating that males have 1.56 times higher odds of consuming alcohol compared to females. This suggests a moderate association between gender and alcohol consumption, with males having higher odds of being alcohol consumers compared to females.
+
+
+Based on the data, it can be concluded that there is a moderate association between gender and alcohol consumption. Males have a slightly higher prevalence and odds of consuming alcohol compared to females. The findings emphasize the need for comprehensive alcohol-related interventions and education for both genders to promote responsible alcohol consumption and address potential health risks associated with excessive alcohol use.
+
+=======
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 
 
 ##8 What percentage of the population consumes alcohol, and how does this vary by socioeconomic
 ```{r}
-d8 <- n1[c("q14", "key1")]
 
-# Calculate the percentage of alcoholic by 
-alcohol_soc <- d8 %>%
-  group_by(q14,key1) %>%
+s8 <- n1 %>% 
+  dplyr::group_by(q14, key1) %>% 
+  dplyr::summarise(count = n()) |>
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  ungroup() %>%
   group_by(key1) %>%
-  mutate(perc = count / sum(count) * 100) 
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(key1, q14, count)
+
+
+drinking_by_sec <- 
+  s8 %>% 
+  group_by(key1, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(key1) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(key1)
+
 
 # Create a bar plot
-ggplot(alcohol_soc, aes(x = key1, y = perc, fill = q14)) +
-  geom_bar(stat = "identity", position="dodge") +
+ggplot(drinking_by_sec, aes(x = key1, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
   labs(x = "Age", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 90,hjust=1))+
   ggtitle ( "Alcohol consumption by socioeconomic status")
 ```
 
-##9 people from which region drink the most?
+
+The data shows the varying patterns of alcohol consumption among different social economic groups. Here are some key observations:
+
+Employers and Managers (Group A) have a high percentage (90.56%) of individuals consuming alcohol, while a relatively lower percentage (9.44%) do not consume alcohol.
+
+Higher Professional (Group B) also has a high percentage (90.91%) of individuals consuming alcohol, with a similar pattern as Group A.
+
+The percentage of alcohol consumers gradually decreases in subsequent groups such as Lower Professional (Group C), Non-Manual (Group D), Manual Skilled (Group E), Semi-Skilled (Group F), Unskilled (Group G), Own Account Workers (Group H), Farmers (Group I), Agricultural Workers (Group J), and All others gainfully occupied and unknown (Group Z).
+
+Among Agricultural Workers (Group J), the percentage of alcohol consumers (73.68%) is relatively lower compared to other groups.
+
+These findings suggest that there are variations in alcohol consumption patterns across different social economic groups. Factors such as occupation, income, and social status may influence these patterns. 
+
+
+<<<<<<< HEAD
+### calculating relative risk and an odds ratio for Employers and Managers compared to Agricultural Workers
+
+## relative risk = 0.9056/0.7368 = 1.06
+
+## odds for Employers and Managers = 0.9056/(1-0.9056) = 9.59
+
+## odds for Agricultural Workers = 0.7368/(1-0.7368) = 2.79
+
+## odds ratio = 9.59/2.79 = 3.43
+
+
+
+The calculated relative risk of 1.06 suggests that Employers and Managers have a 1.06 times higher risk of consuming alcohol compared to Agricultural Workers. This indicates a slightly higher prevalence of alcohol consumption among Employers and Managers, although the difference is not substantial.
+
+The odds ratio is 3.43, indicating that Employers and Managers have 3.43 times higher odds of consuming alcohol compared to Agricultural Workers. This suggests a moderate association between occupational group and alcohol consumption, with Employers and Managers having higher odds of being alcohol consumers compared to Agricultural Workers.
+
+
+Based on the data, it can be concluded that there is a moderate association between occupational group and alcohol consumption. These findings highlight the importance of considering occupational factors when addressing alcohol consumption patterns and implementing workplace wellness programs that promote responsible drinking behavior. It is essential to provide resources, support, and education on alcohol consumption within different occupational settings to ensure the well-being and safety of all individuals.
+=======
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
+
+
+
+##9 people from which region consume alcohol the most?
 
 ```{r}
-d9 <- n1[c("q14", "lho","q52")]
 
-# Calculate the percentage of alcoholic by region
-alcohol_r <- d9 %>%
-  group_by(q14,lho,q52) %>%
+s9 <- n1 %>% 
+  dplyr::group_by(q14, lho) %>% 
+  dplyr::summarise(count = n()) |>
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  ungroup() %>%
   group_by(lho) %>%
-  mutate(perc = count / sum(count) * 100) 
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(lho, q14, count)
+
+
+drinking_by_region <- 
+  s9 %>% 
+  group_by(lho, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(lho) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(lho)
+ 
 
 # Create a bar plot
-ggplot(alcohol_r, aes(x = lho, y = perc, fill = q14)) +
-  geom_bar(stat = "identity", position="dodge") +
+ggplot(drinking_by_region, aes(x = lho, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
   labs(x = "Age", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 90,hjust=1))+
   ggtitle ( "Alcohol consumption by region")
 ```
 
-people in galway drink the most
 
+The graph provides information on alcohol consumption patterns in different Local Health Offices (LHOs).
+
+Here is a conclusion based on the data:
+
+1.The percentage of individuals who do not consume alcohol varies across LHOs, ranging from as low as 4.50% (Dublin South East) to as high as 27.51% (Sligo/Leitrim/West Cavan). The majority of LHOs have a lower percentage of non-alcohol consumers, indicating a higher prevalence of alcohol consumption.
+
+2.The percentage of individuals who consume alcohol also varies across LHOs, ranging from 72.49% (Sligo/Leitrim/West Cavan) to 95.50% (Dublin South East). This suggests that there are variations in alcohol consumption rates among different areas.
+
+3.Some LHOs, such as Cavan/Monaghan, Dublin North Central, Dublin West, Dun Laoghaire, Kerry, Meath, and West Cork, have a higher percentage of individuals who consume alcohol, exceeding 90%.
+
+4.LHOs like Dublin South East, Wicklow, and Louth have a relatively lower percentage of alcohol consumers, below 10%.
+
+The prevalence of alcohol consumption in LHOs can help inform public health initiatives and interventions tailored to specific areas. LHOs with higher alcohol consumption rates might benefit from targeted programs addressing alcohol-related issues and promoting responsible drinking habits.
+<<<<<<< HEAD
+
+### calculating relative risk and an odds ratio for Dublin South East compared to Limerick
+
+## relative risk = 0.9549/0.8544 = 1.26
+
+## odds for Dublin South East = 0.9549/(1-0.9549) = 21.17
+
+## odds for Limerick = 0.8544/(1-0.8544) = 5.86
+
+## odds ratio = 21.17/5.86 = 3.61
+
+
+The relative risk of 1.26 indicates that individuals in Dublin South East have a 1.26 times higher risk of consuming alcohol compared to those in Limerick. This suggests a slightly higher prevalence of alcohol consumption in Dublin South East.
+
+The odds ratio of 3.61 indicates that individuals in Dublin South East have 3.61 times higher odds of consuming alcohol compared to those in Limerick. This suggests a moderate association between the region and alcohol consumption, with Dublin South East having higher odds of alcohol consumption compared to Limerick.
+
+Based on the data, it can be concluded that there is a moderate association between the geographic regions of Dublin South East and Limerick and alcohol consumption. Dublin South East has a slightly higher prevalence and significantly higher odds of alcohol consumption compared to Limerick. These findings highlight the importance of considering regional variations in alcohol consumption patterns and tailoring interventions and policies to address the specific needs and challenges of different areas. It is essential to promote responsible drinking behaviors and provide support and resources for individuals in both Dublin South East and Limerick to ensure the well-being and health of the population.
+
+```{r}
+val_labels(s10)
+
+```
+=======
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 
 
 ##10 health condition
 ```{r}
-d6 <- n1[c("q6", "ageclass", "q52", "spq1")]
+s10 <- n1[c("q6", "ageclass", "q52", "spq1")]
+<<<<<<< HEAD
+
+# converting the values "Fair", "Bad", and "Very Bad" to "Bad" and keeps the rest of the values as "Good" or "Very Good"
+
+s10$spq1 <- ifelse(s10$spq1 %in% c("Fair", "Bad", "Very Bad"), "Bad", ifelse(s10$spq1 == "Good", "Good", "Very Good"))
+
+=======
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
 
 # Calculate the percentage of alcoholic by 
-h <- d6 %>%
+h <- s10 %>%
   group_by(ageclass,q6,q52,spq1) %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
-  mutate(perc = count / sum(count) * 100) 
+  ungroup() %>%
+  group_by(ageclass) %>%
+  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+
 
 # Create a bar plot
 ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
-  geom_bar(stat = "identity", position="dodge") +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Health condition") +
   labs(x = "Age", y = "Percentage")+
   ggtitle("Health Condition of people who smoke and who doesnt")+
   guides(color = guide_legend(reverse = TRUE))+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_grid(vars(q6), vars(q52))
+  facet_grid(vars(q6), vars(q52),labeller = label_both)
+
 ```
 
 
-It is evident that people who doesnt smoke have a better health.
-females from age 25-44 (9.44%), 45-64 (6.93%) and males from age 25-44 (5.96%), 45-64 (4.54%) are the healthy ones who doesnt smoke.
+<<<<<<< HEAD
+The provided data shows the distribution of individuals across different age groups (ageclass) and their alcohol consumption levels (spq1). The data also includes information about gender (GENDER), self-reported health status (q52), and the count and percentage of individuals in each category.
+
+
+1. Age Group "15-24 years":
+   - The majority of individuals in this age group have good or very good self-reported health status.
+   - A higher percentage of individuals in this age group consume alcohol compared to those who do not.
+   - Both males and females in this age group have a similar pattern of alcohol consumption and health status.
+
+2. Age Group "25-44 years":
+   - The majority of individuals in this age group have good or very good self-reported health status.
+   - A higher percentage of individuals in this age group consume alcohol compared to those who do not.
+   - Both males and females in this age group have a similar pattern of alcohol consumption and health status.
+
+3. Age Group "45-64 years":
+   - The majority of individuals in this age group have good or very good self-reported health status.
+   - A higher percentage of individuals in this age group consume alcohol compared to those who do not.
+   - Both males and females in this age group have a similar pattern of alcohol consumption and health status.
+
+4. Age Group "65 and over":
+   - The majority of individuals in this age group have good or very good self-reported health status.
+   - A higher percentage of individuals in this age group consume alcohol compared to those who do not.
+   - Both males and females in this age group have a similar pattern of alcohol consumption and health status.
+
+
+We can conclude that there is a significant proportion of individuals across different age groups who consume alcohol. Additionally, the majority of individuals in all age groups report good or very good self-reported health status. It is important to note that this analysis is limited to the information provided and does not consider other factors that may impact alcohol consumption or health status, such as underlying health conditions or lifestyle choices. 
+=======
+15-24
+Based on the data provided, it can be concluded that overall, a significant portion of individuals in the 15-24 age group reported their health as "Very Good" or "Good." This trend was consistent among both non-smoking males and females. However, there was a slightly lower proportion of individuals reporting "Very Good" health among smokers, indicating a potential negative impact of smoking on health perception.
+
+It's important to note that this conclusion is based solely on the self-reported health conditions and does not take into account any objective medical assessments. .
+
+
+25-44
+Similar to the 25-44 age group, both non-smoking males and females in the 45-64 age group had a higher percentage reporting "Very Good" and "Good" health compared to smoking males and females. This indicates that smoking may have a negative impact on health perception in this age group as well.
+
+45-64
+The majority of individuals in the age group of 45-64 years reported good or very good health, with higher proportions among non-smoking individuals.
+
+Non-smoking females had the highest proportion of individuals reporting very good health (6.94%), followed by non-smoking males (4.55%).
+
+The prevalence of fair, bad, and very bad health conditions was relatively low in all groups.
+Smoking males had the lowest proportion of individuals reporting very good health (0.68%).
+
+Smoking females had a slightly higher proportion of individuals reporting very good health (1.04%) compared to smoking males.
+
+
+65+
+
+Similar to the previous age groups, both non-smoking males and females in the 65 and over age group had a higher percentage reporting "Very Good" and "Good" health compared to smoking males and females. This indicates that smoking may have a negative impact on health perception in this age group as well
+
+
+
+The prevalence of fair, bad, and very bad health conditions was relatively low in all groups.
+
+Smoking females had the lowest proportion of individuals reporting good and very good health.
+
+Smoking males had a slightly higher proportion of individuals reporting good and very good health compared to smoking females, but still lower than non-smoking individuals.
+>>>>>>> a4a74b626e8aa77c9120f9135d54d9a1a8b3fdd7
+
 
 
 
@@ -445,17 +1010,21 @@ health_ins <- d11 %>%
   group_by(q14,q6,q52,q55) %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
-  mutate(perc = count / sum(count) * 100) 
+  ungroup() %>%
+  group_by(q14) %>%
+  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+
+
 
 # Create a bar plot
 ggplot(health_ins, aes(x = q52, y = perc, fill = q55)) +
-  geom_bar(stat = "identity", position="dodge") +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you have private health insurance?") +
   labs(x = "Age", y = "Percentage")+
-  ggtitle("Health Insurance for smokers and alcoholics")+
+  ggtitle("Health Insurance for People who smoke and consume alcohol")+
   guides(color = guide_legend(reverse = TRUE))+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_grid(vars(q6), vars(q14))
+  facet_grid(vars(q6), vars(q14),labeller = label_both)
 ```
 
 this categorizes people who smoke and consume alcohol with whether they own a private health insurance or not. people who drink and doesnt smoke have a private health insurance
@@ -469,21 +1038,46 @@ d12 <- n1[c("lho","q120")]
 # Calculate the percentage by region
 suppl <- d12 %>%
   group_by(lho,q120) %>%
+  dplyr::summarise(count = n()) |>
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  ungroup() %>%
   group_by(lho) %>%
-  mutate(perc = count / sum(count) * 100) 
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(lho, q120, count)
 
 suppl$q120 <- ifelse(suppl$q120 %in% c("No", "Don’t know/refused"), "No", "Yes")
 
+
+folic <- 
+  suppl %>% 
+  group_by(lho, q120) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(lho) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q120 = q120) %>% 
+  arrange(lho)
+
+
 # Create a bar plot
-ggplot(suppl, aes(x = lho, y = perc, fill = q120)) +
-  geom_bar(stat = "identity", position="dodge") +
+ggplot(folic, aes(x = lho, y = perc, fill = q120)) +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you take folicacid suppliments?") +
   labs(x = "Age", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 90,hjust=1))+
   ggtitle ( "Folic acid consumption by region")
 ```
+
+
+Regional Variations: There are notable differences in folic acid consumption rates across different regions. Some regions have a higher percentage of individuals consuming folic acid supplements, while others have lower percentages. This suggests that there may be variations in awareness, accessibility, or cultural factors influencing folic acid consumption.
+
+High Consumption Regions: Some regions stand out for their relatively high folic acid consumption rates. For example, regions like Tipperary South, Longford/Westmeath, and North Cork have higher percentages of individuals taking folic acid supplements. This indicates a positive trend in these regions and suggests the presence of effective health promotion efforts or prenatal care initiatives.
+
+Low Consumption Regions: Conversely, there are regions with lower folic acid consumption rates. For instance, regions like Louth, Meath, and Dublin South East have relatively lower percentages of individuals taking folic acid supplements. This highlights areas where there might be a need for increased awareness campaigns and targeted interventions to promote folic acid supplementation during pregnancy.
+
+Regional Disparities: The data reveals regional disparities in folic acid consumption. It is important to address these disparities to ensure equitable access to prenatal care and reduce the risk of birth defects. Targeted interventions and educational campaigns can be designed to raise awareness and encourage folic acid supplementation in regions with lower consumption rates.
+
+In conclusion, the analysis of folic acid consumption by region provides valuable insights into the prevalence and regional variations of folic acid supplementation. This information can guide public health strategies and interventions aimed at improving folic acid awareness, accessibility, and uptake, ultimately contributing to better maternal and child health outcomes.
 
 
 
@@ -501,7 +1095,7 @@ income <- d13 %>%
 
 # Create a bar plot
 ggplot(income, aes(x = ageclass, y = perc, fill = q63b)) +
-  geom_bar(stat = "identity", position="dodge") +
+  geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Chief Income Earner") +
   labs(x = "Age", y = "Percentage")+
   ggtitle("Chief Income Earner")+
