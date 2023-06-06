@@ -322,7 +322,6 @@ It is important to address health disparities and provide support and resources 
 
 ### 4 What are the observed variations in smoking rates across different local health offices (LHOs) in various counties?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-
 s4 <- n1 %>% 
   dplyr::group_by(q6, lho) %>% 
   dplyr::summarise(count = n()) |>
@@ -350,11 +349,9 @@ ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
   scale_fill_discrete(name = "Do you Smoke?") +
   labs(x = "County", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 90))+
-<<<<<<< HEAD
+
   ggtitle ( "Smoking rates in various regions (Smokers)")
-=======
   ggtitle ( "Smoking rates in various regions")
->>>>>>> bc2061889e0f18fef4222cdbcce3bf6e9ba9098d
 
 ```
 
