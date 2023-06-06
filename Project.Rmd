@@ -350,7 +350,11 @@ ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
   scale_fill_discrete(name = "Do you Smoke?") +
   labs(x = "County", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 90))+
+<<<<<<< HEAD
   ggtitle ( "Smoking rates in various regions (Smokers)")
+=======
+  ggtitle ( "Smoking rates in various regions")
+>>>>>>> bc2061889e0f18fef4222cdbcce3bf6e9ba9098d
 
 ```
 
@@ -901,7 +905,11 @@ In conclusion, the calculations suggest that there is a higher prevalence of fol
 
 
 
+<<<<<<< HEAD
 ### 13 What is the relationship between the prevalence of smoking and the consumption of alcohol among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?
+=======
+### 13 What is the relationship between the prevalence of smoking (Q6) and the consumption of alcohol (Q14) among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?
+>>>>>>> bc2061889e0f18fef4222cdbcce3bf6e9ba9098d
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 d13 <- n1[c("q6", "q14", "ageclass", "q63b")]
