@@ -39,7 +39,6 @@ suppressWarnings(library(plyr))
 
 ```{r}
 data <- read_sav("0021-04_healthy_ireland_2018.sav")
-#View(data)
 ```
 
 
@@ -75,11 +74,6 @@ newdata <- cbind(df1, df2,df3,df4,df5)
 ```
 
 
-```{r}
-# Continuous variables
-#summary(df2)
-```
-
 
 ```{r}
 #converting to factors
@@ -108,7 +102,7 @@ s1 <- n1 %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
   dplyr::select(ageclass, q6, count)
 
-# Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
+# Re-code smoking variable to combine "Yes, daily" and "Yes, occasionally"
 s1$q6 <- ifelse(s1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 
@@ -204,7 +198,7 @@ smoking_by_gender <-
   arrange(q52)
 
 
-# Calculate the percentage of the population that smokes, by gender
+# Plot the results
 ggplot(smoking_by_gender, aes(x = q52, y = perc, fill = q6)) +
   geom_bar(stat = "identity") +
   labs(x = "Gender", y = "Percentage", fill = "Smoking") +
@@ -270,7 +264,7 @@ smoking_by_ses <-
   arrange(key1)
 
 
-# Create a bar plot
+# Plot the results
 ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do You smoke?") +
@@ -343,14 +337,12 @@ smoking_by_region <-
   arrange(lho)
 
 
-# Create a bar plot
+# Plot the results
 ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you Smoke?") +
   labs(x = "County", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 90))+
-
-  ggtitle ( "Smoking rates in various regions (Smokers)")
   ggtitle ( "Smoking rates in various regions")
 
 ```
@@ -417,13 +409,13 @@ smoking_by_country <-
   arrange(countbirth)
 
 
-# Create a bar plot
+# Plot the results
 ggplot(smoking_by_country, aes(x = countbirth, y = perc, fill = q6)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you Smoke?") +
   labs(x = "County", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  ggtitle ( "Smokers from different countries")
+  ggtitle ("Country-wise Distribution of Smoking Rates")
 
 ```
 
@@ -487,7 +479,7 @@ drinking_by_age <-
                    q14 = q14) %>% 
   arrange(ageclass)
 
-# Create a bar plot
+# Plot the results
 ggplot(drinking_by_age, aes(x = ageclass, y = perc, fill = q14)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
@@ -553,7 +545,7 @@ drinking_by_gender <-
                    q14 = q14) %>% 
   arrange(q52)
 
-# Create a bar plot
+# Plot the results
 ggplot(drinking_by_gender, aes(x = q52, y = perc, fill = q14)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
@@ -612,7 +604,7 @@ drinking_by_sec <-
   arrange(key1)
 
 
-# Create a bar plot
+# Plot the results
 ggplot(drinking_by_sec, aes(x = key1, y = perc, fill = q14)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
@@ -679,7 +671,7 @@ drinking_by_region <-
   arrange(lho)
  
 
-# Create a bar plot
+# Plot the results
 ggplot(drinking_by_region, aes(x = lho, y = perc, fill = q14)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
@@ -743,7 +735,7 @@ h <- s10 %>%
   dplyr::mutate(perc = count*100/sum(count),q6=q6) 
 
 
-# Create a bar plot
+# Plot the results
 ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Health condition") +
@@ -801,7 +793,7 @@ health_ins <- d11 %>%
 
 
 
-# Create a bar plot
+# Plot the results
 ggplot(health_ins, aes(x = q52, y = perc, fill = q55)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you have private health insurance?") +
@@ -858,7 +850,7 @@ folic <-
   arrange(lho)
 
 
-# Create a bar plot
+# Plot the results
 ggplot(folic, aes(x = lho, y = perc, fill = q120)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you take folicacid suppliments?") +
@@ -919,7 +911,7 @@ income <- d13 %>%
   dplyr::mutate(perc = count*100/sum(count),q6=q6) 
 
 
-# Create a bar plot
+# Plot the results
 ggplot(income, aes(x = ageclass, y = perc, fill = q63b)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Chief Income Earner") +
