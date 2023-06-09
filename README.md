@@ -28,6 +28,6 @@
 
 <li>What is the relationship between the prevalence of smoking and the consumption of alcohol among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?</li>
 
-<li>What is the relationship between the prevalence of smoking (Q6) and the consumption of alcohol (Q14) among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?</li>
+<li>What is the relationship between the prevalence of smoking and the consumption of alcohol among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?</li>
 
 

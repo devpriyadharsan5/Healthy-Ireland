@@ -1,7 +1,7 @@
 ---
 title: "Exploring the Relationship between Smoking, Alcohol Consumption, and Demographic Factors: A Survey-Based Analysis"
 
-author: "Devpriyadharsan Balan Saravanan 22250355"
+author: "Devpriyadharsan Balan Saravanan - 22250355"
 
 output:
   html_document: default
@@ -320,7 +320,7 @@ It is important to address health disparities and provide support and resources 
 
 
 
-### 4 What are the observed variations in smoking rates across different local health offices (LHOs) in various counties?
+### 4. What are the observed variations in smoking rates across different local health offices (LHOs) in various counties?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 s4 <- n1 %>% 
   dplyr::group_by(q6, lho) %>% 
@@ -393,7 +393,7 @@ It is important to address these regional disparities in smoking rates to promot
 
 
 
-### 5 How do smoking rates vary based on the country of birth?
+### 5. How do smoking rates vary based on the country of birth?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
 s5 <- n1 %>% 
@@ -463,7 +463,7 @@ Continued efforts and investments in comprehensive tobacco control strategies ar
 
 
 
-### 6 What percentage of the population consumes alcohol and how does this vary by age?
+### 6. What percentage of the population consumes alcohol and how does this vary by age?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 n1$q14 <- ifelse(n1$q14 %in% c("Yes", "Have only had a few sips of alcohol in my lifetime"), "Yes", "No")
 
@@ -530,7 +530,7 @@ These findings align with general trends in alcohol consumption, where younger i
 
 
 
-### 7 What percentage of the population consumes alcohol and how does this vary by gender?
+### 7. What percentage of the population consumes alcohol and how does this vary by gender?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
 s7 <- n1 %>% 
@@ -588,7 +588,7 @@ Based on the data, it can be concluded that there is a moderate association betw
 
 
 
-### 8 What percentage of the population consumes alcohol, and how does this vary by socioeconomic status?
+### 8. What percentage of the population consumes alcohol, and how does this vary by socioeconomic status?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
 s8 <- n1 %>% 
@@ -654,7 +654,7 @@ The odds ratio is 3.43, indicating that Employers and Managers have 3.43 times h
 Based on the data, it can be concluded that there is a moderate association between occupational group and alcohol consumption. These findings highlight the importance of considering occupational factors when addressing alcohol consumption patterns and implementing workplace wellness programs that promote responsible drinking behavior. It is essential to provide resources, support, and education on alcohol consumption within different occupational settings to ensure the well-being and safety of all individuals.
 
 
-### 9 What percentage of the population consumes alcohol and how does this vary by counties?
+### 9. What percentage of the population consumes alcohol and how does this vary by counties?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
@@ -692,13 +692,13 @@ ggplot(drinking_by_region, aes(x = lho, y = perc, fill = q14)) +
 The graph provides information on alcohol consumption patterns in different Local Health Offices (LHOs).
 
 
-1.The percentage of individuals who do not consume alcohol varies across LHOs, ranging from as low as 4.50% (Dublin South East) to as high as 27.51% (Sligo/Leitrim/West Cavan). The majority of LHOs have a lower percentage of non-alcohol consumers, indicating a higher prevalence of alcohol consumption.
+1. The percentage of individuals who do not consume alcohol varies across LHOs, ranging from as low as 4.50% (Dublin South East) to as high as 27.51% (Sligo/Leitrim/West Cavan). The majority of LHOs have a lower percentage of non-alcohol consumers, indicating a higher prevalence of alcohol consumption.
 
-2.The percentage of individuals who consume alcohol also varies across LHOs, ranging from 72.49% (Sligo/Leitrim/West Cavan) to 95.50% (Dublin South East). This suggests that there are variations in alcohol consumption rates among different areas.
+2. The percentage of individuals who consume alcohol also varies across LHOs, ranging from 72.49% (Sligo/Leitrim/West Cavan) to 95.50% (Dublin South East). This suggests that there are variations in alcohol consumption rates among different areas.
 
-3.Some LHOs, such as Cavan/Monaghan, Dublin North Central, Dublin West, Dun Laoghaire, Kerry, Meath, and West Cork, have a higher percentage of individuals who consume alcohol, exceeding 90%.
+3. Some LHOs, such as Cavan/Monaghan, Dublin North Central, Dublin West, Dun Laoghaire, Kerry, Meath, and West Cork, have a higher percentage of individuals who consume alcohol, exceeding 90%.
 
-4.LHOs like Dublin South East, Wicklow, and Louth have a relatively lower percentage of alcohol consumers, below 10%.
+4. LHOs like Dublin South East, Wicklow, and Louth have a relatively lower percentage of alcohol consumers, below 10%.
 
 The prevalence of alcohol consumption in LHOs can help inform public health initiatives and interventions tailored to specific areas. LHOs with higher alcohol consumption rates might benefit from targeted programs addressing alcohol-related issues and promoting responsible drinking habits.
 
@@ -722,7 +722,7 @@ Based on the data, it can be concluded that there is a moderate association betw
 
 
 
-### 10 Does the proportion of individuals who smoke vary significantly across different age groups?
+### 10. Does the proportion of individuals who smoke vary significantly across different age groups?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 s10 <- n1[c("q6", "ageclass", "q52", "spq1")]
@@ -785,7 +785,7 @@ We can conclude that there is a significant proportion of individuals across dif
 
 
 
-### 11 In the last 12 months, how often have you consumed alcoholic beverages and have a smoking habit, and do you have private health insurance?
+### 11. In the last 12 months, how often have you consumed alcoholic beverages and have a smoking habit, and do you have private health insurance?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 d11 <- n1[c("q6", "q14", "q55", "q52")]
@@ -829,7 +829,7 @@ The data provided includes information about individuals' responses to questions
 Based on the provided data, we can conclude that there is a significant proportion of individuals, especially females, who have private health insurance. However, it is important to note that this analysis is limited to the information provided and does not consider other factors that may influence the presence or absence of private health insurance, such as socioeconomic status or geographic location. Further research and analysis would be needed to obtain a more comprehensive understanding of the factors affecting private health insurance coverage.
 
 
-### 12 How does folic acid consumption vary across different regions in terms of percentages?
+### 12. How does folic acid consumption vary across different regions in terms of percentages?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 d12 <- n1[c("lho","q120")]
@@ -903,7 +903,7 @@ In conclusion, the calculations suggest that there is a higher prevalence of fol
 
 
 
-### 13 What is the relationship between the prevalence of smoking and the consumption of alcohol among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?
+### 13. What is the relationship between the prevalence of smoking and the consumption of alcohol among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
