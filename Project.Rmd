@@ -901,6 +901,28 @@ In conclusion, the calculations suggest that there is a higher prevalence of fol
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 d13 <- n1[c("q6", "q14", "ageclass", "q63b")]
 
+
+income1 <- d13 %>%
+  group_by(ageclass,q63b,q14,q6) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(ageclass,q63b,q14) %>%
+  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+
+
+ggplot(income1, aes(x = q14, y = perc, fill=q6)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "smoking") +
+  labs(x = "Age", y = "Percentage")+
+  ggtitle("Chief Income Earner")+
+  guides(color = guide_legend(reverse = TRUE))+
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+
+  facet_wrap(~ageclass+q63b)
+
+
+
+
 # Calculate the percentage of alcoholic by 
 income <- d13 %>%
   group_by(q14,q6,ageclass,q63b) %>%
@@ -909,6 +931,8 @@ income <- d13 %>%
   ungroup() %>%
   group_by(q14) %>%
   dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+
+
 
 
 # Plot the results
