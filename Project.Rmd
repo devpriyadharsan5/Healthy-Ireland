@@ -60,7 +60,6 @@ df5 <- data[c("q63b","lho","key1","ageclass","countbirth")]
 newdata <- cbind(df1, df2,df3,df4,df5) 
 
 #write_sav(newdata, "newdata.sav") 
-
 ```
 
 
@@ -80,13 +79,8 @@ newdata <- cbind(df1, df2,df3,df4,df5)
 
 n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
 
-table(n1$q6,exclude = NULL)
+#table(n1$q6,exclude = NULL)
 ```
-
-```{r}
-table(n1$q7,exclude = NULL)
-```
-
 
 
 ###  1. What percentage of the population smokes and how does this vary by age?
@@ -454,279 +448,18 @@ Continued efforts and investments in comprehensive tobacco control strategies ar
 
 
 
-
-### 6. What percentage of the population consumes alcohol and how does this vary by age?
-```{r, echo = FALSE, warning=FALSE,message=FALSE}
-n1$q14 <- ifelse(n1$q14 %in% c("Yes", "Have only had a few sips of alcohol in my lifetime"), "Yes", "No")
-
-s6 <- n1 %>% 
-  dplyr::group_by(q14, ageclass) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
-  ungroup() %>%
-  group_by(ageclass) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(ageclass, q14, count)
-
-
-drinking_by_age <- 
-  s6 %>% 
-  group_by(ageclass, q14) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
-  ungroup() %>% 
-  group_by(ageclass) %>% 
-  dplyr::summarise(perc = count*100/sum(count),
-                   q14 = q14) %>% 
-  arrange(ageclass)
-
-# Plot the results
-ggplot(drinking_by_age, aes(x = ageclass, y = perc, fill = q14)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Age", y = "Percentage")+
-  ggtitle ( "Alcohol consumption by age")
-
-
-```
-
-
-Age Group "15-24 years": The majority of individuals in this age group (77.33%) consume alcohol, while a smaller percentage (22.67%) do not consume alcohol.
-
-Age Group "25-44 years": A significant majority of individuals in this age group (91.07%) consume alcohol, with only a small percentage (8.93%) not consuming alcohol.
-
-Age Group "45-64 years": A high percentage of individuals in this age group (87.50%) consume alcohol, while a relatively smaller percentage (12.50%) do not consume alcohol.
-
-Age Group "65 and over": The majority of individuals in this age group (80.48%) consume alcohol, while a smaller percentage (19.52%) do not consume alcohol.
-
-Overall, the data suggests that alcohol consumption tends to be more prevalent among younger age groups (15-24 years and 25-44 years) compared to older age groups (45-64 years and 65 and over).
-
-
-
-**calculating relative risk and an odds ratio for 25-44 year olds compared to 65 +**
-
-* relative risk = 0.9107/0.8048 = 1.13
-
-* odds for 25-44 = 0.9107/(1-0.9107) = 10.19
-
-* odds for 65+ = 0.8048/(1-0.8048) = 4.12
-
-* odds ratio = 0.31/0.12 = 2.47
-
-
-The relative risk of 1.13 indicates that individuals in the 25-44 age group have a 1.13 times higher risk of consuming alcohol compared to those in the 65 and over age group. This suggests a slightly higher prevalence of alcohol consumption in the younger age group.
-
-The odds ratio of 2.47 implies that the odds of alcohol consumption are 2.47 times higher in the 25-44 age group compared to the 65 and over age group. This indicates a significant difference in alcohol consumption patterns between the two age groups, with a higher likelihood of alcohol consumption in the younger age group.
-
-
-These findings align with general trends in alcohol consumption, where younger individuals tend to have higher rates of alcohol use. It is important to address alcohol consumption behaviors, particularly among younger age groups, through education, awareness campaigns, and targeted interventions to promote responsible and healthy alcohol consumption habits. Additionally, efforts to prevent alcohol-related harm should also be focused on older age groups, as a significant proportion of individuals in these age groups still consume alcohol.
-
-
-
-### 7. What percentage of the population consumes alcohol and how does this vary by gender?
-```{r, echo = FALSE, warning=FALSE,message=FALSE}
-
-s7 <- n1 %>% 
-  dplyr::group_by(q14, q52) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
-  ungroup() %>%
-  group_by(q52) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(q52, q14, count)
-
-
-drinking_by_gender <- 
-  s7 %>% 
-  group_by(q52, q14) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
-  ungroup() %>% 
-  group_by(q52) %>% 
-  dplyr::summarise(perc = count*100/sum(count),
-                   q14 = q14) %>% 
-  arrange(q52)
-
-# Plot the results
-ggplot(drinking_by_gender, aes(x = q52, y = perc, fill = q14)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Age", y = "Percentage")+
-  theme(axis.text.x = element_text(hjust=1))+
-  ggtitle ( "Alcohol consumption by gender")
-```
-
-Males: Among males, a significant majority (88.88%) consume alcohol, while a relatively smaller percentage (11.12%) do not consume alcohol.
-
-Females: Among females, the majority (83.60%) consume alcohol, while a smaller percentage (16.40%) do not consume alcohol.
-
-Based on the provided data, it appears that both males and females have a substantial proportion of individuals who consume alcohol. 
-
-
-**calculating relative risk and an odds ratio for males compared to females**
-
-* relative risk = 0.8888/0.8359 = 1.06
-
-* odds for males = 0.8888/(1-0.8888) = 7.99
-
-* odds for females = 0.8359/(1-0.8359) = 5.09
-
-* odds ratio = 7.99/5.09 = 1.56
-
-The calculated relative risk of 1.06 suggests that males have a 1.06 times higher risk of consuming alcohol compared to females. This indicates a slightly higher prevalence of alcohol consumption among males, although the difference is not substantial.
-
-The odds ratio is 1.56, indicating that males have 1.56 times higher odds of consuming alcohol compared to females. This suggests a moderate association between gender and alcohol consumption, with males having higher odds of being alcohol consumers compared to females.
-
-
-Based on the data, it can be concluded that there is a moderate association between gender and alcohol consumption. Males have a slightly higher prevalence and odds of consuming alcohol compared to females. The findings emphasize the need for comprehensive alcohol-related interventions and education for both genders to promote responsible alcohol consumption and address potential health risks associated with excessive alcohol use.
-
-
-
-### 8. What percentage of the population consumes alcohol, and how does this vary by socioeconomic status?
-```{r, echo = FALSE, warning=FALSE,message=FALSE}
-
-s8 <- n1 %>% 
-  dplyr::group_by(q14, key1) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
-  ungroup() %>%
-  group_by(key1) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(key1, q14, count)
-
-
-drinking_by_sec <- 
-  s8 %>% 
-  group_by(key1, q14) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
-  ungroup() %>% 
-  group_by(key1) %>% 
-  dplyr::summarise(perc = count*100/sum(count),
-                   q14 = q14) %>% 
-  arrange(key1)
-
-
-# Plot the results
-ggplot(drinking_by_sec, aes(x = key1, y = perc, fill = q14)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Age", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 90,hjust=1))+
-  ggtitle ( "Alcohol consumption by socioeconomic status")
-```
-
-
-The data shows the varying patterns of alcohol consumption among different social economic groups. Here are some key observations:
-
-1. Employers and Managers (Group A) have a high percentage (90.56%) of individuals consuming alcohol, while a relatively lower percentage (9.44%) do not consume alcohol.
-
-2. Higher Professional (Group B) also has a high percentage (90.91%) of individuals consuming alcohol, with a similar pattern as Group A.
-
-3. The percentage of alcohol consumers gradually decreases in subsequent groups such as Lower Professional (Group C), Non-Manual (Group D), Manual Skilled (Group E), Semi-Skilled (Group F), Unskilled (Group G), Own Account Workers (Group H), Farmers (Group I), Agricultural Workers (Group J), and All others gainfully occupied and unknown (Group Z).
-
-4. Among Agricultural Workers (Group J), the percentage of alcohol consumers (73.68%) is relatively lower compared to other groups.
-
-These findings suggest that there are variations in alcohol consumption patterns across different social economic groups. Factors such as occupation, income, and social status may influence these patterns. 
-
-
-**calculating relative risk and an odds ratio for Employers and Managers compared to Agricultural Workers**
-
-* relative risk = 0.9056/0.7368 = 1.06
-
-* odds for Employers and Managers = 0.9056/(1-0.9056) = 9.59
-
-* odds for Agricultural Workers = 0.7368/(1-0.7368) = 2.79
-
-* odds ratio = 9.59/2.79 = 3.43
-
-
-The calculated relative risk of 1.06 suggests that Employers and Managers have a 1.06 times higher risk of consuming alcohol compared to Agricultural Workers. This indicates a slightly higher prevalence of alcohol consumption among Employers and Managers, although the difference is not substantial.
-
-The odds ratio is 3.43, indicating that Employers and Managers have 3.43 times higher odds of consuming alcohol compared to Agricultural Workers. This suggests a moderate association between occupational group and alcohol consumption, with Employers and Managers having higher odds of being alcohol consumers compared to Agricultural Workers.
-
-
-Based on the data, it can be concluded that there is a moderate association between occupational group and alcohol consumption. These findings highlight the importance of considering occupational factors when addressing alcohol consumption patterns and implementing workplace wellness programs that promote responsible drinking behavior. It is essential to provide resources, support, and education on alcohol consumption within different occupational settings to ensure the well-being and safety of all individuals.
-
-
-### 9. What percentage of the population consumes alcohol and how does this vary by counties?
+### 6. Does the proportion of individuals who smoke vary significantly across different age groups?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-
-s9 <- n1 %>% 
-  dplyr::group_by(q14, lho) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
-  ungroup() %>%
-  group_by(lho) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(lho, q14, count)
-
-
-drinking_by_region <- 
-  s9 %>% 
-  group_by(lho, q14) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
-  ungroup() %>% 
-  group_by(lho) %>% 
-  dplyr::summarise(perc = count*100/sum(count),
-                   q14 = q14) %>% 
-  arrange(lho)
- 
-
-# Plot the results
-ggplot(drinking_by_region, aes(x = lho, y = perc, fill = q14)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Age", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 90,hjust=1))+
-  ggtitle ( "Alcohol consumption by region")
-```
-
-
-The graph provides information on alcohol consumption patterns in different Local Health Offices (LHOs).
-
-
-1. The percentage of individuals who do not consume alcohol varies across LHOs, ranging from as low as 4.50% (Dublin South East) to as high as 27.51% (Sligo/Leitrim/West Cavan). The majority of LHOs have a lower percentage of non-alcohol consumers, indicating a higher prevalence of alcohol consumption.
-
-2. The percentage of individuals who consume alcohol also varies across LHOs, ranging from 72.49% (Sligo/Leitrim/West Cavan) to 95.50% (Dublin South East). This suggests that there are variations in alcohol consumption rates among different areas.
-
-3. Some LHOs, such as Cavan/Monaghan, Dublin North Central, Dublin West, Dun Laoghaire, Kerry, Meath, and West Cork, have a higher percentage of individuals who consume alcohol, exceeding 90%.
-
-4. LHOs like Dublin South East, Wicklow, and Louth have a relatively lower percentage of alcohol consumers, below 10%.
-
-The prevalence of alcohol consumption in LHOs can help inform public health initiatives and interventions tailored to specific areas. LHOs with higher alcohol consumption rates might benefit from targeted programs addressing alcohol-related issues and promoting responsible drinking habits.
-
-
-**calculating relative risk and an odds ratio for Dublin South East compared to Limerick**
-
-* relative risk = 0.9549/0.8544 = 1.26
-
-* odds for Dublin South East = 0.9549/(1-0.9549) = 21.17
-
-* odds for Limerick = 0.8544/(1-0.8544) = 5.86
-
-* odds ratio = 21.17/5.86 = 3.61
-
-
-The relative risk of 1.26 indicates that individuals in Dublin South East have a 1.26 times higher risk of consuming alcohol compared to those in Limerick. This suggests a slightly higher prevalence of alcohol consumption in Dublin South East.
-
-The odds ratio of 3.61 indicates that individuals in Dublin South East have 3.61 times higher odds of consuming alcohol compared to those in Limerick. This suggests a moderate association between the region and alcohol consumption, with Dublin South East having higher odds of alcohol consumption compared to Limerick.
-
-Based on the data, it can be concluded that there is a moderate association between the geographic regions of Dublin South East and Limerick and alcohol consumption. Dublin South East has a slightly higher prevalence and significantly higher odds of alcohol consumption compared to Limerick. These findings highlight the importance of considering regional variations in alcohol consumption patterns and tailoring interventions and policies to address the specific needs and challenges of different areas. It is essential to promote responsible drinking behaviors and provide support and resources for individuals in both Dublin South East and Limerick to ensure the well-being and health of the population.
-
-
-
-### 10. Does the proportion of individuals who smoke vary significantly across different age groups?
-
-```{r, echo = FALSE, warning=FALSE,message=FALSE}
-s10 <- n1[c("q6", "ageclass", "q52", "spq1")]
-
+s6 <- n1[c("q6", "ageclass", "q52", "spq1")]
 
 # converting the values "Fair", "Bad", and "Very Bad" to "Bad" and keeps the rest of the values as "Good" or "Very Good"
 
-s10$spq1 <- ifelse(s10$spq1 %in% c("Fair", "Bad", "Very Bad"), "Bad", ifelse(s10$spq1 == "Good", "Good", "Very Good"))
+s6$spq1 <- ifelse(s6$spq1 %in% c("Fair", "Bad", "Very Bad"), "Bad", ifelse(s6$spq1 == "Good", "Good", "Very Good"))
 
 
 # Calculate the percentage of smoking by 
-h <- s10 %>%
+h <- s6 %>%
   group_by(ageclass,q6,q52,spq1) %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
@@ -776,58 +509,444 @@ We can conclude that there is a significant proportion of individuals across dif
 
 
 
+     
+### 7. In the last 12 months, how often you have a smoking habit, and do you have private health insurance?
 
-### 11. In the last 12 months, how often have you consumed alcoholic beverages and have a smoking habit, and do you have private health insurance?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-d11 <- n1[c("q6", "q14", "q55", "q52")]
+s7 <- n1[c("q6", "q52", "ageclass", "q55")]
 
 # Calculate the percentage of alcoholic by 
-health_ins <- d11 %>%
-  group_by(q14,q6,q52,q55) %>%
+health_ins_smoke <- s7 %>%
+  group_by(q6,q52,ageclass,q55) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(q6) %>%
+  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+
+
+# Plot the results
+ggplot(health_ins_smoke, aes(x = ageclass, y = perc, fill=q55)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Do you have private health insurance?") +
+  labs(x = "Age", y = "Percentage")+
+  ggtitle("Health Insurance for People smoke")+
+  guides(color = guide_legend(reverse = TRUE))+
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+
+  facet_wrap(~q6+q52,labeller = label_both)
+
+```
+
+
+1. For individuals with private health insurance:
+   - Among females with private health insurance, the smoking rates vary across different age groups. The lowest smoking rate is observed among females aged 15-24 years (0.70%), while the highest smoking rate is among females aged 45-64 years (4.77%). It is worth noting that females aged 65 and over have a relatively lower smoking rate (4.91%).
+   
+   - Among males with private health insurance, the smoking rates are generally higher compared to females. The highest smoking rate is among males aged 25-44 years (4.84%), followed by males aged 45-64 years (4.21%). Males aged 15-24 years have a relatively lower smoking rate (1.19%), and males aged 65 and over have the lowest smoking rate (1.89%).
+
+
+2. For individuals without private health insurance:
+  
+   - Among females without private health insurance, the smoking rates vary across age groups. The highest smoking rate is observed among females aged 45-64 years (12.27%), which is significantly higher compared to females with private health insurance in the same age group. Females aged 15-24 years have a relatively lower smoking rate (1.63%), and females aged 25-44 years have the lowest smoking rate (2.25%). Females aged 65 and over also show a relatively lower smoking rate (7.60%).
+  
+   - Among males without private health insurance, the smoking rates are relatively higher compared to females. The highest smoking rate is among males aged 45-64 years (6.12%), followed by males aged 65 and over (6.54%). Males aged 15-24 years have a relatively lower smoking rate (1.75%), and males aged 25-44 years have the lowest smoking rate (6.09%).
+
+
+Conclusion:
+  - Private health insurance appears to have a somewhat mitigating effect on smoking rates, particularly among females. Females with private health insurance generally have lower smoking rates compared to females without private health insurance in most age groups.
+
+
+  - Among males, the influence of private health insurance on smoking rates is not as pronounced, with some age groups showing slightly higher smoking rates among those with private health insurance.
+    
+  - The highest smoking rates are observed among individuals without private health insurance, particularly among females aged 45-64 years and males aged 45-64 years and 65 and over.
+
+
+  - These findings highlight the importance of promoting smoking cessation programs, public health campaigns, and access to affordable healthcare, including private health insurance, to address and reduce smoking rates, especially among vulnerable populations.
+
+
+
+### 8. What is the relationship between the prevalence of smoking among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?
+
+
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
+s8 <- n1[c("q6", "ageclass", "q63b")]
+
+income <- s8 %>%
+  group_by(ageclass,q63b,q6) %>%
+  drop_na() |>
+  dplyr::summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(ageclass,q63b) %>%
+  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+
+
+ggplot(income, aes(x = ageclass, y = perc, fill=q6)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Do You Smoke") +
+  labs(x = "Age", y = "Percentage")+
+  ggtitle("Chief Income Earner")+
+  guides(color = guide_legend(reverse = TRUE))+
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+
+  facet_wrap(~q63b,labeller = label_both)
+
+```
+
+
+
+Based on the breakdown of being the Chief Income Earner in the household (q63b) by age class (AGECLASS) and smoking status (q6):
+
+1. Age Class: 15-24 years:
+   - Among individuals aged 15-24 years, the majority (85.98%) are not the Chief Income Earner in their household, regardless of their smoking status.
+  
+   - Among those who are not the Chief Income Earner, the count is 417, representing a significant proportion of this age group.
+  
+   - Among those who are the Chief Income Earner, the count is 137, with a higher percentage (40.88%) for non-smokers compared to smokers (14.02%).
+
+
+2. Age Class: 25-44 years:
+   - In the age group of 25-44 years, a majority of individuals (81.70%) who are not the Chief Income Earner, regardless of their smoking status.
+   
+   - The count for individuals not holding the role of Chief Income Earner is 634, indicating a significant portion of this age group.
+   - Among those who are the Chief Income Earner, the count is 456, with a higher percentage (73.69%) for non-smokers compared to smokers (26.31%).
+
+
+3. Age Class: 45-64 years:
+   - Among individuals aged 45-64 years, the majority (85.63%) who are not the Chief Income Earner in their household, regardless of their smoking status.
+  
+   - The count for individuals not holding the role of Chief Income Earner is 572, representing a significant proportion of this age group.
+  
+   - Among those who are the Chief Income Earner, the count is 390, with a higher percentage (78.75%) for non-smokers compared to smokers (21.25%).
+
+
+4. Age Class: 65 and over:
+   - In the age group of 65 and over, the majority (93.38%) who are not the Chief Income Earner in their household, regardless of their smoking status.
+  
+   - The count for individuals not holding the role of Chief Income Earner is 282, indicating a significant portion of this age group.
+  
+   - Among those who are the Chief Income Earner, the count is 198, with a higher percentage (88.77%) for non-smokers compared to smokers (11.23%).
+
+
+Overall, the data indicates that across all age classes, a larger percentage of individuals are not the Chief Income Earner in their household, irrespective of their smoking status. However, among those who hold the role of Chief Income Earner, there is a higher percentage of non-smokers compared to smokers in each age group.
+
+It's important to note that being the Chief Income Earner can depend on various factors such as education, occupation, and household dynamics. Further analysis and consideration of these factors would be necessary to draw more definitive conclusions.
+
+
+
+
+### 9. What percentage of the population consumes alcohol and how does this vary by age?
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
+n1$q14 <- ifelse(n1$q14 %in% c("Yes", "Have only had a few sips of alcohol in my lifetime"), "Yes", "No")
+
+s9 <- n1 %>% 
+  dplyr::group_by(q14, ageclass) %>% 
+  dplyr::summarise(count = n()) |>
+  drop_na() |>
+  ungroup() %>%
+  group_by(ageclass) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(ageclass, q14, count)
+
+
+drinking_by_age <- 
+  s9 %>% 
+  group_by(ageclass, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(ageclass) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(ageclass)
+
+# Plot the results
+ggplot(drinking_by_age, aes(x = ageclass, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Do you consume alcohol?") +
+  labs(x = "Age", y = "Percentage")+
+  ggtitle ( "Alcohol consumption by age")
+
+```
+
+
+Age Group "15-24 years": The majority of individuals in this age group (77.33%) consume alcohol, while a smaller percentage (22.67%) do not consume alcohol.
+
+Age Group "25-44 years": A significant majority of individuals in this age group (91.07%) consume alcohol, with only a small percentage (8.93%) not consuming alcohol.
+
+Age Group "45-64 years": A high percentage of individuals in this age group (87.50%) consume alcohol, while a relatively smaller percentage (12.50%) do not consume alcohol.
+
+Age Group "65 and over": The majority of individuals in this age group (80.48%) consume alcohol, while a smaller percentage (19.52%) do not consume alcohol.
+
+Overall, the data suggests that alcohol consumption tends to be more prevalent among younger age groups (15-24 years and 25-44 years) compared to older age groups (45-64 years and 65 and over).
+
+
+
+**calculating relative risk and an odds ratio (Alcohol consumption) for 25-44 year olds compared to 65 +**
+
+* relative risk = 0.9107/0.8048 = 1.13
+
+* odds for 25-44 = 0.9107/(1-0.9107) = 10.19
+
+* odds for 65+ = 0.8048/(1-0.8048) = 4.12
+
+* odds ratio = 0.31/0.12 = 2.47
+
+
+The relative risk of 1.13 indicates that individuals in the 25-44 age group have a 1.13 times higher risk of consuming alcohol compared to those in the 65 and over age group. This suggests a slightly higher prevalence of alcohol consumption in the younger age group.
+
+The odds ratio of 2.47 implies that the odds of alcohol consumption are 2.47 times higher in the 25-44 age group compared to the 65 and over age group. This indicates a significant difference in alcohol consumption patterns between the two age groups, with a higher likelihood of alcohol consumption in the younger age group.
+
+
+These findings align with general trends in alcohol consumption, where younger individuals tend to have higher rates of alcohol use. It is important to address alcohol consumption behaviors, particularly among younger age groups, through education, awareness campaigns, and targeted interventions to promote responsible and healthy alcohol consumption habits. Additionally, efforts to prevent alcohol-related harm should also be focused on older age groups, as a significant proportion of individuals in these age groups still consume alcohol.
+
+
+
+### 10. What percentage of the population consumes alcohol and how does this vary by gender?
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+s10 <- n1 %>% 
+  dplyr::group_by(q14, q52) %>% 
+  dplyr::summarise(count = n()) |>
+  drop_na() |>
+  ungroup() %>%
+  group_by(q52) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(q52, q14, count)
+
+
+drinking_by_gender <- 
+  s10 %>% 
+  group_by(q52, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(q52) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(q52)
+
+# Plot the results
+ggplot(drinking_by_gender, aes(x = q52, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Do you consume alcohol?") +
+  labs(x = "Age", y = "Percentage")+
+  theme(axis.text.x = element_text(hjust=1))+
+  ggtitle ( "Alcohol consumption by gender")
+```
+
+Males: Among males, a significant majority (88.88%) consume alcohol, while a relatively smaller percentage (11.12%) do not consume alcohol.
+
+Females: Among females, the majority (83.60%) consume alcohol, while a smaller percentage (16.40%) do not consume alcohol.
+
+Based on the provided data, it appears that both males and females have a substantial proportion of individuals who consume alcohol. 
+
+
+**calculating relative risk and an odds ratio (Alcohol consumption) for males compared to females**
+
+* relative risk = 0.8888/0.8359 = 1.06
+
+* odds for males = 0.8888/(1-0.8888) = 7.99
+
+* odds for females = 0.8359/(1-0.8359) = 5.09
+
+* odds ratio = 7.99/5.09 = 1.56
+
+The calculated relative risk of 1.06 suggests that males have a 1.06 times higher risk of consuming alcohol compared to females. This indicates a slightly higher prevalence of alcohol consumption among males, although the difference is not substantial.
+
+The odds ratio is 1.56, indicating that males have 1.56 times higher odds of consuming alcohol compared to females. This suggests a moderate association between gender and alcohol consumption, with males having higher odds of being alcohol consumers compared to females.
+
+
+Based on the data, it can be concluded that there is a moderate association between gender and alcohol consumption. Males have a slightly higher prevalence and odds of consuming alcohol compared to females. The findings emphasize the need for comprehensive alcohol-related interventions and education for both genders to promote responsible alcohol consumption and address potential health risks associated with excessive alcohol use.
+
+
+
+### 11. What percentage of the population consumes alcohol, and how does this vary by socioeconomic status?
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+s11 <- n1 %>% 
+  dplyr::group_by(q14, key1) %>% 
+  dplyr::summarise(count = n()) |>
+  drop_na() |>
+  ungroup() %>%
+  group_by(key1) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(key1, q14, count)
+
+
+drinking_by_sec <- 
+  s11 %>% 
+  group_by(key1, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(key1) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(key1)
+
+
+# Plot the results
+ggplot(drinking_by_sec, aes(x = key1, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Do you consume alcohol?") +
+  labs(x = "Age", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  ggtitle ( "Alcohol consumption by socioeconomic status")
+```
+
+
+The data shows the varying patterns of alcohol consumption among different social economic groups. Here are some key observations:
+
+1. Employers and Managers (Group A) have a high percentage (90.56%) of individuals consuming alcohol, while a relatively lower percentage (9.44%) do not consume alcohol.
+
+2. Higher Professional (Group B) also has a high percentage (90.91%) of individuals consuming alcohol, with a similar pattern as Group A.
+
+3. The percentage of alcohol consumers gradually decreases in subsequent groups such as Lower Professional (Group C), Non-Manual (Group D), Manual Skilled (Group E), Semi-Skilled (Group F), Unskilled (Group G), Own Account Workers (Group H), Farmers (Group I), Agricultural Workers (Group J), and All others gainfully occupied and unknown (Group Z).
+
+4. Among Agricultural Workers (Group J), the percentage of alcohol consumers (73.68%) is relatively lower compared to other groups.
+
+These findings suggest that there are variations in alcohol consumption patterns across different social economic groups. Factors such as occupation, income, and social status may influence these patterns. 
+
+
+**calculating relative risk and an odds ratio (Alcohol consumption) for Employers and Managers compared to Agricultural Workers**
+
+* relative risk = 0.9056/0.7368 = 1.06
+
+* odds for Employers and Managers = 0.9056/(1-0.9056) = 9.59
+
+* odds for Agricultural Workers = 0.7368/(1-0.7368) = 2.79
+
+* odds ratio = 9.59/2.79 = 3.43
+
+
+The calculated relative risk of 1.06 suggests that Employers and Managers have a 1.06 times higher risk of consuming alcohol compared to Agricultural Workers. This indicates a slightly higher prevalence of alcohol consumption among Employers and Managers, although the difference is not substantial.
+
+The odds ratio is 3.43, indicating that Employers and Managers have 3.43 times higher odds of consuming alcohol compared to Agricultural Workers. This suggests a moderate association between occupational group and alcohol consumption, with Employers and Managers having higher odds of being alcohol consumers compared to Agricultural Workers.
+
+
+Based on the data, it can be concluded that there is a moderate association between occupational group and alcohol consumption. These findings highlight the importance of considering occupational factors when addressing alcohol consumption patterns and implementing workplace wellness programs that promote responsible drinking behavior. It is essential to provide resources, support, and education on alcohol consumption within different occupational settings to ensure the well-being and safety of all individuals.
+
+
+### 12. What percentage of the population consumes alcohol and how does this vary by counties?
+
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+s12 <- n1 %>% 
+  dplyr::group_by(q14, lho) %>% 
+  dplyr::summarise(count = n()) |>
+  drop_na() |>
+  ungroup() %>%
+  group_by(lho) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(lho, q14, count)
+
+
+drinking_by_region <- 
+  s12 %>% 
+  group_by(lho, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(lho) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(lho)
+ 
+
+# Plot the results
+ggplot(drinking_by_region, aes(x = lho, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Do you consume alcohol?") +
+  labs(x = "Age", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  ggtitle ( "Alcohol consumption by region")
+```
+
+
+The graph provides information on alcohol consumption patterns in different Local Health Offices (LHOs).
+
+1. The percentage of individuals who do not consume alcohol varies across LHOs, ranging from as low as 4.50% (Dublin South East) to as high as 27.51% (Sligo/Leitrim/West Cavan). The majority of LHOs have a lower percentage of non-alcohol consumers, indicating a higher prevalence of alcohol consumption.
+
+2. The percentage of individuals who consume alcohol also varies across LHOs, ranging from 72.49% (Sligo/Leitrim/West Cavan) to 95.50% (Dublin South East). This suggests that there are variations in alcohol consumption rates among different areas.
+
+3. Some LHOs, such as Cavan/Monaghan, Dublin North Central, Dublin West, Dun Laoghaire, Kerry, Meath, and West Cork, have a higher percentage of individuals who consume alcohol, exceeding 90%.
+
+4. LHOs like Dublin South East, Wicklow, and Louth have a relatively lower percentage of alcohol consumers, below 10%.
+
+The prevalence of alcohol consumption in LHOs can help inform public health initiatives and interventions tailored to specific areas. LHOs with higher alcohol consumption rates might benefit from targeted programs addressing alcohol-related issues and promoting responsible drinking habits.
+
+
+**calculating relative risk and an odds ratio (Alcohol consumption) for Dublin South East compared to Limerick**
+
+* relative risk = 0.9549/0.8544 = 1.26
+
+* odds for Dublin South East = 0.9549/(1-0.9549) = 21.17
+
+* odds for Limerick = 0.8544/(1-0.8544) = 5.86
+
+* odds ratio = 21.17/5.86 = 3.61
+
+
+The relative risk of 1.26 indicates that individuals in Dublin South East have a 1.26 times higher risk of consuming alcohol compared to those in Limerick. This suggests a slightly higher prevalence of alcohol consumption in Dublin South East.
+
+The odds ratio of 3.61 indicates that individuals in Dublin South East have 3.61 times higher odds of consuming alcohol compared to those in Limerick. This suggests a moderate association between the region and alcohol consumption, with Dublin South East having higher odds of alcohol consumption compared to Limerick.
+
+Based on the data, it can be concluded that there is a moderate association between the geographic regions of Dublin South East and Limerick and alcohol consumption. Dublin South East has a slightly higher prevalence and significantly higher odds of alcohol consumption compared to Limerick. These findings highlight the importance of considering regional variations in alcohol consumption patterns and tailoring interventions and policies to address the specific needs and challenges of different areas. It is essential to promote responsible drinking behaviors and provide support and resources for individuals in both Dublin South East and Limerick to ensure the well-being and health of the population.
+
+
+
+### 13. In the last 12 months, how often have you consumed alcoholic beverages and have a private health insurance?
+
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
+s13 <- n1[c("q14", "q52", "ageclass", "q55")]
+
+# Calculate the percentage of alcoholic by 
+health_ins_al <- s13 %>%
+  group_by(q14,q52,ageclass,q55) %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
   ungroup() %>%
   group_by(q14) %>%
-  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
-
+  dplyr::mutate(perc = count*100/sum(count),q14=q14) 
 
 
 # Plot the results
-ggplot(health_ins, aes(x = q52, y = perc, fill = q55)) +
+ggplot(health_ins_al, aes(x = ageclass, y = perc, fill=q55)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you have private health insurance?") +
   labs(x = "Age", y = "Percentage")+
-  ggtitle("Health Insurance for People who smoke and consume alcohol")+
+  ggtitle("Health Insurance for People consume alcohol")+
   guides(color = guide_legend(reverse = TRUE))+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_grid(vars(q6), vars(q14),labeller = label_both)
+  facet_wrap(~q14+q52,labeller = label_both)
+
 ```
 
 
-The data provided includes information about individuals' responses to questions related to private health insurance. 
 
-1. Private Health Insurance:
-   - Among the respondents who have private health insurance, the majority of them are females.
-   - The count and percentage of individuals with private health insurance are higher among females compared to males.
-   - Among individuals with private health insurance, a higher percentage of them responded "Yes" to having private health insurance.
-
-2. No Private Health Insurance:
-   - Among the respondents who do not have private health insurance, the majority of them are females.
-   - The count and percentage of individuals without private health insurance are higher among females compared to males.
-   - Among individuals without private health insurance, a higher percentage of them responded "No" to having private health insurance.
+1. For males:
+   - Among males aged 15-24 years, 18 individuals (1.67%) with private health insurance reported not consuming alcohol, while 43 individuals (3.98%) without private health insurance also reported not consuming alcohol.
+  
+   - In the 25-44 years age group, 19 individuals (1.76%) with private health insurance and 52 individuals (4.81%) without private health insurance reported not consuming alcohol.
+  
+   - For males aged 45-64 years, 53 individuals (4.90%) with private health insurance and 65 individuals (6.01%) without private health insurance reported not consuming alcohol.
+  
+   - Among males aged 65 and over, 62 individuals (5.74%) with private health insurance and 71 individuals (6.57%) without private health insurance reported not consuming alcohol.
 
 
-Based on the provided data, we can conclude that there is a significant proportion of individuals, especially females, who have private health insurance. However, it is important to note that this analysis is limited to the information provided and does not consider other factors that may influence the presence or absence of private health insurance, such as socioeconomic status or geographic location. Further research and analysis would be needed to obtain a more comprehensive understanding of the factors affecting private health insurance coverage.
+2. For females:
+   - In the 15-24 years age group, 33 individuals (3.05%) with private health insurance and 47 individuals (4.35%) without private health insurance reported not consuming alcohol.
+  
+   - Among females aged 25-44 years, 41 individuals (3.79%) with private health insurance and 112 individuals (10.36%) without private health insurance reported not consuming alcohol.
+  
+   - For females aged 45-64 years, 73 individuals (6.75%) with private health insurance and 122 individuals (11.29%) without private health insurance reported not consuming alcohol.
+  
+   - Among females aged 65 and over, 99 individuals (9.16%) with private health insurance and 171 individuals (15.82%) without private health insurance reported not consuming alcohol.
 
 
-### 12. How does folic acid consumption vary across different regions in terms of percentages?
+
+### 14. How does folic acid consumption vary across different regions in terms of percentages?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-d12 <- n1[c("lho","q120")]
+s14 <- n1[c("lho","q120")]
 
 # Calculate the percentage by region
-suppl <- d12 %>%
+suppl <- s14 %>%
   group_by(lho,q120) %>%
   dplyr::summarise(count = n()) |>
   drop_na() |>
@@ -872,7 +991,7 @@ In conclusion, the analysis of folic acid consumption by region provides valuabl
 
 
 
-**calculating relative risk and an odds ratio for Meath compared to Galway**
+**calculating relative risk and an odds ratio (Folic acid consumption) for Meath compared to Galway**
 
 * relative risk = 0.1052/0.0682 = 1.54
 
@@ -893,66 +1012,182 @@ In conclusion, the calculations suggest that there is a higher prevalence of fol
 
 
 
-
-
-### 13. What is the relationship between the prevalence of smoking and the consumption of alcohol among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?
+### 15. What is the relationship between the prevalence of consumption of alcohol among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household?
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-d13 <- n1[c("q6", "q14", "ageclass", "q63b")]
+s15 <- n1[c("q14", "ageclass", "q63b")]
 
-
-income1 <- d13 %>%
-  group_by(ageclass,q63b,q14,q6) %>%
-  drop_na() |>
-  dplyr::summarize(count = n()) %>%
-  ungroup() %>%
+income1 <- s15 %>%
   group_by(ageclass,q63b,q14) %>%
-  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
-
-
-ggplot(income1, aes(x = q14, y = perc, fill=q6)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "smoking") +
-  labs(x = "Age", y = "Percentage")+
-  ggtitle("Chief Income Earner")+
-  guides(color = guide_legend(reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_wrap(~ageclass+q63b)
-
-
-
-
-# Calculate the percentage of alcoholic by 
-income <- d13 %>%
-  group_by(q14,q6,ageclass,q63b) %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
   ungroup() %>%
-  group_by(q14) %>%
-  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+  group_by(ageclass,q63b) %>%
+  dplyr::mutate(perc = count*100/sum(count),q14=q14) 
 
 
-
-
-# Plot the results
-ggplot(income, aes(x = ageclass, y = perc, fill = q63b)) +
+ggplot(income1, aes(x = ageclass, y = perc, fill=q14)) +
   geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Chief Income Earner") +
+  scale_fill_discrete(name = "Do You consume alcohol") +
   labs(x = "Age", y = "Percentage")+
   ggtitle("Chief Income Earner")+
   guides(color = guide_legend(reverse = TRUE))+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_grid(vars(q6), vars(q14),labeller = label_both)
+  facet_wrap(~q63b,labeller = label_both)
+
 ```
 
 
 
-1. The percentage of individuals who smoke varies across different age groups and Chief Income Earner statuses. Notably, the highest percentage of smokers is observed among individuals aged 15-24 years who are not the Chief Income Earner in their household (11.75%), followed by individuals aged 25-44 years who are not the Chief Income Earner (8.45%).
+Based on the breakdown of being the Chief Income Earner in the household (q63b) by age class (AGECLASS) and alcohol consumption (q14), let's provide a detailed explanation and conclusion:
 
-2. When it comes to alcohol consumption, there are similar patterns. The highest percentage of alcohol consumers is found among individuals aged 15-24 years who are not the Chief Income Earner (16.84%), followed by individuals aged 25-44 years who are not the Chief Income Earner (17.69%).
+1. Age Class: 15-24 years:
+   - Among individuals aged 15-24 years, a significant majority (91.24%) of those who are the Chief Income Earner consume alcohol.
+   - The count for Chief Income Earners in this age group who consume alcohol is 125, while those who do not consume alcohol have a count of 12.
+   - Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (356) compared to those who do not (129).
 
-3. It is interesting to note that the highest percentages for both smoking and alcohol consumption are seen in the same age groups and Chief Income Earner statuses. This suggests a potential association between these two behaviors within these specific demographic categories.
+2. Age Class: 25-44 years:
+   - In the age group of 25-44 years, the majority (92.15%) of those who are the Chief Income Earner consume alcohol.
+   - The count for Chief Income Earners in this age group who consume alcohol is 1597, while those who do not consume alcohol have a count of 136.
+   - Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (688) compared to those who do not (88).
 
-In conclusion, there appears to be a notable association between the prevalence of smoking and the consumption of alcohol among the individuals, particularly among those aged 15-24 years who are not the Chief Income Earner.
+3. Age Class: 45-64 years:
+   - Among individuals aged 45-64 years, the majority (88.39%) of those who are the Chief Income Earner consume alcohol.
+   - The count for Chief Income Earners in this age group who consume alcohol is 1622, while those who do not consume alcohol have a count of 213.
+   - Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (568) compared to those who do not (100).
+
+4. Age Class: 65 and over:
+   - In the age group of 65 and over, the majority (81.28%) of those who are the Chief Income Earner consume alcohol.
+   - The count for Chief Income Earners in this age group who consume alcohol is 1433, while those who do not consume alcohol have a count of 330.
+   - Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (229) compared to those who do not (73).
+
+Overall, the data shows that across all age classes, a higher percentage of individuals who are the Chief Income Earner in their household consume alcohol compared to those who do not. This trend is consistent across different age groups.
+
+It's important to note that alcohol consumption can have various implications on individuals' health, finances, and overall well-being. Further analysis and consideration of these factors would be necessary to draw more comprehensive conclusions.
+
+
+
+### 16. How does alcohol consumption vary among the surveyed individuals based on their country of birth?
+
+
+```{r}
+s16 <- n1 %>% 
+  dplyr::group_by(q14, countbirth) %>% 
+  dplyr::summarise(count = n()) |>
+  drop_na() |>
+  ungroup() %>%
+  group_by(countbirth) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(countbirth, q14, count)
+
+
+drinking_by_country <- 
+  s16 %>% 
+  group_by(countbirth, q14) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(countbirth) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   q14 = q14) %>% 
+  arrange(countbirth)
+
+
+# Plot the results
+ggplot(drinking_by_country, aes(x = countbirth, y = perc, fill = q14)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Do you Consume Alcohol?") +
+  labs(x = "County", y = "Percentage")+
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+
+  ggtitle ("Alcohol Consumption by Country of Birth")
+```
+
+
+
+The graph displays the alcohol consumption rates based on the country of birth.
+
+Alcohol Consumption Rates by Country of Birth: The table presents the alcohol consumption rates among individuals based on their country of birth. For example, among individuals born in Ireland, 86.53% consume alcohol, while among those born in the UK, the consumption rate is 90.43%. These rates vary based on the country of birth, indicating differences in alcohol consumption behaviors among different populations.
+
+Variation in Alcohol Consumption Rates: The data reveals significant variations in alcohol consumption rates based on the country of birth. For instance, individuals born in the Rest of the World have a lower alcohol consumption rate of 67.37%, while those born in the Rest of EU have a higher rate of 87.29%. These disparities suggest that cultural and demographic factors associated with the country of birth may influence alcohol consumption behaviors.
+
+Comparison by Country of Birth: The table allows for a comparison of alcohol consumption rates among individuals from different countries. For example, individuals born in Ireland have a relatively high alcohol consumption rate of 86.53%, whereas individuals born in the Rest of the World exhibit a lower consumption rate of 67.37%.
+
+Understanding these variations in alcohol consumption rates can inform the development of targeted interventions and tailored alcohol awareness programs for specific populations. It underscores the significance of considering cultural and demographic factors associated with the country of birth when addressing alcohol consumption behaviors.
+
+
+**calculating relative risk and an odds ratio (Alcohol Consumption) for Ireland compared to Rest of EU**
+
+* relative risk = 0.8653/0.8728 = 0.99
+
+
+* odds for Ireland = 0.8653/(1-0.8653) = 6.42
+
+* odds for Rest of EU = 0.8728/(1-0.8728) = 6.86 
+
+* odds ratio = 6.42/6.86 = 0.93
+
+
+The relative risk compares the risk of alcohol consumption between Ireland and the Rest of the EU. A relative risk of 0.99 suggests that individuals in Ireland have a similar risk of alcohol consumption compared to individuals in the Rest of the EU. This indicates that alcohol consumption rates are comparable between Ireland and the Rest of the EU.
+
+The odds ratio compares the odds of alcohol consumption between Ireland and the Rest of the EU. An odds ratio of 0.93 means that the odds of alcohol consumption in Ireland are 0.93 times lower than the odds of alcohol consumption in the Rest of the EU. This suggests that individuals in Ireland have slightly lower odds of being alcohol consumers compared to individuals in the Rest of the EU.
+
+These findings indicate that there is no significant difference in alcohol consumption rates between Ireland and the Rest of the EU. The prevalence of alcohol consumption seems to be similar in both populations.
+
+
+Understanding the factors influencing alcohol consumption behaviors is essential for public health interventions and policies aimed at promoting responsible drinking and reducing alcohol-related harms. Continued monitoring and evaluation of alcohol consumption trends can inform targeted interventions and strategies to address alcohol misuse and promote healthier behaviors.
+
+̥
+
+### 17. How do individuals rate their own health in general, and are there differences between genders and age groups?
+
+
+```{r}
+
+s17 <- n1 %>% 
+  dplyr::group_by(spq1, q52, ageclass) %>% 
+  dplyr::summarise(count = n()) |>
+  drop_na() |>
+  ungroup() %>%
+  group_by(spq1) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::select(spq1, q52, ageclass, count)
+
+# converting the values "Fair", "Bad", and "Very Bad" to "Bad" and keeps the rest of the values as "Good" or "Very Good"
+s17$spq1 <- ifelse(s17$spq1 %in% c("Fair", "Bad", "Very Bad"), "Bad", ifelse(s17$spq1 == "Good", "Good", "Very Good"))
+
+
+health <- 
+  s17 %>% 
+  group_by(spq1, q52,ageclass) %>% 
+  dplyr::summarise(count = sum(count)) %>% 
+  ungroup() %>% 
+  group_by(spq1) %>% 
+  dplyr::summarise(perc = count*100/sum(count),
+                   ageclass=ageclass,q52=q52) %>% 
+  arrange(spq1)
+
+
+# Plot the results
+ggplot(health, aes(x = spq1, y = perc, fill = spq1)) +
+  geom_bar(stat = "identity",position="dodge")  +
+  labs(x = "Age Group", y = "Proportion", fill = "Health")+
+  ggtitle("Proportion of Individuals Rating Their Health by Gender and Age Group")+
+  facet_wrap(~q52+ageclass)
+
+```
+
+
+Based on the provided data, we can analyze how individuals rate their own health condition (variable: spq1) across different age groups (variable: ageclass) and genders (variable: q52).
+
+1. Proportion of Individuals Rating Their Health Condition by Gender and Age Group: The table presents the proportions of individuals rating their health condition as "Bad," "Good," or "Very Good" based on their gender and age group. The percentages are calculated within each subgroup.
+
+2. Differences by Gender: Among males, the proportion of individuals rating their health as "Bad" is highest in the 65 and over age group (23.56%), followed by the 45-64 years age group (17.56%). For females, the highest proportion of individuals rating their health as "Bad" is observed in the 65 and over age group (23.33%), followed by the 45-64 years age group (16.74%).
+
+3. Differences by Age Group: Within the male population, the 65 and over age group has the highest proportion of individuals rating their health as "Bad" (23.56%), followed by the 45-64 years age group (17.56%). Among females, the 65 and over age group also has the highest proportion of individuals rating their health as "Bad" (23.33%), followed by the 45-64 years age group (16.74%).
+
+4. Overall Health Ratings: Across all gender and age groups, the proportions of individuals rating their health as "Good" or "Very Good" are generally higher compared to those rating their health as "Bad." The highest proportions of individuals rating their health as "Good" or "Very Good" are observed in the 25-44 years age group for both males and females.
+
+These findings indicate variations in self-rated health across different age groups and genders. Older age groups tend to have a higher proportion of individuals rating their health as "Bad" compared to younger age groups. Further analysis and exploration can provide insights into the factors influencing self-rated health, such as underlying health conditions, lifestyle factors, and access to healthcare.
+
+
 
