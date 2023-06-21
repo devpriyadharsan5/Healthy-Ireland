@@ -26,6 +26,10 @@
 
 <li> What percentage of the population consumes alcohol, and how does this vary by gender?</li>
 
+<li>What percentage of the population consumes alcohol, and how does this vary by age?</li>
+
+<li>What percentage of the population consumes alcohol, and how does this vary by gender?</li>
+
 <li> What percentage of the population consumes alcohol, and how does this vary by socioeconomic status?</li>
 
 <li> What are the patterns of alcohol consumption across different local health offices (LHOs) within each county?
