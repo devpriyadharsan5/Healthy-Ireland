@@ -21,8 +21,6 @@
 
 ### Alcohol
 
-<ol>
-
 <li>What percentage of the population consumes alcohol, and how does this vary by age</li>
 
 <li>What percentage of the population consumes alcohol, and how does this vary by gender</li>
@@ -41,8 +39,6 @@
 <li> What is the relationship between the prevalence of consumption of alcohol among the surveyed individuals based on their age group and their status as the Chief Income Earner in their household? </li>
 
 ### General
-
-<ol>
 
 <li>How does folic acid consumption vary across different regions in terms of percentages?</li>
 
