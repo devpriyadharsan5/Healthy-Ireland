@@ -1269,3 +1269,97 @@ Based on the breakdown of self-perceived health (spq1) by age class (AGECLASS), 
 
 Overall, the data suggests that there is a trend of higher perceived health as individuals age, with a higher percentage of individuals perceiving their health as "Very Good" in older age groups. Additionally, the data indicates that females tend to have slightly higher percentages of perceiving their health as "Good" and "Very Good" compared to males across most age groups. Further analysis and exploration can provide insights into the factors influencing self-rated health, such as underlying health conditions, lifestyle factors, and access to healthcare.
 
+
+
+### Modelling 
+
+
+```{r}
+example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
+  
+  
+#example_dat$q6 <-   ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No") 
+
+#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
+example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.factor(q6), ageclass = as.factor(ageclass))
+
+logistic_mod <- glm(q6_binary ~ ageclass + q52, data = example_dat, family = "binomial")
+logistic_mod
+
+
+summary(logistic_mod)
+```
+
+
+The logistic regression model was fitted using the formula `q6_binary ~ ageclass + q52` with the binomial family, indicating that the outcome variable `q6_binary` is a binary variable (smoker or non-smoker). The model was applied to the `example_dat` dataset.
+
+
+The intercept represents the estimated log-odds of being a smoker when all other predictors are zero. The coefficients for ageclass and q52 represent the estimated changes in log-odds of being a smoker associated with each level of the corresponding predictor, relative to the reference level.
+
+The degrees of freedom indicate that there were 7698 observations in total, with 7694 residual degrees of freedom after accounting for missing data (2 observations were deleted due to missingness).
+
+The null deviance measures the deviance of the null model (i.e., a model with only an intercept term) from the observed data. In this case, the null deviance is 7379.
+
+The residual deviance measures the deviance of the fitted model from the observed data. A smaller residual deviance suggests a better fit. In this case, the residual deviance is 7199.
+
+The AIC (Akaike Information Criterion) is a measure of model quality that penalizes complex models. In this case, the AIC value is 7209.
+
+Overall, based on this logistic regression model, the coefficients provide estimates of the relationship between the predictors (ageclass and q52) and the log-odds of being a smoker. The negative coefficients for ageclass suggest a decreasing trend in the log-odds of being a smoker as age class increases. The positive coefficient for ageclass.C indicates a slightly increasing trend in the log-odds of being a smoker for the "C" age class compared to the reference level. The negative coefficient for q52.L suggests a decrease in the log-odds of being a smoker for the given level of q52 compared to the reference level.
+
+The residual deviance is lower than the null deviance, indicating that the model provides a better fit to the data than the null model. However, the AIC value suggests that there may be room for improvement in the model's predictive ability.
+
+
+
+
+```{r}
+library(dplyr)
+library(caret)
+
+example_dat <- n1 %>%
+  dplyr::select(q6, ageclass, q52) %>%
+  drop_na(q6) %>%
+  mutate(q6_binary = as.factor(q6),ageclass = as.factor(ageclass))
+
+# Create a training and testing dataset
+set.seed(123)
+trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
+train_data <- example_dat[trainIndex, ]
+test_data <- example_dat[-trainIndex, ]
+
+# Fit the logistic regression model
+logistic_mod <- glm(q6_binary ~ ageclass + q52, data = train_data, family = "binomial")
+
+# Evaluate the model on the test dataset
+
+predicted_classes <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
+
+
+# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
+test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
+
+# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
+predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
+
+# Create the confusion matrix
+confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+
+
+# Print the model summary, accuracy, and confusion matrix
+summary(logistic_mod)
+print(paste("Accuracy:", accuracy*100))
+print(confusion_matrix)
+
+
+```
+
+
+
+
+
+
+
+
+
+
