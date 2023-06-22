@@ -122,13 +122,13 @@ ggplot(smoking_by_age, aes(x = ageclass, y = perc, fill = q6)) +
 
 This output provides insights into the prevalence of smoking among different age groups. 
 
-* For the age group "15-24 years", the percentage of non-smokers is approximately 80.06% and the percentage of smokers is 19.94%.
+* For the age group **15-24 years**, the percentage of non-smokers is approximately 80.06% and the percentage of smokers is 19.94%.
 
-* For the age group "25-44 years", the percentage of non-smokers is approximately 76.17% and the percentage of smokers is 23.83%.
+* For the age group **25-44 years**, the percentage of non-smokers is approximately 76.17% and the percentage of smokers is 23.83%.
 
-* For the age group "45-64 years", the percentage of non-smokers is approximately 80.58% and the percentage of smokers is 19.42%.
+* For the age group **45-64 years**, the percentage of non-smokers is approximately 80.58% and the percentage of smokers is 19.42%.
 
-* For the age group "65 and over", the percentage of non-smokers is approximately 89.44% and the percentage of smokers is 10.56%.
+* For the age group **65 and over**, the percentage of non-smokers is approximately 89.44% and the percentage of smokers is 10.56%.
 
 
 The highest percentage of smokers is observed in the age group "25-44 years" with approximately 23.83% of individuals being smokers. This age group has a higher smoking prevalence compared to other age groups.
@@ -212,13 +212,13 @@ This information can be useful for public health interventions and targeted smok
 
 **calculating relative risk and an odds ratio for males compared to females**
 
-*relative risk = 0.2119/0.1637 = 1.29
+* relative risk = 0.2119/0.1637 = 1.29
 
-*odds for males = 0.2119/(1-0.2119) = 0.26  yes/no
+* odds for males = 0.2119/(1-0.2119) = 0.26  yes/no
 
-*odds for females = 0.1637/(1-0.1637) = 0.19
+* odds for females = 0.1637/(1-0.1637) = 0.19
 
-*odds ratio = 0.31/0.12 = 1.36
+* odds ratio = 0.31/0.12 = 1.36
 
 
 The relative risk compares the risk of smoking between males and females. A relative risk of 1.29 means that males have a 1.29 times higher risk of smoking compared to females. This suggests that males are slightly more likely to be smokers than females.
@@ -482,35 +482,36 @@ ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
 ```
 
 
-The provided data shows the distribution of individuals across different age groups (ageclass) and their alcohol consumption levels (spq1). The data also includes information about gender (GENDER), self-reported health status (q52), and the count and percentage of individuals in each category.
+The provided data shows the distribution of individuals across different age groups (ageclass) and their smoking status (q6). The data also includes information about gender (GENDER), self-reported health status (spq1), and percentage of individuals in each category.
 
 
-1. Age Group "15-24 years":
-   - The majority of individuals in this age group have good or very good self-reported health status.
-   - A higher percentage of individuals in this age group consume alcohol compared to those who do not.
-   - Both males and females in this age group have a similar pattern of alcohol consumption and health status.
+1. **Among individuals aged 15-24 years**:
+   
+   * Non-smokers: Approximately 1.6% of both males and females reported bad health conditions, while around 12.2% of males and 10.5% of females reported good health conditions. Moreover, about 27.2% of males and 27% of females reported very good health conditions.
+   
+   * Smokers: Similar to non-smokers, around 1.6% of both males and females reported bad health conditions. However, the percentage of smokers reporting good health conditions was slightly lower, with approximately 4.3% of males and 2.6% of females. Additionally, around 5.3% of males and 4.8% of females reported very good health conditions.
 
-2. Age Group "25-44 years":
-   - The majority of individuals in this age group have good or very good self-reported health status.
-   - A higher percentage of individuals in this age group consume alcohol compared to those who do not.
-   - Both males and females in this age group have a similar pattern of alcohol consumption and health status.
+2. **Among individuals aged 25-44 years**:
+   
+   * Non-smokers: About 2.1% of males and 3.4% of females reported bad health conditions. Moreover, around 9.1% of males and 14.3% of females reported good health conditions, while approximately 18.3% of males and 29% of females reported very good health conditions.
+  
+   * Smokers: Among smokers, roughly 1.6% of males and 1.5% of females reported bad health conditions. The percentage of smokers reporting good health conditions was approximately 3.6% of males and 4.7% of females. Additionally, about 6.6% of males and 5.8% of females reported very good health conditions.
 
-3. Age Group "45-64 years":
-   - The majority of individuals in this age group have good or very good self-reported health status.
-   - A higher percentage of individuals in this age group consume alcohol compared to those who do not.
-   - Both males and females in this age group have a similar pattern of alcohol consumption and health status.
+3. **Among individuals aged 45-64 years**:
+   
+   * Non-smokers: Around 6.2% of males and 6.9% of females reported bad health conditions. Additionally, approximately 14.3% of males and 17.9% of females reported good health conditions, while about 14% of males and 21.3% of females reported very good health conditions.
+   
+   * Smokers: Among smokers, approximately 3.2% of males and 2.2% of females reported bad health conditions. The percentage of smokers reporting good health conditions was around 4.4% of males and 4.4% of females. Furthermore, roughly 2.1% of males and 3.2% of females reported very good health conditions.
 
-4. Age Group "65 and over":
-   - The majority of individuals in this age group have good or very good self-reported health status.
-   - A higher percentage of individuals in this age group consume alcohol compared to those who do not.
-   - Both males and females in this age group have a similar pattern of alcohol consumption and health status.
+4. **Among individuals aged 65 and over**:
 
-
-We can conclude that there is a significant proportion of individuals across different age groups who consume alcohol. Additionally, the majority of individuals in all age groups report good or very good self-reported health status. It is important to note that this analysis is limited to the information provided and does not consider other factors that may impact alcohol consumption or health status, such as underlying health conditions or lifestyle choices. 
-
+   * Non-smokers: Approximately 12.8% of males and 13.8% of females reported bad health conditions. Moreover, around 20% of males and 22.4% of females reported good health conditions, while about 8.6% of males and 11.8% of females reported very good health conditions.
+   
+   * Smokers: Among smokers, around 2.6% of males and 1.5% of females reported bad health conditions. The percentage of smokers reporting good health conditions was approximately 2.5% of males and 2.3% of females. Additionally, roughly 0.6% of males and 1.1% of females reported very good health conditions.
 
 
-     
+Overall, these findings underscore the importance of avoiding smoking to maintain better health outcomes, especially among younger individuals. It is evident that smoking is associated with an increased likelihood of experiencing bad health conditions across different age groups and genders. Public health initiatives and targeted interventions should continue to emphasize the harmful effects of smoking and encourage smoking cessation to improve overall health and well-being.
+
 ### 7. In the last 12 months, how often you have a smoking habit, and do you have private health insurance?
 
 
@@ -540,28 +541,29 @@ ggplot(health_ins_smoke, aes(x = ageclass, y = perc, fill=q55)) +
 
 
 1. For individuals with private health insurance:
-   - Among females with private health insurance, the smoking rates vary across different age groups. The lowest smoking rate is observed among females aged 15-24 years (0.70%), while the highest smoking rate is among females aged 45-64 years (4.77%). It is worth noting that females aged 65 and over have a relatively lower smoking rate (4.91%).
+   * Among females with private health insurance, the smoking rates vary across different age groups. The lowest smoking rate is observed among females aged 15-24 years (0.70%), while the highest smoking rate is among females aged 45-64 years (4.77%). It is worth noting that females aged 65 and over have a relatively lower smoking rate (4.91%).
    
-   - Among males with private health insurance, the smoking rates are generally higher compared to females. The highest smoking rate is among males aged 25-44 years (4.84%), followed by males aged 45-64 years (4.21%). Males aged 15-24 years have a relatively lower smoking rate (1.19%), and males aged 65 and over have the lowest smoking rate (1.89%).
+   * Among males with private health insurance, the smoking rates are generally higher compared to females. The highest smoking rate is among males aged 25-44 years (4.84%), followed by males aged 45-64 years (4.21%). Males aged 15-24 years have a relatively lower smoking rate (1.19%), and males aged 65 and over have the lowest smoking rate (1.89%).
 
 
 2. For individuals without private health insurance:
   
-   - Among females without private health insurance, the smoking rates vary across age groups. The highest smoking rate is observed among females aged 45-64 years (12.27%), which is significantly higher compared to females with private health insurance in the same age group. Females aged 15-24 years have a relatively lower smoking rate (1.63%), and females aged 25-44 years have the lowest smoking rate (2.25%). Females aged 65 and over also show a relatively lower smoking rate (7.60%).
+   * Among females without private health insurance, the smoking rates vary across age groups. The highest smoking rate is observed among females aged 45-64 years (12.27%), which is significantly higher compared to females with private health insurance in the same age group. Females aged 15-24 years have a relatively lower smoking rate (1.63%), and females aged 25-44 years have the lowest smoking rate (2.25%). Females aged 65 and over also show a relatively lower smoking rate (7.60%).
   
-   - Among males without private health insurance, the smoking rates are relatively higher compared to females. The highest smoking rate is among males aged 45-64 years (6.12%), followed by males aged 65 and over (6.54%). Males aged 15-24 years have a relatively lower smoking rate (1.75%), and males aged 25-44 years have the lowest smoking rate (6.09%).
+   * Among males without private health insurance, the smoking rates are relatively higher compared to females. The highest smoking rate is among males aged 45-64 years (6.12%), followed by males aged 65 and over (6.54%). Males aged 15-24 years have a relatively lower smoking rate (1.75%), and males aged 25-44 years have the lowest smoking rate (6.09%).
 
 
 Conclusion:
-  - Private health insurance appears to have a somewhat mitigating effect on smoking rates, particularly among females. Females with private health insurance generally have lower smoking rates compared to females without private health insurance in most age groups.
+  
+  * Private health insurance appears to have a somewhat mitigating effect on smoking rates, particularly among females. Females with private health insurance generally have lower smoking rates compared to females without private health insurance in most age groups.
 
 
-  - Among males, the influence of private health insurance on smoking rates is not as pronounced, with some age groups showing slightly higher smoking rates among those with private health insurance.
+  * Among males, the influence of private health insurance on smoking rates is not as pronounced, with some age groups showing slightly higher smoking rates among those with private health insurance.
     
-  - The highest smoking rates are observed among individuals without private health insurance, particularly among females aged 45-64 years and males aged 45-64 years and 65 and over.
+  * The highest smoking rates are observed among individuals without private health insurance, particularly among females aged 45-64 years and males aged 45-64 years and 65 and over.
 
 
-  - These findings highlight the importance of promoting smoking cessation programs, public health campaigns, and access to affordable healthcare, including private health insurance, to address and reduce smoking rates, especially among vulnerable populations.
+  * These findings highlight the importance of promoting smoking cessation programs, public health campaigns, and access to affordable healthcare, including private health insurance, to address and reduce smoking rates, especially among vulnerable populations.
 
 
 
@@ -595,35 +597,40 @@ ggplot(income, aes(x = ageclass, y = perc, fill=q6)) +
 
 Based on the breakdown of being the Chief Income Earner in the household (q63b) by age class (AGECLASS) and smoking status (q6):
 
-1. Age Class: 15-24 years:
-   - Among individuals aged 15-24 years, the majority (85.98%) are not the Chief Income Earner in their household, regardless of their smoking status.
+1. **Age Class: 15-24 years**:
+
+   * Among individuals aged 15-24 years, the majority (85.98%) are not the Chief Income Earner in their household, regardless of their smoking status.
   
-   - Among those who are not the Chief Income Earner, the count is 417, representing a significant proportion of this age group.
+   * Among those who are not the Chief Income Earner, the count is 417, representing a significant proportion of this age group.
   
-   - Among those who are the Chief Income Earner, the count is 137, with a higher percentage (40.88%) for non-smokers compared to smokers (14.02%).
+   * Among those who are the Chief Income Earner, the count is 137, with a higher percentage (40.88%) for non-smokers compared to smokers (14.02%).
 
 
-2. Age Class: 25-44 years:
-   - In the age group of 25-44 years, a majority of individuals (81.70%) who are not the Chief Income Earner, regardless of their smoking status.
+2. **Age Class: 25-44 years**:
+
+   * In the age group of 25-44 years, a majority of individuals (81.70%) who are not the Chief Income Earner, regardless of their smoking status.
    
-   - The count for individuals not holding the role of Chief Income Earner is 634, indicating a significant portion of this age group.
-   - Among those who are the Chief Income Earner, the count is 456, with a higher percentage (73.69%) for non-smokers compared to smokers (26.31%).
+   * The count for individuals not holding the role of Chief Income Earner is 634, indicating a significant portion of this age group.
+   
+   * Among those who are the Chief Income Earner, the count is 456, with a higher percentage (73.69%) for non-smokers compared to smokers (26.31%).
 
 
-3. Age Class: 45-64 years:
-   - Among individuals aged 45-64 years, the majority (85.63%) who are not the Chief Income Earner in their household, regardless of their smoking status.
+3. **Age Class: 45-64 years**:
   
-   - The count for individuals not holding the role of Chief Income Earner is 572, representing a significant proportion of this age group.
+   * Among individuals aged 45-64 years, the majority (85.63%) who are not the Chief Income Earner in their household, regardless of their smoking status.
   
-   - Among those who are the Chief Income Earner, the count is 390, with a higher percentage (78.75%) for non-smokers compared to smokers (21.25%).
+   * The count for individuals not holding the role of Chief Income Earner is 572, representing a significant proportion of this age group.
+  
+   * Among those who are the Chief Income Earner, the count is 390, with a higher percentage (78.75%) for non-smokers compared to smokers (21.25%).
 
 
-4. Age Class: 65 and over:
-   - In the age group of 65 and over, the majority (93.38%) who are not the Chief Income Earner in their household, regardless of their smoking status.
+4. **Age Class: 65 and over**:
+
+   * In the age group of 65 and over, the majority (93.38%) who are not the Chief Income Earner in their household, regardless of their smoking status.
   
-   - The count for individuals not holding the role of Chief Income Earner is 282, indicating a significant portion of this age group.
+   * The count for individuals not holding the role of Chief Income Earner is 282, indicating a significant portion of this age group.
   
-   - Among those who are the Chief Income Earner, the count is 198, with a higher percentage (88.77%) for non-smokers compared to smokers (11.23%).
+   * Among those who are the Chief Income Earner, the count is 198, with a higher percentage (88.77%) for non-smokers compared to smokers (11.23%).
 
 
 Overall, the data indicates that across all age classes, a larger percentage of individuals are not the Chief Income Earner in their household, irrespective of their smoking status. However, among those who hold the role of Chief Income Earner, there is a higher percentage of non-smokers compared to smokers in each age group.
@@ -668,13 +675,13 @@ ggplot(drinking_by_age, aes(x = ageclass, y = perc, fill = q14)) +
 ```
 
 
-Age Group "15-24 years": The majority of individuals in this age group (77.33%) consume alcohol, while a smaller percentage (22.67%) do not consume alcohol.
+1. **Age Group "15-24 years"**: The majority of individuals in this age group (77.33%) consume alcohol, while a smaller percentage (22.67%) do not consume alcohol.
 
-Age Group "25-44 years": A significant majority of individuals in this age group (91.07%) consume alcohol, with only a small percentage (8.93%) not consuming alcohol.
+2. **Age Group "25-44 years"**: A significant majority of individuals in this age group (91.07%) consume alcohol, with only a small percentage (8.93%) not consuming alcohol.
 
-Age Group "45-64 years": A high percentage of individuals in this age group (87.50%) consume alcohol, while a relatively smaller percentage (12.50%) do not consume alcohol.
+3. **Age Group "45-64 years"**: A high percentage of individuals in this age group (87.50%) consume alcohol, while a relatively smaller percentage (12.50%) do not consume alcohol.
 
-Age Group "65 and over": The majority of individuals in this age group (80.48%) consume alcohol, while a smaller percentage (19.52%) do not consume alcohol.
+4. **Age Group "65 and over"**: The majority of individuals in this age group (80.48%) consume alcohol, while a smaller percentage (19.52%) do not consume alcohol.
 
 Overall, the data suggests that alcohol consumption tends to be more prevalent among younger age groups (15-24 years and 25-44 years) compared to older age groups (45-64 years and 65 and over).
 
@@ -894,7 +901,7 @@ Based on the data, it can be concluded that there is a moderate association betw
 ### 13. How does alcohol consumption vary among the surveyed individuals based on their country of birth?
 
 
-```{r}
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
 s13 <- n1 %>% 
   dplyr::group_by(q14, countbirth) %>% 
   dplyr::summarise(count = n()) |>
@@ -929,11 +936,11 @@ ggplot(drinking_by_country, aes(x = countbirth, y = perc, fill = q14)) +
 
 The graph displays the alcohol consumption rates based on the country of birth.
 
-Alcohol Consumption Rates by Country of Birth: The table presents the alcohol consumption rates among individuals based on their country of birth. For example, among individuals born in Ireland, 86.53% consume alcohol, while among those born in the UK, the consumption rate is 90.43%. These rates vary based on the country of birth, indicating differences in alcohol consumption behaviors among different populations.
+1. Alcohol Consumption Rates by Country of Birth: The table presents the alcohol consumption rates among individuals based on their country of birth. For example, among individuals born in Ireland, 86.53% consume alcohol, while among those born in the UK, the consumption rate is 90.43%. These rates vary based on the country of birth, indicating differences in alcohol consumption behaviors among different populations.
 
-Variation in Alcohol Consumption Rates: The data reveals significant variations in alcohol consumption rates based on the country of birth. For instance, individuals born in the Rest of the World have a lower alcohol consumption rate of 67.37%, while those born in the Rest of EU have a higher rate of 87.29%. These disparities suggest that cultural and demographic factors associated with the country of birth may influence alcohol consumption behaviors.
+2. Variation in Alcohol Consumption Rates: The data reveals significant variations in alcohol consumption rates based on the country of birth. For instance, individuals born in the Rest of the World have a lower alcohol consumption rate of 67.37%, while those born in the Rest of EU have a higher rate of 87.29%. These disparities suggest that cultural and demographic factors associated with the country of birth may influence alcohol consumption behaviors.
 
-Comparison by Country of Birth: The table allows for a comparison of alcohol consumption rates among individuals from different countries. For example, individuals born in Ireland have a relatively high alcohol consumption rate of 86.53%, whereas individuals born in the Rest of the World exhibit a lower consumption rate of 67.37%.
+3. Comparison by Country of Birth: The table allows for a comparison of alcohol consumption rates among individuals from different countries. For example, individuals born in Ireland have a relatively high alcohol consumption rate of 86.53%, whereas individuals born in the Rest of the World exhibit a lower consumption rate of 67.37%.
 
 Understanding these variations in alcohol consumption rates can inform the development of targeted interventions and tailored alcohol awareness programs for specific populations. It underscores the significance of considering cultural and demographic factors associated with the country of birth when addressing alcohol consumption behaviors.
 
@@ -989,6 +996,21 @@ ggplot(h1, aes(x = ageclass, y = perc, fill = spq1)) +
 ```
 
 
+The distribution of alcohol consumption varies among different age groups and genders in relation to health conditions. Here is a breakdown of the data:
+
+1. Among individuals aged **15-24 years**, the majority of non-drinkers (No) report good or very good health conditions, while a small proportion report bad health conditions. Among drinkers (Yes), the percentages are relatively higher for good and very good health conditions, but there is also a noticeable increase in the proportion of individuals reporting bad health conditions.
+
+2. For individuals aged **25-44 years**, a similar pattern is observed. Non-drinkers tend to have higher proportions of good and very good health conditions, while drinkers have higher percentages of individuals reporting bad health conditions.
+
+3. Among individuals aged **45-64 years**, the distribution remains consistent. Non-drinkers have higher rates of good and very good health conditions compared to drinkers, with a smaller proportion reporting bad health conditions.
+
+4. For individuals aged **65 and over**, non-drinkers generally have higher percentages of good and very good health conditions. However, it is worth noting that the difference between drinkers and non-drinkers is less pronounced in this age group.
+
+
+In conclusion, the analysis suggests that alcohol consumption is associated with a higher likelihood of individuals reporting bad health conditions across different age groups and genders. Non-drinkers consistently have higher rates of good and very good health conditions compared to drinkers, indicating a potential negative impact of alcohol consumption on overall health. These findings highlight the importance of promoting responsible drinking habits and raising awareness about the potential health risks associated with excessive alcohol consumption, particularly among younger age groups.
+
+
+
 
 ### 15. In the last 12 months, how often have you consumed alcoholic beverages and have a private health insurance?
 
@@ -1019,54 +1041,63 @@ ggplot(health_ins_al, aes(x = ageclass, y = perc, fill=q55)) +
 
 
 
-the breakdown of the consumption of alcohol (q14), private health insurance (q55), by gender (q52), and age class (AGECLASS):
+The breakdown of the consumption of alcohol (q14), private health insurance (q55), by gender (q52), and age class (AGECLASS):
 
 
-1. Gender: Female, Age Class: 15-24 years:
-   - Among females aged 15-24 years, 2.50% have private health insurance, while 97.50% do not have private health insurance.
+1. **Gender: Female, Age Class: 15-24 years**:
+
+   * Among females aged 15-24 years, 2.50% have private health insurance, while 97.50% do not have private health insurance.
   
-   - Regarding alcohol consumption, 66.67% of females in this age group consume alcohol, and 33.33% do not consume alcohol.
+   * Regarding alcohol consumption, 66.67% of females in this age group consume alcohol, and 33.33% do not consume alcohol.
 
-2. Gender: Male, Age Class: 15-24 years:
-   - Among males aged 15-24 years, 3.45% have private health insurance, while 96.55% do not have private health insurance.
+
+2. **Gender: Male, Age Class: 15-24 years**:
+
+   * Among males aged 15-24 years, 3.45% have private health insurance, while 96.55% do not have private health insurance.
  
-   - Regarding alcohol consumption, 91.24% of males in this age group consume alcohol, and 8.76% do not consume alcohol.
+   * Regarding alcohol consumption, 91.24% of males in this age group consume alcohol, and 8.76% do not consume alcohol.
 
 
-3. Gender: Female, Age Class: 25-44 years:
-   - Among females aged 25-44 years, 18.54% have private health insurance, while 81.46% do not have private health insurance.
+3. **Gender: Female, Age Class: 25-44 years**:
+   
+   * Among females aged 25-44 years, 18.54% have private health insurance, while 81.46% do not have private health insurance.
   
-   - Regarding alcohol consumption, 59.24% of females in this age group consume alcohol, and 40.76% do not consume alcohol.
+   * Regarding alcohol consumption, 59.24% of females in this age group consume alcohol, and 40.76% do not consume alcohol.
 
 
-4. Gender: Male, Age Class: 25-44 years:
-   - Among males aged 25-44 years, 12.93% have private health insurance, while 87.07% do not have private health insurance.
+4. **Gender: Male, Age Class: 25-44 years**:
+
+   * Among males aged 25-44 years, 12.93% have private health insurance, while 87.07% do not have private health insurance.
   
-   - Regarding alcohol consumption, 92.15% of males in this age group consume alcohol, and 7.85% do not consume alcohol.
+   * Regarding alcohol consumption, 92.15% of males in this age group consume alcohol, and 7.85% do not consume alcohol.
 
 
-5. Gender: Female, Age Class: 45-64 years:
-   - Among females aged 45-64 years, 21.17% have private health insurance, while 78.83% do not have private health insurance.
+5. **Gender: Female, Age Class: 45-64 years**:
+   
+   * Among females aged 45-64 years, 21.17% have private health insurance, while 78.83% do not have private health insurance.
   
-   - Regarding alcohol consumption, 88.39% of females in this age group consume alcohol, and 11.61% do not consume alcohol.
+   * Regarding alcohol consumption, 88.39% of females in this age group consume alcohol, and 11.61% do not consume alcohol.
 
 
-6. Gender: Male, Age Class: 45-64 years:
-   - Among males aged 45-64 years, 15.44% have private health insurance, while 84.56% do not have private health insurance.
+6. **Gender: Male, Age Class: 45-64 years**:
+
+   * Among males aged 45-64 years, 15.44% have private health insurance, while 84.56% do not have private health insurance.
   
-   - Regarding alcohol consumption, 88.39% of males in this age group consume alcohol, and 11.61% do not consume alcohol.
+   * Regarding alcohol consumption, 88.39% of males in this age group consume alcohol, and 11.61% do not consume alcohol.
 
 
-7. Gender: Female, Age Class: 65 and over:
-   - Among females aged 65 and over, 14.07% have private health insurance, while 85.93% do not have private health insurance.
+7. **Gender: Female, Age Class: 65 and over**:
+
+   * Among females aged 65 and over, 14.07% have private health insurance, while 85.93% do not have private health insurance.
   
-   - Regarding alcohol consumption, 81.28% of females in this age group consume alcohol, and 18.72% do not consume alcohol.
+   * Regarding alcohol consumption, 81.28% of females in this age group consume alcohol, and 18.72% do not consume alcohol.
 
 
-8. Gender: Male, Age Class: 65 and over:
-   - Among males aged 65 and over, 11.88% have private health insurance, while 88.12% do not have private health insurance.
+8. **Gender: Male, Age Class: 65 and over**:
+
+   * Among males aged 65 and over, 11.88% have private health insurance, while 88.12% do not have private health insurance.
   
-   - Regarding alcohol consumption, 81.28% of males in this age group consume alcohol, and 18.72% do not consume alcohol.
+   * Regarding alcohol consumption, 81.28% of males in this age group consume alcohol, and 18.72% do not consume alcohol.
 
 
 
@@ -1100,25 +1131,40 @@ ggplot(income1, aes(x = ageclass, y = perc, fill=q14)) +
 
 Based on the breakdown of being the Chief Income Earner in the household (q63b) by age class (AGECLASS) and alcohol consumption (q14), let's provide a detailed explanation and conclusion:
 
-1. Age Class: 15-24 years:
-   - Among individuals aged 15-24 years, a significant majority (91.24%) of those who are the Chief Income Earner consume alcohol.
-   - The count for Chief Income Earners in this age group who consume alcohol is 125, while those who do not consume alcohol have a count of 12.
-   - Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (356) compared to those who do not (129).
+1. **Age Class: 15-24 years**:
 
-2. Age Class: 25-44 years:
-   - In the age group of 25-44 years, the majority (92.15%) of those who are the Chief Income Earner consume alcohol.
-   - The count for Chief Income Earners in this age group who consume alcohol is 1597, while those who do not consume alcohol have a count of 136.
-   - Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (688) compared to those who do not (88).
+   * Among individuals aged 15-24 years, a significant majority (91.24%) of those who are the Chief Income Earner consume alcohol.
+   
+   * The count for Chief Income Earners in this age group who consume alcohol is 125, while those who do not consume alcohol have a count of 12.
+   
+   * Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (356) compared to those who do not (129).
 
-3. Age Class: 45-64 years:
-   - Among individuals aged 45-64 years, the majority (88.39%) of those who are the Chief Income Earner consume alcohol.
-   - The count for Chief Income Earners in this age group who consume alcohol is 1622, while those who do not consume alcohol have a count of 213.
-   - Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (568) compared to those who do not (100).
 
-4. Age Class: 65 and over:
-   - In the age group of 65 and over, the majority (81.28%) of those who are the Chief Income Earner consume alcohol.
-   - The count for Chief Income Earners in this age group who consume alcohol is 1433, while those who do not consume alcohol have a count of 330.
-   - Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (229) compared to those who do not (73).
+2. **Age Class: 25-44 years**:
+
+   * In the age group of 25-44 years, the majority (92.15%) of those who are the Chief Income Earner consume alcohol.
+   
+   * The count for Chief Income Earners in this age group who consume alcohol is 1597, while those who do not consume alcohol have a count of 136.
+   
+   * Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (688) compared to those who do not (88).
+
+
+3. **Age Class: 45-64 years**:
+
+   * Among individuals aged 45-64 years, the majority (88.39%) of those who are the Chief Income Earner consume alcohol.
+   
+   * The count for Chief Income Earners in this age group who consume alcohol is 1622, while those who do not consume alcohol have a count of 213.
+   
+   * Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (568) compared to those who do not (100).
+
+
+4. **Age Class: 65 and over**:
+
+   * In the age group of 65 and over, the majority (81.28%) of those who are the Chief Income Earner consume alcohol.
+   
+   * The count for Chief Income Earners in this age group who consume alcohol is 1433, while those who do not consume alcohol have a count of 330.
+   
+   * Among those who are not the Chief Income Earner, there is a higher count of individuals who consume alcohol (229) compared to those who do not (73).
 
 Overall, the data shows that across all age classes, a higher percentage of individuals who are the Chief Income Earner in their household consume alcohol compared to those who do not. This trend is consistent across different age groups.
 
@@ -1164,6 +1210,7 @@ ggplot(folic, aes(x = lho, y = perc, fill = q120)) +
 ```
 
 
+
 1. Regional Variations: There are notable differences in folic acid consumption rates across different regions. Some regions have a higher percentage of individuals consuming folic acid supplements, while others have lower percentages. This suggests that there may be variations in awareness, accessibility, or cultural factors influencing folic acid consumption.
 
 2. High Consumption Regions: Some regions stand out for their relatively high folic acid consumption rates. For example, regions like Tipperary South, Longford/Westmeath, and North Cork have higher percentages of individuals taking folic acid supplements. This indicates a positive trend in these regions and suggests the presence of effective health promotion efforts or prenatal care initiatives.
@@ -1202,7 +1249,7 @@ In conclusion, the calculations suggest that there is a higher prevalence of fol
 ### 18. How do individuals rate their own health in general, and are there differences between genders and age groups?
 
 
-```{r}
+```{r, echo = FALSE, warning=FALSE,message=FALSE}
 s18 <- n1 %>% 
   dplyr::group_by(spq1, q52, ageclass) %>% 
   dplyr::summarise(count = n()) |>
@@ -1236,36 +1283,41 @@ ggplot(health, aes(x = q52, y = perc, fill = spq1)) +
 
 Based on the breakdown of self-perceived health (spq1) by age class (AGECLASS), gender (q52), and the corresponding percentages, a detailed explanation is provided below:
 
-1. Age Class: 15-24 years:
-   - Among individuals aged 15-24 years, the majority of males (62.15%) and females (66.67%) perceive their health as "Very Good."
+1. **Age Class: 15-24 years**:
+   
+   * Among individuals aged 15-24 years, the majority of males (62.15%) and females (66.67%) perceive their health as "Very Good."
  
-   - A smaller percentage of males (31.69%) and females (27.27%) perceive their health as "Good."
+   * A smaller percentage of males (31.69%) and females (27.27%) perceive their health as "Good."
  
-   - A minority of males (6.15%) and females (6.06%) perceive their health as "Bad."
+   * A minority of males (6.15%) and females (6.06%) perceive their health as "Bad."
 
 
-2. Age Class: 25-44 years:
-   - In the age group of 25-44 years, a significant portion of males (60.27%) and females (59.24%) perceive their health as "Very Good."
+2. **Age Class: 25-44 years**:
+
+   * In the age group of 25-44 years, a significant portion of males (60.27%) and females (59.24%) perceive their health as "Very Good."
   
-   - A considerable percentage of males (30.76%) and females (32.40%) perceive their health as "Good."
+   * A considerable percentage of males (30.76%) and females (32.40%) perceive their health as "Good."
   
-   - A smaller proportion of males (8.97%) and females (8.36%) perceive their health as "Bad."
+   * A smaller proportion of males (8.97%) and females (8.36%) perceive their health as "Bad."
 
 
-3. Age Class: 45-64 years:
-   - Among individuals aged 45-64 years, a notable percentage of males (42.28%) and females (43.98%) perceive their health as "Very Good."
+3. **Age Class: 45-64 years**:
+
+   * Among individuals aged 45-64 years, a notable percentage of males (42.28%) and females (43.98%) perceive their health as "Very Good."
  
-   - A considerable portion of males (36.31%) and females (39.83%) perceive their health as "Good."
+   * A considerable portion of males (36.31%) and females (39.83%) perceive their health as "Good."
   
-   - A significant proportion of males (21.41%) and females (16.19%) perceive their health as "Bad."
+   * A significant proportion of males (21.41%) and females (16.19%) perceive their health as "Bad."
 
 
-4. Age Class: 65 and over:
-   - In the age group of 65 and over, a significant portion of males (47.79%) and females (46.79%) perceive their health as "Good."
+4. **Age Class: 65 and over**:
+
+   * In the age group of 65 and over, a significant portion of males (47.79%) and females (46.79%) perceive their health as "Good."
   
-   - A notable percentage of males (32.62%) and females (28.90%) perceive their health as "Bad."
+   * A notable percentage of males (32.62%) and females (28.90%) perceive their health as "Bad."
   
-   - A smaller proportion of males (19.59%) and females (24.31%) perceive their health as "Very Good."
+   * A smaller proportion of males (19.59%) and females (24.31%) perceive their health as "Very Good."
+
 
 Overall, the data suggests that there is a trend of higher perceived health as individuals age, with a higher percentage of individuals perceiving their health as "Very Good" in older age groups. Additionally, the data indicates that females tend to have slightly higher percentages of perceiving their health as "Good" and "Very Good" compared to males across most age groups. Further analysis and exploration can provide insights into the factors influencing self-rated health, such as underlying health conditions, lifestyle factors, and access to healthcare.
 

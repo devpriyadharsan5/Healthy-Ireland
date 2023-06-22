@@ -21,7 +21,7 @@
 
 
 ### Alcohol
-<ol>
+
 
 <li>What percentage of the population consumes alcohol, and how does this vary by age?</li>
 
@@ -42,7 +42,7 @@
 
 
 ### General
-<ol>
+
 <li>How does folic acid consumption vary across different regions in terms of percentages?</li> 
 
 <li> How do individuals rate their own health in general, and are there differences between genders and age groups? </li>
