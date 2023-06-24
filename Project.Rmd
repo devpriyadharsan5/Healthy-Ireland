@@ -113,8 +113,9 @@ smoking_by_age <-
 
 # Plot the results
 ggplot(smoking_by_age, aes(x = ageclass, y = perc, fill = q6)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity")+
   labs(x = "Age", y = "Percentage of population", fill = "Smoking status") +
+  scale_fill_discrete(name = "Do you Smoke?") +
   ggtitle("Smoking by Age") +
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -272,13 +273,15 @@ ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
 
 The data reveals interesting patterns in smoking rates across different socioeconomic groups. 
 
-1. Smoking Rates: The percentage of smokers varies among the socioeconomic groups. For example, the "A Employers and Managers" group has a smoking rate of 1.99%, while the "G Unskilled" group has a smoking rate of 0.87%. This indicates that smoking behavior differs among socioeconomic categories.
+1. Smoking Rates: The data reveals varying smoking rates among different socioeconomic groups. For example, the "A Employers and Managers" group has a smoking rate of 13.01%, while the "B Higher Professional" group has a smoking rate of 7.95%. On the other hand, the "G Unskilled" group has a higher smoking rate of 29.91%. These differences indicate that smoking behavior differs across socioeconomic categories.
 
-2. Socioeconomic Disparities: There are notable disparities in smoking rates across socioeconomic groups. Some groups, such as "A Employers and Managers" and "B Higher Professional," have relatively lower smoking rates compared to others. On the other hand, groups like "J Agricultural Workers" and "G Unskilled" have higher smoking rates. These disparities may be influenced by various socioeconomic factors, including education, income, and occupation.
+2. Socioeconomic Disparities: The data highlights notable disparities in smoking rates across socioeconomic groups. Some groups, such as "A Employers and Managers" and "B Higher Professional," have relatively lower smoking rates, while groups like "G Unskilled" have higher smoking rates. These disparities suggest that socioeconomic factors play a role in smoking behavior.
 
-3. Socioeconomic Influence: The data suggests that socioeconomic status plays a role in smoking behavior. Higher socioeconomic groups tend to have lower smoking rates, possibly due to better access to healthcare, higher awareness of health risks, and stronger social norms against smoking. Conversely, lower socioeconomic groups may face more challenges in quitting smoking, such as limited resources for smoking cessation programs and higher exposure to smoking triggers.
+3. Socioeconomic Influence: The data supports the hypothesis that socioeconomic status influences smoking rates. Higher socioeconomic groups tend to have lower smoking rates, potentially due to factors like better access to healthcare, higher awareness of health risks, and stronger social norms against smoking. In contrast, lower socioeconomic groups face more challenges in quitting smoking, such as limited resources for smoking cessation programs and higher exposure to smoking triggers.
 
-In conclusion, the analysis highlights the relationship between smoking rates and socioeconomic status. The data indicates that smoking rates vary significantly across different socioeconomic groups, suggesting a link between socioeconomic factors and smoking behavior. These findings emphasize the importance of considering socioeconomic disparities when designing smoking cessation programs, tobacco control policies, and public health campaigns.
+
+In conclusion, the analysis of the data underscores the association between smoking rates and socioeconomic status. The findings indicate that smoking rates significantly vary across different socioeconomic groups, suggesting a link between socioeconomic factors and smoking behavior. These findings highlight the importance of considering socioeconomic disparities when implementing smoking cessation programs, tobacco control policies, and public health campaigns. 
+
 
 Targeted interventions should focus on addressing the specific needs and challenges faced by different socioeconomic groups. Efforts should be made to provide accessible and affordable smoking cessation resources, education on the health risks of smoking, and supportive environments to help individuals quit smoking, particularly in higher-risk groups with higher smoking rates.
 
@@ -795,7 +798,8 @@ ggplot(drinking_by_sec, aes(x = key1, y = perc, fill = q14)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
   labs(x = "Age", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  theme(axis.text.x = element_text(angle = 90))+scale_x_discrete(labels = function(x) 
+    stringr::str_wrap(x, width = 15))+
   ggtitle ( "Alcohol consumption by socioeconomic status")
 ```
 
@@ -1323,17 +1327,83 @@ Overall, the data suggests that there is a trend of higher perceived health as i
 
 
 
-### Modelling 
+### Models
 
 
+```{r}
+library(randomForest)
+library(dplyr)
+
+example_dat <- n1 %>% dplyr::select(q6, ageclass, q52)
+
+# Drop rows with missing values
+example_dat <- example_dat %>% drop_na()
+
+
+
+example_dat <- example_dat %>% mutate(q6_binary = as.numeric(as.factor(q6)) - 1)
+
+# Fit the Random Forest model
+random_forest <- randomForest(q6_binary ~ ageclass + q52, data = example_dat, ntree = 100)
+
+# Print the Random Forest model
+(random_forest)
+```
+
+
+```{r}
+library(dplyr)
+library(caret)
+library(randomForest)
+
+example_dat <- n1 %>% dplyr::select(q6, ageclass, q52)
+example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = (as.factor(q6)), ageclass = as.factor(ageclass))
+
+# Convert q6_binary to a factor
+example_dat$q6_binary <- factor(example_dat$q6_binary, levels = c("No", "Yes"))
+
+# Create a training and testing dataset
+set.seed(123)
+trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
+train_data <- example_dat[trainIndex, ]
+test_data <- example_dat[-trainIndex, ]
+
+# Handle missing values in the training and testing data
+train_data <- na.omit(train_data)
+test_data <- na.omit(test_data)
+
+# Fit the Random Forest model
+random_forest <- randomForest(q6_binary ~ ageclass + q52, data = train_data, ntree = 100)
+random_forest
+# Predict using the Random Forest model
+predicted_classes <- predict(random_forest, newdata = test_data)
+
+# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
+predicted_classes <- factor(predicted_classes, levels = c("No", "Yes"))
+
+# Create the confusion matrix
+confusion_matrix <- table(predicted_classes, test_data$q6_binary)
+
+# Calculate accuracy
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+
+# Print accuracy
+print(paste("Accuracy:", round(accuracy * 100, 2), "%"))
+
+```
+
+
+
+
+### 1. Logistic Regression
 ```{r}
 example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
   
   
 #example_dat$q6 <-   ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No") 
 
-#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
-example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.factor(q6), ageclass = as.factor(ageclass))
+example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
+#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = (as.factor(q6)), ageclass = as.factor(ageclass))
 
 logistic_mod <- glm(q6_binary ~ ageclass + q52, data = example_dat, family = "binomial")
 logistic_mod
@@ -1362,15 +1432,17 @@ The residual deviance is lower than the null deviance, indicating that the model
 
 
 
-
+#### Smoking
 ```{r}
 library(dplyr)
 library(caret)
 
-example_dat <- n1 %>%
-  dplyr::select(q6, ageclass, q52) %>%
-  drop_na(q6) %>%
-  mutate(q6_binary = as.factor(q6),ageclass = as.factor(ageclass))
+
+example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
+
+#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
+
+example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = (as.factor(q6)), ageclass = as.factor(ageclass))
 
 # Create a training and testing dataset
 set.seed(123)
@@ -1399,7 +1471,51 @@ accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
 
 
 # Print the model summary, accuracy, and confusion matrix
-summary(logistic_mod)
+(logistic_mod)
+print(paste("Accuracy:", accuracy*100))
+print(confusion_matrix)
+
+```
+
+
+
+#### Alcohol
+```{r}
+
+example_dat <- n1 %>% dplyr::select(q14,ageclass,q52)
+
+#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
+
+example_dat <- example_dat %>% drop_na(q14) %>% mutate(q14_binary = (as.factor(q14)), ageclass = as.factor(ageclass))
+
+# Create a training and testing dataset
+set.seed(123)
+trainIndex <- createDataPartition(example_dat$q14_binary, p = 0.65, list = FALSE)
+train_data <- example_dat[trainIndex, ]
+test_data <- example_dat[-trainIndex, ]
+
+# Fit the logistic regression model
+logistic_mod1 <- glm(q14_binary ~ ageclass + q52, data = train_data, family = "binomial")
+
+# Evaluate the model on the test dataset
+
+predicted_classes <- ifelse(predict(logistic_mod1, newdata = test_data, type = "response") > 0.5, "Yes", "No")
+
+
+# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
+test_data$q14_binary <- factor(test_data$q14_binary, levels = c("Yes", "No"))
+
+# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
+predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
+
+# Create the confusion matrix
+confusion_matrix <- confusionMatrix(predicted_classes, test_data$q14_binary)
+
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+
+
+# Print the model summary, accuracy, and confusion matrix
+logistic_mod1
 print(paste("Accuracy:", accuracy*100))
 print(confusion_matrix)
 
@@ -1408,10 +1524,120 @@ print(confusion_matrix)
 
 
 
+### 2. Decision Trees
+
+#### Smoking
+```{r}
+library(rpart)
+
+# Fit the decision tree model
+decision_tree <- rpart(q6_binary ~ ageclass + q52, data = train_data, method = "class")
+
+# Predict the classes using the decision tree model
+predicted_classes_tree <- predict(decision_tree, newdata = test_data, type = "class")
+
+# Create the confusion matrix
+confusion_matrix_tree <- confusionMatrix(predicted_classes_tree, test_data$q6_binary)
+
+# Calculate accuracy
+accuracy_tree <- round(confusion_matrix_tree$overall["Accuracy"], digits = 4)
+
+# Print the decision tree model, accuracy, and confusion matrix
+print(decision_tree)
+print(paste("Accuracy:", accuracy_tree * 100))
+print(confusion_matrix_tree)
+
+```
+
+
+
+#### Alcohol
+
+```{r}
+library(rpart)
+
+# Fit the decision tree model
+decision_tree1 <- rpart(q14_binary ~ ageclass + q52, data = train_data, method = "class")
+
+# Predict the classes using the decision tree model
+predicted_classes_tree <- predict(decision_tree1, newdata = test_data, type = "class")
+
+# Create the confusion matrix
+confusion_matrix_tree <- confusionMatrix(predicted_classes_tree, test_data$q14_binary)
+
+# Calculate accuracy
+accuracy_tree <- round(confusion_matrix_tree$overall["Accuracy"], digits = 4)
+
+# Print the decision tree model, accuracy, and confusion matrix
+print(decision_tree1)
+print(paste("Accuracy:", accuracy_tree * 100))
+print(confusion_matrix_tree)
+
+```
 
 
 
 
 
 
+```{r}
+library(dplyr)
+library(caret)
+library(randomForest)
+
+example_dat <- n1 %>% dplyr::select(q6, ageclass, q52)
+
+example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = (as.factor(q6)), ageclass = as.factor(ageclass))
+
+# Create a training and testing dataset
+set.seed(123)
+trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
+train_data <- example_dat[trainIndex, ]
+test_data <- example_dat[-trainIndex, ]
+
+# Fit the logistic regression model
+logistic_mod <- glm(q6_binary ~ ageclass + q52, data = train_data, family = "binomial")
+
+# Evaluate the logistic regression model on the test dataset
+predicted_classes_logistic <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
+
+# Convert test_data$q6_binary to a factor with the same levels as predicted_classes_logistic
+test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
+
+# Convert predicted_classes_logistic to a factor with the same levels as test_data$q6_binary
+predicted_classes_logistic <- factor(predicted_classes_logistic, levels = c("Yes", "No"))
+
+# Create the confusion matrix for logistic regression
+confusion_matrix_logistic <- confusionMatrix(predicted_classes_logistic, test_data$q6_binary)
+
+# Calculate accuracy for logistic regression
+accuracy_logistic <- round(confusion_matrix_logistic$overall["Accuracy"], digits = 4)
+
+# Print the logistic regression model summary, accuracy, and confusion matrix
+print(logistic_mod)
+print(paste("Logistic Regression Accuracy:", accuracy_logistic * 100))
+print(confusion_matrix_logistic)
+
+# Preprocess the data for Random Forest (handle missing values)
+train_data_rf <- na.omit(train_data)
+test_data_rf <- na.omit(test_data)
+
+# Fit the Random Forest model
+random_forest <- randomForest(q6_binary ~ ageclass + q52, data = train_data_rf, ntree = 100)
+
+# Predict the classes using the Random Forest model
+predicted_classes_forest <- predict(random_forest, newdata = test_data_rf, type = "class")
+
+# Create the confusion matrix for Random Forest
+confusion_matrix_forest <- confusionMatrix(predicted_classes_forest, test_data_rf$q6_binary)
+
+# Calculate accuracy for Random Forest
+accuracy_forest <- round(confusion_matrix_forest$overall["Accuracy"], digits = 4)
+
+# Print the Random Forest model, accuracy, and confusion matrix
+print(random_forest)
+print(paste("Random Forest Accuracy:", accuracy_forest * 100))
+print(confusion_matrix_forest)
+
+```
 
