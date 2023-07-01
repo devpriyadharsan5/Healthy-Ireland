@@ -178,7 +178,10 @@ s2 <- n1 %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
   dplyr::select(q52, q6, count)
 
+tab<- n1 |> dplyr::select(q6,q52)|>
+  table()
 
+chisq.test(tab)
 s2$q6 <- ifelse(s2$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 
@@ -468,8 +471,8 @@ h <- s6 %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
   ungroup() %>%
-  group_by(ageclass) %>%
-  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+  group_by(q6,q52,ageclass) %>%
+  dplyr::mutate(perc = count*100/sum(count)) 
 
 
 # Plot the results
@@ -480,40 +483,97 @@ ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
   ggtitle("Health Condition of people who smoke and who doesnt")+
   guides(color = guide_legend(reverse = TRUE))+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_grid(vars(q6), vars(q52),labeller = label_both)
+  facet_grid(~(q6)+~(q52),labeller = label_both)
 
 ```
+
 
 
 The provided data shows the distribution of individuals across different age groups (ageclass) and their smoking status (q6). The data also includes information about gender (GENDER), self-reported health status (spq1), and percentage of individuals in each category.
 
 
-1. **Among individuals aged 15-24 years**:
-   
-   * Non-smokers: Approximately 1.6% of both males and females reported bad health conditions, while around 12.2% of males and 10.5% of females reported good health conditions. Moreover, about 27.2% of males and 27% of females reported very good health conditions.
-   
-   * Smokers: Similar to non-smokers, around 1.6% of both males and females reported bad health conditions. However, the percentage of smokers reporting good health conditions was slightly lower, with approximately 4.3% of males and 2.6% of females. Additionally, around 5.3% of males and 4.8% of females reported very good health conditions.
+1. **Age Group: 15-24 years:**
 
-2. **Among individuals aged 25-44 years**:
+   a) **Male:**
    
-   * Non-smokers: About 2.1% of males and 3.4% of females reported bad health conditions. Moreover, around 9.1% of males and 14.3% of females reported good health conditions, while approximately 18.3% of males and 29% of females reported very good health conditions.
-  
-   * Smokers: Among smokers, roughly 1.6% of males and 1.5% of females reported bad health conditions. The percentage of smokers reporting good health conditions was approximately 3.6% of males and 4.7% of females. Additionally, about 6.6% of males and 5.8% of females reported very good health conditions.
-
-3. **Among individuals aged 45-64 years**:
+   * Non-smokers: 66.27% of non-smoking males reported very good health conditions.
    
-   * Non-smokers: Around 6.2% of males and 6.9% of females reported bad health conditions. Additionally, approximately 14.3% of males and 17.9% of females reported good health conditions, while about 14% of males and 21.3% of females reported very good health conditions.
-   
-   * Smokers: Among smokers, approximately 3.2% of males and 2.2% of females reported bad health conditions. The percentage of smokers reporting good health conditions was around 4.4% of males and 4.4% of females. Furthermore, roughly 2.1% of males and 3.2% of females reported very good health conditions.
-
-4. **Among individuals aged 65 and over**:
-
-   * Non-smokers: Approximately 12.8% of males and 13.8% of females reported bad health conditions. Moreover, around 20% of males and 22.4% of females reported good health conditions, while about 8.6% of males and 11.8% of females reported very good health conditions.
-   
-   * Smokers: Among smokers, around 2.6% of males and 1.5% of females reported bad health conditions. The percentage of smokers reporting good health conditions was approximately 2.5% of males and 2.3% of females. Additionally, roughly 0.6% of males and 1.1% of females reported very good health conditions.
+   * Smokers: Among male smokers, 47.14% reported very good health conditions. This suggests that a significant proportion of male smokers still maintain good overall health.
 
 
-Overall, these findings underscore the importance of avoiding smoking to maintain better health outcomes, especially among younger individuals. It is evident that smoking is associated with an increased likelihood of experiencing bad health conditions across different age groups and genders. Public health initiatives and targeted interventions should continue to emphasize the harmful effects of smoking and encourage smoking cessation to improve overall health and well-being.
+   b) **Female:**
+   
+   * Non-smokers: 69.14% of non-smoking females reported very good health conditions.
+   
+   * Smokers: Among female smokers, 55.56% reported very good health conditions. This indicates that a considerable proportion of female smokers still enjoy good overall health.
+
+
+2. **Age Group: 25-44 years:**
+
+   a) **Male:**
+   
+   * Non-smokers: 62.03% of non-smoking males reported very good health conditions.
+   
+   * Smokers: Among male smokers, 55.89% reported very good health conditions. This suggests that a considerable proportion of male smokers still maintain good overall health.
+   
+
+   b) **Female:**
+   
+   * Non-smokers: 62.08% of non-smoking females reported very good health conditions.
+   
+   * Smokers: Among female smokers, 48.17% reported very good health conditions. This indicates that a significant proportion of female smokers still enjoy good overall health.
+
+
+3. **Age Group: 45-64 years:**
+
+   a) **Male:**
+   
+   * Non-smokers: 40.51% of non-smoking males reported very good health conditions.
+   
+   * Smokers: Among male smokers, 45.27% reported good health conditions. This suggests that a significant proportion of male smokers still maintain relatively good overall health.
+
+
+   b) **Female:**
+   
+   * Non-smokers: 46.31% of non-smoking females reported very good health conditions.
+   
+   * Smokers: Among female smokers, 44.86% reported good health conditions. This indicates that a considerable proportion of female smokers still enjoy relatively good overall health.
+
+
+4. **Age Group: 65 and over:**
+
+   a) **Male:**
+   
+   * Non-smokers: 30.84% of non-smoking males reported bad health conditions.
+   
+   * Smokers: Among male smokers, 43.70% reported good health conditions. This suggests that a considerable proportion of male smokers still maintain relatively good overall health.
+
+
+   b) **Female:**
+   
+   * Non-smokers: 28.76% of non-smoking females reported bad health conditions.
+   
+   * Smokers: Among female smokers, 47.47% reported good health conditions. This indicates that a significant proportion of female smokers still enjoys relatively good overall health.
+
+
+   **Conclusion:** 
+   
+* In the 15-24 age group, both male and female non-smokers generally maintain very good health. Among smokers, a significant proportion still maintains good overall health, although the percentage is slightly lower than non-smokers.
+
+
+* In the 25-44 age group, both male and female non-smokers generally maintain very good health. Among smokers, a considerable proportion still maintains good overall health, although the percentage is lower than non-smokers.
+   
+   
+* In the 45-64 age group, both male and female non-smokers generally maintain good overall health. Among smokers, a significant proportion still maintains relatively good health conditions.
+
+   
+* In the 65 and over age group, both non-smoking males and females exhibit a higher prevalence of health issues. However, among smokers, a considerable proportion still maintains relatively good health conditions.
+   
+   
+   
+Overall, the analysis shows that while smoking can have negative health effects, a significant proportion of individuals across different age groups and genders still maintain good or very good health despite being smokers. It's important to note that quitting smoking is generally associated with better health outcomes. These findings highlight the need for smoking cessation efforts and personalized health considerations when assessing the relationship between smoking and health outcomes.
+
+
 
 ### 7. In the last 12 months, how often you have a smoking habit, and do you have private health insurance?
 
@@ -797,7 +857,7 @@ drinking_by_sec <-
 ggplot(drinking_by_sec, aes(x = key1, y = perc, fill = q14)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Age", y = "Percentage")+
+  labs(x = "Socioeconomic status", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 90))+scale_x_discrete(labels = function(x) 
     stringr::str_wrap(x, width = 15))+
   ggtitle ( "Alcohol consumption by socioeconomic status")
@@ -983,7 +1043,7 @@ h1 <- s14 %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
   ungroup() %>%
-  group_by(ageclass) %>%
+  group_by(q14,q52,ageclass) %>%
   dplyr::mutate(perc = count*100/sum(count),q14=q14) 
 
 
@@ -995,24 +1055,88 @@ ggplot(h1, aes(x = ageclass, y = perc, fill = spq1)) +
   ggtitle("Distribution of Health Conditions and Alcohol Consumption by Age and Gender")+
   guides(color = guide_legend(reverse = TRUE))+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_grid(vars(q14), vars(q52),labeller = label_both)
+  facet_grid(~(q14)+ ~(q52),labeller = label_both)
 
 ```
 
 
-The distribution of alcohol consumption varies among different age groups and genders in relation to health conditions. Here is a breakdown of the data:
-
-1. Among individuals aged **15-24 years**, the majority of non-drinkers (No) report good or very good health conditions, while a small proportion report bad health conditions. Among drinkers (Yes), the percentages are relatively higher for good and very good health conditions, but there is also a noticeable increase in the proportion of individuals reporting bad health conditions.
-
-2. For individuals aged **25-44 years**, a similar pattern is observed. Non-drinkers tend to have higher proportions of good and very good health conditions, while drinkers have higher percentages of individuals reporting bad health conditions.
-
-3. Among individuals aged **45-64 years**, the distribution remains consistent. Non-drinkers have higher rates of good and very good health conditions compared to drinkers, with a smaller proportion reporting bad health conditions.
-
-4. For individuals aged **65 and over**, non-drinkers generally have higher percentages of good and very good health conditions. However, it is worth noting that the difference between drinkers and non-drinkers is less pronounced in this age group.
+The analysis examined the relationship between alcohol consumption and health conditions, specifically comparing individuals who consume alcohol to those who do not. The findings are as follows:
 
 
-In conclusion, the analysis suggests that alcohol consumption is associated with a higher likelihood of individuals reporting bad health conditions across different age groups and genders. Non-drinkers consistently have higher rates of good and very good health conditions compared to drinkers, indicating a potential negative impact of alcohol consumption on overall health. These findings highlight the importance of promoting responsible drinking habits and raising awareness about the potential health risks associated with excessive alcohol consumption, particularly among younger age groups.
+1. **Age Group: 15-24 years:**
 
+   a) **Male:**
+   
+   * Non-consumers (No): Only 1.64% of males in this age group reported bad health conditions. This indicates that the majority of non-drinkers in this age range maintain good or very good health.
+   
+   * Consumers (Yes): Among the male drinkers, 7.20% reported bad health conditions. However, a significant portion (59.85%) reported very good health conditions. This suggests that while some drinkers face negative health effects, a considerable number still maintain good health.
+
+   b) **Female:**
+   
+   * Non-consumers (No): 3.75% of females who don't consume alcohol reported bad health conditions. Similar to males, most non-drinkers in this age group experience good or very good health.
+   
+   * Consumers (Yes): Among female drinkers, 6.91% reported bad health conditions. However, a higher percentage (63.59%) reported very good health conditions. This implies that despite some negative health outcomes, a significant proportion of female drinkers still enjoy good overall health.
+   
+
+2. **Age Group: 25-44 years:**
+
+   a) **Male:**
+   
+   * Non-consumers (No): 18.31% of non-drinking males reported bad health conditions, which is significantly higher than in the previous age group. This indicates a higher prevalence of health issues among non-drinkers in this age range.
+   
+   * Consumers (Yes): Among male drinkers, 8.28% reported bad health conditions, while 60.77% reported very good health conditions. This suggests that while there are some negative health consequences associated with alcohol consumption, a significant portion of male drinkers still maintain very good health.
+
+
+   b) **Female:**
+   
+   * Non-consumers (No): 10.46% of females who abstain from alcohol reported bad health conditions, which is lower than the rate among non-drinking males but still relatively high compared to the younger age group.
+   
+   * Consumers (Yes): Among female drinkers, 8.11% reported bad health conditions, while 32.07% reported very good health conditions. This indicates that despite some negative health effects, a considerable proportion of female drinkers still enjoy good overall health.
+
+
+3. **Age Group: 45-64 years:**
+
+   a) **Male:**
+   
+   * Non-consumers (No): The percentage of non-drinking males reporting bad health conditions further increases to 27.12%. This suggests a higher prevalence of health issues among non-drinkers in this age group.
+   
+   * Consumers (Yes): Among male drinkers, 20.73% reported bad health conditions, while 36.60% reported very good health conditions. This indicates that while there are some negative health consequences associated with alcohol consumption, a significant proportion of male drinkers still maintain very good health.
+   
+
+   b) **Female:**
+   
+   * Non-consumers (No): 28.21% of females who abstain from alcohol reported bad health conditions, indicating a relatively high prevalence of health issues among non-drinkers.
+   
+   * Consumers (Yes): Among female drinkers, 14.24% reported bad health conditions, while 46.21% reported very good health conditions. This suggests that despite some negative health effects, a considerable proportion of female drinkers still enjoy good overall health.
+
+
+4. **Age Group: 65 and over:**
+
+   a) **Male:**
+   
+   * Non-consumers (No): 32.33% of non-drinking males reported bad health conditions, indicating a high prevalence of health issues among this group.
+   
+   * Consumers (Yes): Among male drinkers, 32.66% reported bad health conditions, while 48.57% reported very good health conditions. This suggests that while there are negative health consequences associated with alcohol consumption, a considerable proportion of male drinkers still maintain very good health.
+
+   b) **Female:**
+   
+   * Non-consumers (No): 36.30% of females who abstain from alcohol reported bad health conditions, which is higher than the rate among non-drinking males.
+   
+   * Consumers (Yes): Among female drinkers, 26.46% reported bad health conditions, while 47.32% reported very good health conditions. This indicates that despite some negative health effects, a significant proportion of female drinkers still enjoy good overall health.
+
+
+   **Conclusion:** 
+   
+* In the 15-24 age group, both male and female non-drinkers generally maintain good health. While some negative health effects are observed among drinkers, a considerable number of individuals, especially females, still report very good health conditions despite alcohol consumption.
+   
+* In the 25-44 age group, non-drinking males have a higher prevalence of health issues compared to non-drinking females. However, both male and female drinkers in this age range exhibit a similar pattern, with a portion facing negative health effects but a substantial number maintaining very good health conditions.
+   
+* In the 45-64 age group, both non-drinking males and females have a higher prevalence of health issues compared to younger age groups. However, among drinkers, a significant proportion still maintains very good health, especially among females.
+   
+   
+* In the 65 and over age group, both non-drinking males and females exhibit a high prevalence of health issues. However, among drinkers, a considerable proportion still maintains very good health, suggesting that moderate alcohol consumption may not significantly compromise overall health in this age group.
+
+Overall, the analysis shows that while alcohol consumption can lead to some negative health effects, a considerable proportion of individuals across different age groups still maintain good or very good health despite drinking. It's important to note that moderation and individual factors play a significant role in the overall impact of alcohol on health. These findings highlight the need for responsible alcohol consumption and personalized health considerations when assessing the relationship between alcohol and health outcomes.
 
 
 
@@ -1329,28 +1453,6 @@ Overall, the data suggests that there is a trend of higher perceived health as i
 
 ### Models
 
-
-```{r}
-library(randomForest)
-library(dplyr)
-
-example_dat <- n1 %>% dplyr::select(q6, ageclass, q52)
-
-# Drop rows with missing values
-example_dat <- example_dat %>% drop_na()
-
-
-
-example_dat <- example_dat %>% mutate(q6_binary = as.numeric(as.factor(q6)) - 1)
-
-# Fit the Random Forest model
-random_forest <- randomForest(q6_binary ~ ageclass + q52, data = example_dat, ntree = 100)
-
-# Print the Random Forest model
-(random_forest)
-```
-
-
 ```{r}
 library(dplyr)
 library(caret)
@@ -1413,22 +1515,25 @@ summary(logistic_mod)
 ```
 
 
-The logistic regression model was fitted using the formula `q6_binary ~ ageclass + q52` with the binomial family, indicating that the outcome variable `q6_binary` is a binary variable (smoker or non-smoker). The model was applied to the `example_dat` dataset.
 
 
-The intercept represents the estimated log-odds of being a smoker when all other predictors are zero. The coefficients for ageclass and q52 represent the estimated changes in log-odds of being a smoker associated with each level of the corresponding predictor, relative to the reference level.
+```{r}
+example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
 
-The degrees of freedom indicate that there were 7698 observations in total, with 7694 residual degrees of freedom after accounting for missing data (2 observations were deleted due to missingness).
+  
+example_dat$q6 <-   ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No") 
 
-The null deviance measures the deviance of the null model (i.e., a model with only an intercept term) from the observed data. In this case, the null deviance is 7379.
+#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
 
-The residual deviance measures the deviance of the fitted model from the observed data. A smaller residual deviance suggests a better fit. In this case, the residual deviance is 7199.
+### making the predictors characters first and then factors preserves the labels when running the logistic regression
+example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.factor(q6), 
+                                                      ageclass = as.factor(as.character(ageclass)),
+                                                      q52 = as.factor(as.character(q52))) 
 
-The AIC (Akaike Information Criterion) is a measure of model quality that penalizes complex models. In this case, the AIC value is 7209.
 
-Overall, based on this logistic regression model, the coefficients provide estimates of the relationship between the predictors (ageclass and q52) and the log-odds of being a smoker. The negative coefficients for ageclass suggest a decreasing trend in the log-odds of being a smoker as age class increases. The positive coefficient for ageclass.C indicates a slightly increasing trend in the log-odds of being a smoker for the "C" age class compared to the reference level. The negative coefficient for q52.L suggests a decrease in the log-odds of being a smoker for the given level of q52 compared to the reference level.
-
-The residual deviance is lower than the null deviance, indicating that the model provides a better fit to the data than the null model. However, the AIC value suggests that there may be room for improvement in the model's predictive ability.
+logistic_mod <- glm(q6_binary ~ ageclass + q52, data = example_dat, family = "binomial")
+logistic_mod
+```
 
 
 
@@ -1476,6 +1581,7 @@ print(paste("Accuracy:", accuracy*100))
 print(confusion_matrix)
 
 ```
+
 
 
 
@@ -1531,21 +1637,21 @@ print(confusion_matrix)
 library(rpart)
 
 # Fit the decision tree model
-decision_tree <- rpart(q6_binary ~ ageclass + q52, data = train_data, method = "class")
+#decision_tree <- rpart(q6_binary ~ ageclass + q52, data = train_data, method = "class")
 
 # Predict the classes using the decision tree model
-predicted_classes_tree <- predict(decision_tree, newdata = test_data, type = "class")
+#predicted_classes_tree <- predict(decision_tree, newdata = test_data, type = "class")
 
 # Create the confusion matrix
-confusion_matrix_tree <- confusionMatrix(predicted_classes_tree, test_data$q6_binary)
+#confusion_matrix_tree <- confusionMatrix(predicted_classes_tree, test_data$q6_binary)
 
 # Calculate accuracy
-accuracy_tree <- round(confusion_matrix_tree$overall["Accuracy"], digits = 4)
+#accuracy_tree <- round(confusion_matrix_tree$overall["Accuracy"], digits = 4)
 
 # Print the decision tree model, accuracy, and confusion matrix
-print(decision_tree)
-print(paste("Accuracy:", accuracy_tree * 100))
-print(confusion_matrix_tree)
+#print(decision_tree)
+#print(paste("Accuracy:", accuracy_tree * 100))
+#print(confusion_matrix_tree)
 
 ```
 
@@ -1556,8 +1662,14 @@ print(confusion_matrix_tree)
 ```{r}
 library(rpart)
 
+set.seed(123)
+trainIndex1 <- createDataPartition(example_dat$q14_binary, p = 0.7, list = FALSE)
+train_data1 <- example_dat[trainIndex, ]
+test_data1 <- example_dat[-trainIndex, ]
+
+
 # Fit the decision tree model
-decision_tree1 <- rpart(q14_binary ~ ageclass + q52, data = train_data, method = "class")
+decision_tree1 <- rpart(q14_binary ~ ageclass + q52, data = train_data, method = "class",control = rpart.control(cp = 0))
 
 # Predict the classes using the decision tree model
 predicted_classes_tree <- predict(decision_tree1, newdata = test_data, type = "class")
@@ -1576,7 +1688,13 @@ print(confusion_matrix_tree)
 ```
 
 
-
+```{r}
+library(rpart.plot)
+rpart.plot(decision_tree1,extra= 106)
+```
+```{r}
+train_data1$q14|> table()
+```
 
 
 
