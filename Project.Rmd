@@ -12,46 +12,43 @@ suppressWarnings(library(haven))
 suppressWarnings(library(dplyr))
 suppressWarnings(library(magrittr))
 suppressWarnings(library(knitr))
-suppressWarnings(library(lattice))
 suppressWarnings(library(tidyverse))
-suppressWarnings(library(likert))
-suppressWarnings(library(MASS))
-suppressWarnings(library(psych))
-suppressWarnings(library(viridis))
 suppressWarnings(library(ggplot2))
 suppressWarnings(library(here))
-suppressWarnings(library(flextable))
-suppressWarnings(library(devtools))
 suppressWarnings(library(dplyr))
 suppressWarnings(library(labelled))
 suppressWarnings(library(foreign))
-suppressWarnings(library(questionr))
-suppressWarnings(library(survey))
 suppressWarnings(library(tibble))
 suppressWarnings(library(psych)) #masks ggpplot2:: %+%, alpha
 suppressWarnings(library(GGally)) #masks dbplyr::nasa
-suppressWarnings(library(kableExtra)) #masks dplyr::group_rows
-suppressWarnings(library(MVN))
-suppressWarnings(library(likert))
 suppressWarnings(library(plyr))
 ```
 
 
+
+
 ```{r}
+# Read the data from the SPSS file
 data <- read_sav("0021-04_healthy_ireland_2018.sav")
 ```
 
 
 ```{r}
-df1 <- data[c("q6","q7","q8","slq9b","q10","q11","q13","q340","q348","q349")]
+df1 <- data[c("q6", "q7", "q8", "slq9b", "q10", "q11", "q13", "q340", "q348", "q349")]
+# Select columns "q6", "q7", "q8", "slq9b", "q10", "q11", "q13", "q340", "q348", "q349" from the original data frame and assign it to df1.
 
-df2 <- data[c("q14","exq15","exq18")]
+df2 <- data[c("q14", "exq15", "exq18")]
+# Select columns "q14", "exq15", "exq18" from the original data frame and assign it to df2.
 
-df3 <- data[c("spq1","q52","q55","q58","q120","q205","q208","q308")]
+df3 <- data[c("spq1", "q52", "q55", "q58", "q120", "q205", "q208", "q308")]
+# Select columns "spq1", "q52", "q55", "q58", "q120", "q205", "q208", "q308" from the original data frame and assign it to df3.
 
-df4 <- data[c("q229","q230","q231","q232","q233","q330_1","q330_2","q330_3")]
+df4 <- data[c("q229", "q230", "q231", "q232", "q233", "q330_1", "q330_2", "q330_3")]
+# Select columns "q229", "q230", "q231", "q232", "q233", "q330_1", "q330_2", "q330_3" from the original data frame and assign it to df4.
 
-df5 <- data[c("q63b","lho","key1","ageclass","countbirth")]
+df5 <- data[c("q63b", "lho", "key1", "ageclass", "countbirth")]
+# Select columns "q63b", "lho", "key1", "ageclass", "countbirth" from the original data frame and assign it to df5.
+
 ```
 
 
@@ -88,13 +85,14 @@ n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
 s1 <- n1 %>% 
-  dplyr::group_by(q6, ageclass) %>% 
+  dplyr::group_by(q6, ageclass) %>%  # Group the data by smoking status (q6) and age group (ageclass)
   dplyr::summarise(count = n()) |>
   drop_na() |>
   ungroup() %>%
   group_by(ageclass) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(ageclass, q6, count)
+  dplyr::mutate(perc = count/sum(count)*100) %>%  # Calculate the percentage within each age group
+  dplyr::select(ageclass, q6, count)  # Select only the relevant columns for further analysis
+
 
 # Re-code smoking variable to combine "Yes, daily" and "Yes, occasionally"
 s1$q6 <- ifelse(s1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
@@ -103,13 +101,14 @@ s1$q6 <- ifelse(s1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 # Calculate the percentage of individuals in each group ## Code modified by NC
 smoking_by_age <- 
   s1 %>% 
-  group_by(ageclass, q6) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
+  group_by(ageclass, q6) %>%  # Group the data by age group and smoking status
+  dplyr::summarise(count = sum(count)) %>%  # Summarize the count of observations within each group
   ungroup() %>% 
-  group_by(ageclass) %>% 
-  dplyr::summarise(perc = count*100/sum(count),
-                   q6 = q6) %>% 
-  arrange(ageclass)
+  group_by(ageclass) %>%  # Group the data only by age group
+  dplyr::summarise(perc = count*100/sum(count),  # Calculate the percentage within each age group
+                   q6 = q6) %>%  # Keep the smoking status variable for plotting purposes
+  arrange(ageclass)  # Arrange the data by age group in ascending order
+
 
 # Plot the results
 ggplot(smoking_by_age, aes(x = ageclass, y = perc, fill = q6)) +
@@ -165,42 +164,58 @@ This finding highlights the importance of targeted interventions and prevention 
 
 
 
+
+
+#### Chi-squared test
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+q1 <- n1 %>%
+  dplyr::select(q6, ageclass) |>  # Select the variables of interest
+  table()  # Create a contingency table
+
+chisq.test(q1)  # Perform the chi-squared test
+
+
+```
+
+
+
+
+
 ### 2. What percentage of the population smokes and how does this vary by gender?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
-s2 <- n1 %>% 
-  dplyr::group_by(q6, q52) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
+s2 <- n1 %>%
+  dplyr::group_by(q6, q52) %>%
+  dplyr::summarise(count = n()) |>  # Count the number of individuals in each smoking status and gender combination
+  drop_na() |>  # Drop rows with missing values
   ungroup() %>%
   group_by(q52) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(q52, q6, count)
+  dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage of individuals in each group
+  dplyr::select(q52, q6, count)  # Select relevant columns
 
-tab<- n1 |> dplyr::select(q6,q52)|>
-  table()
 
-chisq.test(tab)
+# Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
 s2$q6 <- ifelse(s2$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 
+# Calculate the percentage of smokers by gender
 smoking_by_gender <- 
-  s2 %>% 
-  group_by(q52, q6) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
-  ungroup() %>% 
-  group_by(q52) %>% 
+  s2 %>%
+  group_by(q52, q6) %>%
+  dplyr::summarise(count = sum(count)) %>%
+  ungroup() %>%
+  group_by(q52) %>%
   dplyr::summarise(perc = count*100/sum(count),
-                   q6 = q6) %>% 
+                   q6 = q6) %>%
   arrange(q52)
-
 
 # Plot the results
 ggplot(smoking_by_gender, aes(x = q52, y = perc, fill = q6)) +
   geom_bar(stat = "identity") +
   labs(x = "Gender", y = "Percentage", fill = "Smoking") +
   ggtitle("Percentage of population that smokes, by gender")
+
 ```
 
 
@@ -235,21 +250,29 @@ Efforts to reduce smoking rates should consider the gender-specific factors that
 
 
 
+#### Chi-squared test
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+q2<- n1 |> dplyr::select(q6,q52)|> # Select the variables of interest
+  table() # Create a contingency table
+
+chisq.test(q2) # Perform the chi-squared test
+```
+
+
 
 ### 3. What percentage of the population smokes and how does this vary by socioeconomic status?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
-n1$q6 <- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+n1$q6 <- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")  # Recode the smoking variable to combine "Yes, daily" and "Yes, occasionally" into "Yes"
 
-s3 <- n1 %>% 
-  dplyr::group_by(q6, key1) %>% 
+s3 <- n1 %>%
+  dplyr::group_by(q6, key1) %>%
   dplyr::summarise(count = n()) |>
   drop_na() |>
   ungroup() %>%
   group_by(key1) %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(key1, q6, count)
-
+  dplyr::select(key1, q6, count)  # Create a summary table with counts and percentages of smokers by socioeconomic status (key1)
 
 smoking_by_ses <- 
   s3 %>% 
@@ -259,17 +282,17 @@ smoking_by_ses <-
   group_by(key1) %>% 
   dplyr::summarise(perc = count*100/sum(count),
                    q6 = q6) %>% 
-  arrange(key1)
-
+  arrange(key1)  # Calculate the percentage of smokers within each socioeconomic status category
 
 # Plot the results
 ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
   geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do You smoke?") +
-  labs(x = "Socioeconomic Status", y = "Percentage of Smokers")+
-  theme(axis.text.x = element_text(angle = 90))+scale_x_discrete(labels = function(x) 
-    stringr::str_wrap(x, width = 15))+
-       ggtitle ( "Smoking Rates by Socioeconomic Status")
+  scale_fill_discrete(name = "Do You Smoke?") +
+  labs(x = "Socioeconomic Status", y = "Percentage of Smokers") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 15)) +
+  ggtitle("Smoking Rates by Socioeconomic Status")
+
 
 ```
 
@@ -314,17 +337,28 @@ It is important to address health disparities and provide support and resources 
 
 
 
+
+#### Chi-squared test
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+q3<- n1 |> dplyr::select(q6,key1)|> # Select the variables of interest
+  table() # Create a contingency table
+
+chisq.test(q3) # Perform the chi-squared test
+```
+
+
+
 ### 4. What are the observed variations in smoking rates across different local health offices (LHOs) in various counties?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-s4 <- n1 %>% 
-  dplyr::group_by(q6, lho) %>% 
+
+s4 <- n1 %>%
+  dplyr::group_by(q6, lho) %>%
   dplyr::summarise(count = n()) |>
   drop_na() |>
   ungroup() %>%
   group_by(lho) %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(lho, q6, count)
-
+  dplyr::select(lho, q6, count)  # Create a summary table with counts and percentages of smokers by region (lho)
 
 smoking_by_region <- 
   s4 %>% 
@@ -334,16 +368,15 @@ smoking_by_region <-
   group_by(lho) %>% 
   dplyr::summarise(perc = count*100/sum(count),
                    q6 = q6) %>% 
-  arrange(lho)
-
+  arrange(lho)  # Calculate the percentage of smokers within each region
 
 # Plot the results
 ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
   geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you Smoke?") +
-  labs(x = "County", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 90))+
-  ggtitle ( "Smoking rates in various regions")
+  scale_fill_discrete(name = "Do You Smoke?") +
+  labs(x = "County", y = "Percentage") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ggtitle("Smoking Rates in Various Regions")
 
 ```
 
@@ -382,6 +415,18 @@ The odds ratio compares the odds of smoking between Roscommon and Dun Laoghaire.
 These findings highlight regional disparities in smoking prevalence and suggest that there may be regional-specific factors influencing smoking behavior. Understanding the underlying determinants of higher smoking rates in Roscommon can help inform targeted interventions and policies to reduce smoking prevalence in that region. Such interventions may include community-based smoking cessation programs, increased access to tobacco cessation resources, and targeted public health campaigns.
 
 It is important to address these regional disparities in smoking rates to promote equitable health outcomes and reduce the burden of smoking-related diseases. By identifying and targeting the unique challenges and risk factors in regions with higher smoking prevalence, effective strategies can be implemented to reduce smoking rates and improve the overall health of the population.
+
+
+
+
+#### Chi-squared test
+```{r,echo = FALSE, warning=FALSE,message=FALSE} 
+q4<- n1 |> dplyr::select(q6,lho)|> # Select the variables of interest
+  table() # Create a contingency table
+
+chisq.test(q4) # Perform the chi-squared test
+```
+
 
 
 
@@ -587,7 +632,7 @@ health_ins_smoke <- s7 %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
   ungroup() %>%
-  group_by(q6,q55) %>%
+  group_by(q6,q52,ageclass) %>%
   dplyr::mutate(perc = count*100/sum(count)) 
 
 # Plot the results
@@ -595,36 +640,72 @@ ggplot(health_ins_smoke, aes(x = ageclass, y = perc, fill=q55)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you have private health insurance?") +
   labs(x = "Age", y = "Percentage")+
-  ggtitle("Health Insurance for People smoke")+
-  guides(color = guide_legend(reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_wrap(~q6+q52,labeller = label_both)
+  ggtitle("Percentage of Individuals with Private Health Insurance by \nSmoking Status, Gender, and Age Group")+
+  guides(color=guide_legend(nrow=2, byrow=TRUE,reverse = TRUE))+
+  theme(axis.text.x = element_text(angle = 90,vjust=0,hjust=1),plot.title = element_text(lineheight = 1.1))+
+  facet_grid(~(q6)+~(q52),labeller = label_both)
 
 ```
 
 
-1. For individuals with private health insurance:
-   * Among females with private health insurance, the smoking rates vary across different age groups. The lowest smoking rate is observed among females aged 15-24 years (0.70%), while the highest smoking rate is among females aged 45-64 years (4.77%). It is worth noting that females aged 65 and over have a relatively lower smoking rate (4.91%).
+Let's analyze the relationship between smoking status, gender, age group, and the possession of private health insurance:
+
+1. **Smoking Status: No**
+
+   a) **Male:**
    
-   * Among males with private health insurance, the smoking rates are generally higher compared to females. The highest smoking rate is among males aged 25-44 years (4.84%), followed by males aged 45-64 years (4.21%). Males aged 15-24 years have a relatively lower smoking rate (1.19%), and males aged 65 and over have the lowest smoking rate (1.89%).
+   * Age Group: 15-24 years: Among non-smoking males, 56.86% do not have private health insurance, while 43.14% have private health insurance.
+   
+   * Age Group: 25-44 years: Among non-smoking males, 51.62% do not have private health insurance, while 48.38% have private health insurance.
+   
+   * Age Group: 45-64 years: Among non-smoking males, 44.44% do not have private health insurance, while 55.56% have private health insurance.
+   
+   * Age Group: 65 and over: Among non-smoking males, 52.10% do not have private health insurance, while 47.90% have private health insurance.
+   
+
+   b) **Female:**
+   
+   * Age Group: 15-24 years: Among non-smoking females, 58.02% do not have private health insurance, while 41.98% have private health insurance.
+   
+   * Age Group: 25-44 years: Among non-smoking females, 50.81% do not have private health insurance, while 49.19% have private health insurance.
+   
+   * Age Group: 45-64 years: Among non-smoking females, 41.63% do not have private health insurance, while 58.37% have private health insurance.
+   
+   * Age Group: 65 and over: Among non-smoking females, 48.13% do not have private health insurance, while 51.87% have private health insurance.
 
 
-2. For individuals without private health insurance:
-  
-   * Among females without private health insurance, the smoking rates vary across age groups. The highest smoking rate is observed among females aged 45-64 years (12.27%), which is significantly higher compared to females with private health insurance in the same age group. Females aged 15-24 years have a relatively lower smoking rate (1.63%), and females aged 25-44 years have the lowest smoking rate (2.25%). Females aged 65 and over also show a relatively lower smoking rate (7.60%).
-  
-   * Among males without private health insurance, the smoking rates are relatively higher compared to females. The highest smoking rate is among males aged 45-64 years (6.12%), followed by males aged 65 and over (6.54%). Males aged 15-24 years have a relatively lower smoking rate (1.75%), and males aged 25-44 years have the lowest smoking rate (6.09%).
+2. **Smoking Status: Yes**
+
+   a) **Male:**
+   
+   * Age Group: 15-24 years: Among smoking males, 75.71% do not have private health insurance, while 24.29% have private health insurance.
+   
+   * Age Group: 25-44 years: Among smoking males, 76.77% do not have private health insurance, while 23.23% have private health insurance.
+   
+   * Age Group: 45-64 years: Among smoking males, 75.31% do not have private health insurance, while 24.69% have private health insurance.
+   
+   * Age Group: 65 and over: Among smoking males, 77.31% do not have private health insurance, while 22.69% have private health insurance.
+   
+
+   b) **Female:**
+   
+   * Age Group: 15-24 years: Among smoking females, 81.48% do not have private health insurance, while 18.52% have private health insurance.
+   
+   * Age Group: 25-44 years: Among smoking females, 83.39% do not have private health insurance, while 16.61% have private health insurance.
+   
+   * Age Group: 45-64 years: Among smoking females, 72.02% do not have private health insurance, while 27.98% have private health insurance.
+   
+   * Age Group: 65 and over: Among smoking females, 70.71% do not have private health insurance, while 29.29% have private health insurance.
 
 
-Conclusion:
-  
+**Conclusion:**
+
   * Private health insurance appears to have a somewhat mitigating effect on smoking rates, particularly among females. Females with private health insurance generally have lower smoking rates compared to females without private health insurance in most age groups.
 
 
   * Among males, the influence of private health insurance on smoking rates is not as pronounced, with some age groups showing slightly higher smoking rates among those with private health insurance.
     
   * The highest smoking rates are observed among individuals without private health insurance, particularly among females aged 45-64 years and males aged 45-64 years and 65 and over.
-
 
   * These findings highlight the importance of promoting smoking cessation programs, public health campaigns, and access to affordable healthcare, including private health insurance, to address and reduce smoking rates, especially among vulnerable populations.
 
@@ -769,6 +850,19 @@ The odds ratio of 2.47 implies that the odds of alcohol consumption are 2.47 tim
 These findings align with general trends in alcohol consumption, where younger individuals tend to have higher rates of alcohol use. It is important to address alcohol consumption behaviors, particularly among younger age groups, through education, awareness campaigns, and targeted interventions to promote responsible and healthy alcohol consumption habits. Additionally, efforts to prevent alcohol-related harm should also be focused on older age groups, as a significant proportion of individuals in these age groups still consume alcohol.
 
 
+#### Chi-squared test
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+q5 <- n1 %>%
+  dplyr::select(q14, ageclass) |>  # Select the variables of interest
+  table()  # Create a contingency table
+
+chisq.test(q5)  # Perform the chi-squared test
+
+
+```
+
+
+
 
 ### 10. What percentage of the population consumes alcohol and how does this vary by gender?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
@@ -825,6 +919,15 @@ The odds ratio is 1.56, indicating that males have 1.56 times higher odds of con
 
 
 Based on the data, it can be concluded that there is a moderate association between gender and alcohol consumption. Males have a slightly higher prevalence and odds of consuming alcohol compared to females. The findings emphasize the need for comprehensive alcohol-related interventions and education for both genders to promote responsible alcohol consumption and address potential health risks associated with excessive alcohol use.
+
+
+#### Chi-squared test
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+q6<- n1 |> dplyr::select(q14,q52)|> # Select the variables of interest
+  table() # Create a contingency table
+
+chisq.test(q6) # Perform the chi-squared test
+```
 
 
 
@@ -896,6 +999,16 @@ The odds ratio is 3.43, indicating that Employers and Managers have 3.43 times h
 Based on the data, it can be concluded that there is a moderate association between occupational group and alcohol consumption. These findings highlight the importance of considering occupational factors when addressing alcohol consumption patterns and implementing workplace wellness programs that promote responsible drinking behavior. It is essential to provide resources, support, and education on alcohol consumption within different occupational settings to ensure the well-being and safety of all individuals.
 
 
+#### Chi-squared test
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+q7<- n1 |> dplyr::select(q14,key1)|> # Select the variables of interest
+  table() # Create a contingency table
+
+chisq.test(q7) # Perform the chi-squared test
+```
+
+
+
 ### 12. What are the patterns of alcohol consumption across different local health offices (LHOs) within each county?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
@@ -960,6 +1073,16 @@ The relative risk of 1.26 indicates that individuals in Dublin South East have a
 The odds ratio of 3.61 indicates that individuals in Dublin South East have 3.61 times higher odds of consuming alcohol compared to those in Limerick. This suggests a moderate association between the region and alcohol consumption, with Dublin South East having higher odds of alcohol consumption compared to Limerick.
 
 Based on the data, it can be concluded that there is a moderate association between the geographic regions of Dublin South East and Limerick and alcohol consumption. Dublin South East has a slightly higher prevalence and significantly higher odds of alcohol consumption compared to Limerick. These findings highlight the importance of considering regional variations in alcohol consumption patterns and tailoring interventions and policies to address the specific needs and challenges of different areas. It is essential to promote responsible drinking behaviors and provide support and resources for individuals in both Dublin South East and Limerick to ensure the well-being and health of the population.
+
+
+#### Chi-squared test
+```{r,echo = FALSE, warning=FALSE,message=FALSE} 
+q8<- n1 |> dplyr::select(q14,lho)|> # Select the variables of interest
+  table() # Create a contingency table
+
+chisq.test(q8) # Perform the chi-squared test
+```
+
 
 
 ### 13. How does alcohol consumption vary among the surveyed individuals based on their country of birth?
@@ -1151,7 +1274,7 @@ health_ins_al <- s15 %>%
   drop_na() |>
   dplyr::summarize(count = n()) %>%
   ungroup() %>%
-  group_by(q14,q55) %>%
+  group_by(q14,q52,ageclass) %>%
   dplyr::mutate(perc = count*100/sum(count)) 
 
 
@@ -1162,8 +1285,8 @@ ggplot(health_ins_al, aes(x = ageclass, y = perc, fill=q55)) +
   labs(x = "Age", y = "Percentage")+
   ggtitle("Health Insurance for People consume alcohol")+
   guides(color = guide_legend(reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_wrap(~q14+q52,labeller = label_both)
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  facet_grid(~q14+q52,labeller = label_both)
 
 ```
 
@@ -1374,37 +1497,37 @@ In conclusion, the calculations suggest that there is a higher prevalence of fol
 
 
 
-### 18. How do individuals rate their own health in general, and are there differences between genders and age groups?
+### 18. How do individuals rate their own health in general, and are there differences between genders and lhos?
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 s18 <- n1 %>% 
-  dplyr::group_by(spq1, q52, ageclass) %>% 
+  dplyr::group_by(spq1, q52, lho) %>% 
   dplyr::summarise(count = n()) |>
   drop_na() |>
   ungroup() %>%
   group_by(spq1) %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(spq1, q52, ageclass, count)
+  dplyr::select(spq1, q52, lho, count)
 
 
 health <- 
   s18 %>% 
-  group_by(spq1, q52,ageclass) %>% 
+  group_by(spq1, q52,lho) %>% 
   dplyr::summarise(count = sum(count)) %>% 
   ungroup() %>% 
-  group_by(ageclass,q52) %>% 
+  group_by(lho,q52) %>% 
   dplyr::summarise(spq1=spq1,
                    perc = count*100/sum(count)) %>% 
-  arrange(ageclass)
+  arrange(lho)
 
 
 # Plot the results
 ggplot(health, aes(x = q52, y = perc, fill = spq1)) +
   geom_bar(stat = "identity")  +
   labs(x = "Gender", y = "Proportion", fill = "Health Status")+
-  ggtitle("Proportion of Individuals Rating Their Health by Gender and Age Group")+
-  facet_wrap(~ageclass)
+  ggtitle("Proportion of Individuals Rating Their Health by Gender in various Counties")+
+  facet_wrap(~lho)
 
 ```
 
@@ -1537,6 +1660,7 @@ logistic_mod
 
 
 
+
 #### Smoking
 ```{r}
 library(dplyr)
@@ -1547,7 +1671,14 @@ example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
 
 #example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
 
-example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = (as.factor(q6)), ageclass = as.factor(ageclass))
+# Convert q6 to binary variable
+example_dat$q6 <- ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+
+# Convert variables to factors
+example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.factor(q6),
+                                                      ageclass = as.factor(as.character(ageclass)),
+                                                      q52 = as.factor(as.character(q52)))
+
 
 # Create a training and testing dataset
 set.seed(123)
@@ -1559,7 +1690,6 @@ test_data <- example_dat[-trainIndex, ]
 logistic_mod <- glm(q6_binary ~ ageclass + q52, data = train_data, family = "binomial")
 
 # Evaluate the model on the test dataset
-
 predicted_classes <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
 
 
@@ -1579,6 +1709,7 @@ accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
 (logistic_mod)
 print(paste("Accuracy:", accuracy*100))
 print(confusion_matrix)
+
 
 ```
 
