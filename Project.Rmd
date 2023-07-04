@@ -1634,7 +1634,6 @@ logistic_mod <- glm(q6_binary ~ ageclass + q52, data = example_dat, family = "bi
 logistic_mod
 
 
-summary(logistic_mod)
 ```
 
 
@@ -1660,6 +1659,56 @@ logistic_mod
 
 
 
+```{r}
+# Load required libraries
+library(dplyr)
+library(caret)
+
+# Load the dataset and select relevant variables
+example_dat <- n1 %>% dplyr::select(q6, ageclass, q52)
+
+# Preprocess the data
+example_dat <- example_dat  %>% mutate(q6_binary = 1*(q6 == "Yes") + 0)
+
+
+example_dat <- example_dat %>% drop_na(q6) %>% mutate(                                                      ageclass = as.factor(as.character(ageclass)),
+                                                      q52 = as.factor(as.character(q52)))
+
+# Create a training and testing dataset
+set.seed(123)
+trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.6, list = FALSE,times=1)
+train_data <- example_dat[trainIndex, ]
+test_data <- example_dat[-trainIndex, ]
+
+
+# Fit the logistic regression model
+logistic_mod <- glm(q6_binary ~ ageclass + q52, data = train_data, family = "binomial")
+
+# Evaluate the model on the test dataset
+predicted_classes <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
+
+# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
+test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
+
+# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
+predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
+
+# Create the confusion matrix
+confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+
+# Print the model summary, accuracy, and confusion matrix
+summary(logistic_mod)
+
+print(paste("Accuracy:", accuracy * 100))
+print(confusion_matrix)
+
+```
+
+
+
 
 #### Smoking
 ```{r}
@@ -1672,7 +1721,7 @@ example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
 #example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
 
 # Convert q6 to binary variable
-example_dat$q6 <- ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+#example_dat$q6 <- ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 # Convert variables to factors
 example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.factor(q6),
@@ -1681,7 +1730,7 @@ example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.factor(q6),
 
 
 # Create a training and testing dataset
-set.seed(123)
+set.seed(1234)
 trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
 train_data <- example_dat[trainIndex, ]
 test_data <- example_dat[-trainIndex, ]
@@ -1699,17 +1748,16 @@ test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
 # Convert predicted_classes to a factor with the same levels as test_data$q6_binary
 predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
 
+
 # Create the confusion matrix
 confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
 
 accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
 
-
 # Print the model summary, accuracy, and confusion matrix
 (logistic_mod)
 print(paste("Accuracy:", accuracy*100))
 print(confusion_matrix)
-
 
 ```
 
@@ -1888,5 +1936,438 @@ print(random_forest)
 print(paste("Random Forest Accuracy:", accuracy_forest * 100))
 print(confusion_matrix_forest)
 
+```
+
+
+
+
+### heatmap
+
+
+```{r}
+library(sf)
+
+ireland_counties <- st_read("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
+
+
+# Print attribute table
+print(ireland_counties)
+
+# Plot the counties
+plot(ireland_counties)
+
+```
+
+
+```{r}
+
+ireland_counties_final = subset(ireland_counties, select = c(OSM_ID,NAME_TAG,LATITUDE,LONGITUDE) )
+```
+
+
+```{r}
+ireland_counties <- st_read("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
+st_layers("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
+
+```
+
+
+```{r}
+library(sf)
+library(dplyr)
+library(ggplot2)
+
+ireland_counties <- st_read("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
+
+# Join the smoking rates data with the spatial data
+ireland_counties <- left_join(ireland_counties, smoking_by_region, by = c("COUNTY" = "lho"))
+
+
+# Plot the map
+ggplot() +
+  geom_sf(data = ireland_counties, aes(fill = perc), color = "white") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Percentage") +
+  labs(title = "Smoking Rates in Various Regions", x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+
+```
+
+
+
+
+
+```{r}
+library(tidyverse)
+library(rjags)
+library(R2jags)
+library(tidybayes)
+library(bayesplot)
+library(maps)
+library(maptools)
+
+## Get the data
+library(SpatialEpi)
+
+data(scotland)
+
+lip_cancer_dat <- scotland$data
+lip_cancer_dat <- lip_cancer_dat %>% mutate(SMR = cases/expected)
+
+## JAGs model spec
+bhpoismodel = "
+model{
+for(i in 1:n) {
+# Poisson likelihood (data model)
+y.i[i] ~ dpois(lambda.i[i])
+lambda.i[i] <- theta.i[i]*e.i[i]
+
+# prior for theta
+theta.i[i] ~ dgamma(alpha,beta)
+# Shrinkage factor
+w.i[i] <- beta/(beta + e.i[i])
+}
+# Prior distributions for hyper parameters
+alpha ~ dexp(0.1)
+beta ~ dexp(0.1)
+# store group mean and across-group variance
+mtheta <- alpha/beta
+sdtheta <- sqrt(alpha/(beta^2))
+}
+"
+jags.data <- list(y.i = lip_cancer_dat$cases,
+                  e.i = lip_cancer_dat$expected,
+                  n = nrow(lip_cancer_dat))
+
+parnames <- c("alpha","beta","mtheta","sdtheta","w.i","theta.i")
+
+mod <- jags(data = jags.data, 
+            parameters.to.save = parnames, 
+            model.file = textConnection(bhpoismodel),
+            n.iter = 6000,
+            n.burnin = 2000,
+            n.thin = 4)
+
+m <- mod$BUGSoutput$sims.matrix
+
+## summary for theta and shrinkage
+index <- 1:nrow(lip_cancer_dat)
+par_summary <- m %>% 
+  gather_rvars(w.i[index],theta.i[index]) %>% 
+  median_qi(.value)
+
+## format for plotting
+par_wide <- par_summary %>% 
+  select(index, .variable, .value) %>% 
+  pivot_wider(id_cols = index, 
+              values_from = .value,
+              names_from = .variable) %>% 
+  mutate(SMR = lip_cancer_dat$SMR,
+         expected = ifelse(lip_cancer_dat$expected<5,"< 5",">/= 5"))
+
+prior_mean <- mod$BUGSoutput$mean$mtheta
+
+p1 <- ggplot(par_wide, aes(x = SMR, y = theta.i)) +
+  geom_point(aes(colour = expected)) +
+  geom_line(aes(x = SMR, y = SMR)) +
+  geom_segment(aes(x = 1.3, y = prior_mean, xend = 0, yend = prior_mean),
+               arrow = arrow(length = unit(0.6, "cm"))) +
+  annotate("text", x = 0.7, y = prior_mean + 0.4, label = "prior mean = 1.4")
+
+p2 <- ggplot(par_wide, aes(x = lip_cancer_dat$expected, y = w.i)) +
+  geom_point(aes(colour = expected)) +
+  ylab("Shrinkage factor (w.i)") +
+  xlab("Expected")
+
+ggpubr::ggarrange(p1,p2, common.legend = T)
+
+## MAPS
+shapefile <- scotland$spatial.polygon
+
+shapefile <- ireland_counties_final
+
+#Reshape for ggplot2 using the Broom package
+mapdata <- broom::tidy(shapefile) #This might take a few minutes
+lip_cancer_dat <- lip_cancer_dat %>% 
+  mutate(id =  mapdata$id %>% unique(),
+         theta.i = mod$BUGSoutput$mean$theta.i)
+
+#Join mydata with mapdata
+df <- plyr::join(mapdata, lip_cancer_dat, by="id")
+
+
+#Create the heatmap for observed SMR
+gg1 <- ggplot() + 
+        geom_polygon(data = df, 
+                     aes(x = long, y = lat, group = group, fill = SMR), 
+                     color = "#FFFFFF", size = 0.25) + 
+        scale_fill_gradient(low = "yellow", high = "red", na.value = "white",limits = c(0,7))+
+        coord_fixed(1)+
+        theme_minimal() +
+        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+        theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+        theme(axis.title.y=element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+#Create the heatmap for model estimates
+gg2 <- ggplot() + 
+        geom_polygon(data = df, 
+                     aes(x = long, y = lat, group = group, fill = theta.i), 
+                     color = "#FFFFFF", size = 0.25)+ 
+        scale_fill_gradient(low = "yellow", high = "red", na.value = "white",limits = c(0,7))+
+        coord_fixed(1)+
+        theme_minimal() +
+        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+        theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+        theme(axis.title.y=element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+ggpubr::ggarrange(gg1 + ggtitle("Raw SMR Estimates") ,gg2 + ggtitle("Model Estimates"))
+
+
+
+# Model with predictor ----------------------------------------------------
+
+bhpoismodel2 = "
+model{
+for(i in 1:n) {
+# Poisson likelihood (data model)
+y.i[i] ~ dpois(lambda.i[i])
+lambda.i[i] <- theta.i[i]*e.i[i]
+
+# prior for theta
+#log(theta.i[i]) <- ltheta.i[i]
+
+theta.i[i] <- exp(alpha.i[i] + beta*(x.i[i]-mean(x.i)))
+alpha.i[i] ~ dnorm(mu_alpha, sigma_alpha^-2)
+
+}
+# Prior distributions for hyper parameters
+mu_alpha ~ dnorm(0,10^-2)
+beta ~ dnorm(0,10^-2)
+sigma_alpha ~ dt(0,2^-2,1)T(0,)
+}
+"
+
+jags.data <- list(y.i = lip_cancer_dat$cases,
+                  e.i = lip_cancer_dat$expected,
+                  n = nrow(lip_cancer_dat),
+                  x.i = lip_cancer_dat$AFF)
+
+parnames <- c("alpha.i","beta","mu_alpha","sigma_alpha","theta.i")
+
+mod2 <- jags(data = jags.data, 
+            parameters.to.save = parnames, 
+            model.file = textConnection(bhpoismodel2),
+            n.iter = 10000,
+            n.burnin = 2000,
+            n.thin = 4)
+
+m2 <- mod2$BUGSoutput$sims.matrix
+
+## Look at alpha
+alpha_ind <- 1:jags.data$n
+alpha_samps2 <- m2 %>% spread_draws(alpha.i[alpha_ind]) %>% 
+  dplyr::select(alpha_ind, alpha.i) %>% dplyr::ungroup() %>% 
+  dplyr::mutate(alpha_ind = factor(alpha_ind, labels = lip_cancer_dat$county.names),
+                exp_alpha.i = exp(alpha.i))
+
+colour_e <- ifelse(lip_cancer_dat$expected<5,"red","yellow")
+
+ggplot(alpha_samps2, aes(x = alpha_ind, y = exp_alpha.i)) +
+  geom_boxplot(colour = colour_e,outlier.shape = NA) +
+  geom_hline(yintercept = exp(mod2$BUGSoutput$mean$mu_alpha))+
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 1)) +
+  xlab("") +
+  ylab("exp(alpha.i)")
+
+## Look at theta
+theta_ind <- 1:jags.data$n
+theta_samps2 <- m2 %>% spread_draws(theta.i[theta_ind]) %>% 
+  dplyr::select(theta_ind, theta.i) %>% dplyr::ungroup() %>% 
+  dplyr::mutate(theta_ind = factor(theta_ind, labels = lip_cancer_dat$county.names))
+
+ggplot(theta_samps2, aes(x = theta_ind, y = theta.i)) +
+  geom_boxplot(colour = colour_e,outlier.shape = NA) +
+  geom_point(data = lip_cancer_dat, aes(x = theta_ind, y = SMR, colour = "observed SMR")) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 1)) +
+  xlab("") +
+  labs(colour = "") +
+  ylab("theta.i")
+
+### MAP
+
+#Reshape for ggplot2 using the Broom package
+mapdata <- broom::tidy(shapefile) #This might take a few minutes
+lip_cancer_dat <- lip_cancer_dat %>% 
+  mutate(theta.i_mod2 = mod2$BUGSoutput$mean$theta.i)
+
+#Join mydata with mapdata
+df <- plyr::join(mapdata, lip_cancer_dat, by="id")
+
+#Create the heatmap using the ggplot2 package
+gg3 <- ggplot() + geom_polygon(data = df, aes(x = long, y = lat, group = group, fill = theta.i_mod2), color = "#FFFFFF", size = 0.25)+ 
+  scale_fill_gradient(low = "yellow", high = "red", na.value = "white",limits = c(0,7))+
+  coord_fixed(1)+
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+  theme(axis.title.y=element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  ggtitle("with predictor")
+
+#Create the heatmap using the ggplot2 package
+gg4 <- ggplot() + geom_polygon(data = df, aes(x = long, y = lat, group = group, fill = AFF), color = "#FFFFFF", size = 0.25)+ 
+  scale_fill_gradient(low = "green", high = "blue", na.value = "white",limits = c(0,0.3))+
+  coord_fixed(1)+
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+  theme(axis.title.y=element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) 
+
+
+ggpubr::ggarrange(gg1 + ggtitle("Raw SMR"),gg2 + ggtitle("w/o predictor"),gg3, gg4)
+
+```
+
+
+
+### model - new
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(caret)
+library(naivebayes)
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(e1071)
+library(xgboost)
+
+
+# Select relevant variables
+example_dat <- n1 %>% dplyr::select(q6, ageclass, q52,key1)
+
+# Drop rows with missing values
+example_dat <- example_dat %>% drop_na()
+
+# Convert variables to appropriate data types
+example_dat <- example_dat %>% mutate(q6_binary = as.factor(q6),
+                                      ageclass = as.factor(as.character(ageclass)),
+                                      q52 = as.factor(as.character(q52)),
+                                      key1 = as.factor((as.character(key1))))
+
+# Create a training and testing dataset
+set.seed(123)
+trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
+train_data <- example_dat[trainIndex, ]
+test_data <- example_dat[-trainIndex, ]
+
+# Fit logistic regression model
+logistic_mod <- glm(q6_binary ~ ageclass + q52+key1, data = train_data, family = "binomial")
+
+# Fit random forest model
+random_forest <- randomForest(q6_binary ~ ageclass + q52+key1, data = train_data, ntree = 100)
+
+# Fit decision tree model
+decision_tree <- rpart(q6_binary ~ ageclass + q52+key1, data = train_data, method = "class")
+
+# Fit Naive Bayes model
+naive_bayes <- naive_bayes(q6_binary ~ ageclass + q52+key1, data = train_data)
+
+# Fit SVM model
+svm_model <- svm(q6_binary ~ ageclass + q52+key1, data = train_data, kernel = "linear")
+
+```
+
+#### naive bayes
+```{r}
+library(e1071)
+
+# Predict the classes using the Naive Bayes model
+predicted_classes <- predict(naive_bayes, newdata = test_data)
+
+# Create the confusion matrix
+confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+
+# Print the accuracy and confusion matrix
+print(paste("Accuracy:", accuracy * 100))
+print(confusion_matrix)
+
+summary(naive_bayes)
+```
+
+
+#### svm
+```{r}
+library(e1071)
+
+# Predict the classes using the SVM model
+predicted_classes <- predict(svm_model, newdata = test_data)
+
+# Create the confusion matrix
+confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+
+# Print the accuracy and confusion matrix
+print(paste("Accuracy:", accuracy * 100))
+print(confusion_matrix)
+summary(svm_model)
+```
+
+
+#### logistic 
+```{r}
+# Evaluate the model on the test dataset
+predicted_classes <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
+
+# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
+test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
+
+# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
+predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
+
+# Create the confusion matrix
+confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+
+# Print the model summary, accuracy, and confusion matrix
+summary(logistic_mod)
+
+print(paste("Accuracy:", accuracy * 100))
+print(confusion_matrix)
+```
+
+
+#### decision tree
+
+```{r}
+library(rpart)
+library(rpart.plot)
+library(caret)
+
+
+# Predict the classes using the decision tree model
+predicted_classes <- predict(decision_tree, newdata = test_data, type = "class")
+
+# Create the confusion matrix
+confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+
+# Print the accuracy and confusion matrix
+print(paste("Accuracy:", accuracy * 100))
+print(confusion_matrix)
+
+```
 ```
 
