@@ -19,21 +19,29 @@ suppressWarnings(library(dplyr))
 suppressWarnings(library(labelled))
 suppressWarnings(library(foreign))
 suppressWarnings(library(tibble))
-suppressWarnings(library(psych)) #masks ggpplot2:: %+%, alpha
-suppressWarnings(library(GGally)) #masks dbplyr::nasa
+suppressWarnings(library(psych)) 
+suppressWarnings(library(GGally)) 
 suppressWarnings(library(plyr))
+suppressWarnings(library(e1071))
+suppressWarnings(library(sf))
+suppressWarnings(library(caret))
+suppressWarnings(library(naivebayes))
+suppressWarnings(library(e1071))
+suppressWarnings(library(xgboost))
+suppressWarnings(library(rpart))
+suppressWarnings(library(randomForest))
+suppressWarnings(library(rpart.plot))
 ```
 
 
 
-
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 # Read the data from the SPSS file
 data <- read_sav("0021-04_healthy_ireland_2018.sav")
 ```
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 df1 <- data[c("q6", "q7", "q8", "slq9b", "q10", "q11", "q13", "q340", "q348", "q349")]
 # Select columns "q6", "q7", "q8", "slq9b", "q10", "q11", "q13", "q340", "q348", "q349" from the original data frame and assign it to df1.
 
@@ -52,7 +60,7 @@ df5 <- data[c("q63b", "lho", "key1", "ageclass", "countbirth")]
 ```
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 #combines the previously created data frames
 newdata <- cbind(df1, df2,df3,df4,df5) 
 
@@ -60,18 +68,18 @@ newdata <- cbind(df1, df2,df3,df4,df5)
 ```
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 #val_labels(df2) #gives options
 ```
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 #var_label(df2) #gives questions
 ```
 
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 #converting to factors
 
 n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
@@ -95,7 +103,7 @@ s1 <- n1 %>%
 
 
 # Re-code smoking variable to combine "Yes, daily" and "Yes, occasionally"
-s1$q6 <- ifelse(s1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+n1$q6 <- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 
 # Calculate the percentage of individuals in each group ## Code modified by NC
@@ -195,9 +203,6 @@ s2 <- n1 %>%
   dplyr::select(q52, q6, count)  # Select relevant columns
 
 
-# Recode smoking variable to combine "Yes, daily" and "Yes, occasionally"
-s2$q6 <- ifelse(s2$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
-
 
 # Calculate the percentage of smokers by gender
 smoking_by_gender <- 
@@ -263,8 +268,6 @@ chisq.test(q2) # Perform the chi-squared test
 ### 3. What percentage of the population smokes and how does this vary by socioeconomic status?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
-n1$q6 <- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")  # Recode the smoking variable to combine "Yes, daily" and "Yes, occasionally" into "Yes"
-
 s3 <- n1 %>%
   dplyr::group_by(q6, key1) %>%
   dplyr::summarise(count = n()) |>
@@ -281,8 +284,8 @@ smoking_by_ses <-
   ungroup() %>% 
   group_by(key1) %>% 
   dplyr::summarise(perc = count*100/sum(count),
-                   q6 = q6) %>% 
-  arrange(key1)  # Calculate the percentage of smokers within each socioeconomic status category
+                   q6 = q6) %>%   # Calculate the percentage of smokers within each socioeconomic status category
+  arrange(key1)  
 
 # Plot the results
 ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
@@ -292,7 +295,6 @@ ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
   theme(axis.text.x = element_text(angle = 90)) +
   scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 15)) +
   ggtitle("Smoking Rates by Socioeconomic Status")
-
 
 ```
 
@@ -349,26 +351,57 @@ chisq.test(q3) # Perform the chi-squared test
 
 
 ### 4. What are the observed variations in smoking rates across different local health offices (LHOs) in various counties?
-```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
+# Recode the values in the lho variable to match the corresponding county names
+n1$lho <- ifelse(n1$lho %in% c("Carlow/Kilkenny"), "Carlow/Kilkenny",
+                 ifelse(n1$lho %in% c("Cavan/Monaghan"), "Cavan/Monaghan",
+                 ifelse(n1$lho %in% c("Clare"), "Clare",
+                 ifelse(n1$lho %in% c("Donegal"), "Donegal",
+                 ifelse(n1$lho %in% c("Dublin North", "Dublin North Central", "Dublin North West", "Dublin South City", "Dublin South East", "Dublin South West", "Dublin West", "Dun Laoghaire"), "Dublin",
+                 ifelse(n1$lho %in% c("Galway"), "Galway",
+                 ifelse(n1$lho %in% c("Kerry"), "Kerry",
+                 ifelse(n1$lho %in% c("Kildare/West Wicklow"), "Kildare/West Wicklow",
+                 ifelse(n1$lho %in% c("Laois/Offaly"), "Laois/Offaly",
+                 ifelse(n1$lho %in% c("Limerick"), "Limerick",
+                 ifelse(n1$lho %in% c("Longford/Westmeath"), "Longford/Westmeath",
+                 ifelse(n1$lho %in% c("Louth"), "Louth",
+                 ifelse(n1$lho %in% c("Mayo"), "Mayo",
+                 ifelse(n1$lho %in% c("Meath"), "Meath",
+                 ifelse(n1$lho %in% c("North Cork", "North Lee", "South Lee", "West Cork"), "Cork",
+                 ifelse(n1$lho %in% c("Roscommon"), "Roscommon",
+                 ifelse(n1$lho %in% c("Sligo/Leitrim/West Cavan"), "Sligo/Leitrim/West Cavan",
+                 ifelse(n1$lho %in% c("Tipp/East Limerick", "Tipperary South"), "Tipperary",
+                 ifelse(n1$lho %in% c("Waterford"), "Waterford",
+                 ifelse(n1$lho %in% c("Wexford"), "Wexford",
+                 ifelse(n1$lho %in% c("Wicklow"), "Wicklow",
+                 n1$lho)))))))))))))))))))))
+
+# Group the data by smoking status (q6) and county (lho), then calculate the count of individuals in each combination
 
 s4 <- n1 %>%
   dplyr::group_by(q6, lho) %>%
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
+  dplyr::summarise(count = n()) |>  # Count the number of individuals in each smoking status and county combination
+  drop_na() |>  # Drop rows with missing values
   ungroup() %>%
   group_by(lho) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(lho, q6, count)  # Create a summary table with counts and percentages of smokers by region (lho)
+  dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage of individuals in each group
+  dplyr::select(lho, q6, count)  # Select relevant columns
 
+
+# Calculate the percentage of smokers by region
 smoking_by_region <- 
   s4 %>% 
   group_by(lho, q6) %>% 
   dplyr::summarise(count = sum(count)) %>% 
-  ungroup() %>% 
-  group_by(lho) %>% 
+  ungroup() %>%
+  group_by(lho) %>%
   dplyr::summarise(perc = count*100/sum(count),
-                   q6 = q6) %>% 
+                   q6 = q6) %>%
   arrange(lho)  # Calculate the percentage of smokers within each region
+
 
 # Plot the results
 ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
@@ -377,7 +410,6 @@ ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
   labs(x = "County", y = "Percentage") +
   theme(axis.text.x = element_text(angle = 90)) +
   ggtitle("Smoking Rates in Various Regions")
-
 ```
 
 
@@ -385,37 +417,60 @@ ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
 The provided table displays the smoking rates in different local health offices (LHOs) across various counties. It includes the LHO names (lho), the percentage of smokers or non-smokers (perc), and the smoking status (q6: "Yes" indicates smokers, "No" indicates non-smokers).
 
 
-1. Smoking Rates by LHO: The table presents the smoking rates within each LHO. For example, in Carlow/Kilkenny, 17.32% of the population are smokers, while in Cavan/Monaghan, the smoking rate is 17.82%. These rates differ across LHOs, indicating variations in smoking behaviors between different areas.
-
-2. Variation in Smoking Rates: The data highlights significant differences in smoking rates across LHOs. For instance, Dun Laoghaire exhibits a low smoking rate of 6.15%, while Dublin South East has a relatively higher rate of 88.29%. These disparities emphasize the importance of considering regional factors and implementing targeted smoking cessation programs.
-
-3. Regional Comparison: The table allows for a comparison of smoking rates among different counties. For example, some counties like Kerry and Meath have relatively balanced smoking rates, with percentages close to 50% for smokers and non-smokers. In contrast, Dun Laoghaire stands out with a significantly lower smoking rate compared to other counties.
-
-Understanding these variations can aid in developing targeted interventions and public health campaigns to reduce smoking prevalence in specific regions.
+ * Starting with Carlow/Kilkenny, it is observed that 82.68% of individuals in this area are non-smokers, while the remaining 17.32% are smokers. Similarly, in Cavan/Monaghan, the majority of individuals (82.18%) do not smoke, with 17.82% being smokers. In Clare, the trend continues with 85.87% of individuals being non-smokers and 14.13% being smokers.
 
 
-**calculating relative risk and an odds ratio for Roscommon compared to Dun Laoghaire**
+ * Moving on to Cork, the data reveals that 82.90% of individuals in this region do not smoke, while 17.10% are smokers. Likewise, in Donegal, the majority of individuals (83.86%) are non-smokers, whereas 16.14% are smokers. The trend continues in Dublin, where 81.84% of individuals are non-smokers, and the remaining 18.16% smoke.
 
-* relative risk = 0.2488/0.0615 = 4.04
+
+ * In Galway, the data indicates that 78.89% of individuals do not smoke, while 21.11% are smokers. Similarly, in Kerry, the majority (82.89%) do not smoke, while 17.11% are smokers. The data for Kildare/West Wicklow shows that 84.46% of individuals do not smoke, and 15.54% are smokers.
+
+
+ * Moving on to Laois/Offaly, it is observed that 77.55% of individuals in this area do not smoke, whereas 22.45% are smokers. In Limerick, the trend continues with 78.16% of individuals being non-smokers, and 21.84% being smokers. The data for Longford/Westmeath indicates that 77.27% of individuals do not smoke, while 22.73% are smokers.
+
+
+ * In Louth, the majority of individuals (84.73%) are non-smokers, whereas 15.27% are smokers. In Mayo, a similar trend is observed, with 83.29% of individuals being non-smokers and 16.71% being smokers. The data for Meath shows that 82.19% of individuals do not smoke, while 17.81% are smokers.
+
+
+ * Moving on to Roscommon, it is seen that 75.12% of individuals do not smoke, and 24.88% are smokers. In Sligo/Leitrim/West Cavan, the majority (79.91%) do not smoke, while 20.09% are smokers. The data for Tipperary indicates that 77.96% of individuals do not smoke, whereas 22.04% are smokers.
+
+
+ * In Waterford, the trend continues with 81.21% of individuals being non-smokers, and 18.79% being smokers. Similarly, in Wexford, the majority (80.60%) do not smoke, while 19.40% are smokers. Finally, in Wicklow, 85.95% of individuals do not smoke, whereas 14.05% are smokers.
+
+
+
+
+Conclusion:
+
+The data provides insights into the smoking rates across various local health offices in Ireland. It shows that the percentage of smokers varies across different regions, ranging from around 14% to 86%. Some areas have higher percentages of non-smokers, while others have relatively higher proportions of smokers
+
+By understanding the smoking patterns at the regional level, public health authorities can develop targeted strategies to reduce smoking prevalence in specific areas. These may include awareness campaigns, smoking cessation programs, and policy interventions aimed at creating smoke-free environments and providing support for individuals to quit smoking. Additionally, the data can inform resource allocation and help prioritize interventions based on the identified areas with higher smoking rates.
+
+It is important to note that smoking rates are influenced by various factors, including socioeconomic conditions, cultural norms, access to healthcare, and tobacco control policies. Therefore, a comprehensive approach that addresses these underlying determinants is crucial in achieving sustained reductions in smoking prevalence.
+
+
+**calculating relative risk and an odds ratio for Roscommon compared to Meath**
+
+* relative risk = 0.2488/0.1781 = 1.39
 
 
 * odds for Roscommon = 0.2488/(1-0.2488) = 0.33
 
-* odds for Dun Laoghaire = 0.0615/(1-0.0615) = 0.06  
+* odds for Meath = 0.1781/(1-0.1781) = 0.21  
 
-* odds ratio = 0.43/0.15 = 5.5
+* odds ratio = 0.33/0.21 = 1.57
 
 
 
-The relative risk compares the risk of smoking between Roscommon and Dun Laoghaire. A relative risk of 4.04 means that individuals from Roscommon have a 4.04 times higher risk of smoking compared to individuals from Dun Laoghaire. This suggests that smoking prevalence is significantly higher in Roscommon compared to Dun Laoghaire.
+The relative risk of smoking in Roscommon compared to Meath is 1.39. This suggests that individuals in Roscommon are 1.39 times more likely to smoke compared to individuals in Meath.
 
-The odds ratio compares the odds of smoking between Roscommon and Dun Laoghaire. An odds ratio of 5.5 means that the odds of smoking in Roscommon are 5.5 times higher than the odds of smoking in Dun Laoghaire. This indicates that individuals from Roscommon have significantly higher odds of being smokers compared to individuals from Dun Laoghaire.
+
+The odds ratio for smoking in Roscommon compared to Meath is 1.57. This indicates that the odds of smoking in Roscommon are 1.57 times higher than the odds of smoking in Meath.
 
 
 These findings highlight regional disparities in smoking prevalence and suggest that there may be regional-specific factors influencing smoking behavior. Understanding the underlying determinants of higher smoking rates in Roscommon can help inform targeted interventions and policies to reduce smoking prevalence in that region. Such interventions may include community-based smoking cessation programs, increased access to tobacco cessation resources, and targeted public health campaigns.
 
 It is important to address these regional disparities in smoking rates to promote equitable health outcomes and reduce the burden of smoking-related diseases. By identifying and targeting the unique challenges and risk factors in regions with higher smoking prevalence, effective strategies can be implemented to reduce smoking rates and improve the overall health of the population.
-
 
 
 
@@ -428,40 +483,38 @@ chisq.test(q4) # Perform the chi-squared test
 ```
 
 
-
-
 ### 5. How do smoking rates vary based on the country of birth?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
 s5 <- n1 %>% 
-  dplyr::group_by(q6, countbirth) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
-  ungroup() %>%
-  group_by(countbirth) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(countbirth, q6, count)
+  dplyr::group_by(q6, countbirth) %>%  # Grouping the data by smoking status and country of birth
+  dplyr::summarise(count = n()) |>  # Counting the number of individuals in each combination
+  drop_na() |>  # Dropping rows with missing values
+  ungroup() %>%  # Removing grouping information
+  group_by(countbirth) %>%  # Grouping the data by country of birth
+  dplyr::mutate(perc = count/sum(count)*100) %>%  # Calculating the percentage within each group
+  dplyr::select(countbirth, q6, count)  # Selecting relevant columns
 
 
 smoking_by_country <- 
   s5 %>% 
-  group_by(countbirth, q6) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
+  group_by(countbirth, q6) %>%  # Grouping the data by country of birth and smoking status
+  dplyr::summarise(count = sum(count)) %>%  # Calculating the total count for each combination
   ungroup() %>% 
-  group_by(countbirth) %>% 
-  dplyr::summarise(perc = count*100/sum(count),
-                   q6 = q6) %>% 
-  arrange(countbirth)
+  group_by(countbirth) %>%  # Grouping the data by country of birth
+  dplyr::summarise(perc = count*100/sum(count), q6 = q6) %>%  # Calculating the percentage within each country
+  arrange(countbirth)  # Arranging the data by country of birth
 
 
 # Plot the results
 ggplot(smoking_by_country, aes(x = countbirth, y = perc, fill = q6)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you Smoke?") +
-  labs(x = "County", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  ggtitle ("Country-wise Distribution of Smoking Rates")
+  geom_bar(stat = "identity") +  # Creating a bar plot
+  scale_fill_discrete(name = "Do you Smoke?") +  # Adding a legend for fill color
+  labs(x = "Country", y = "Percentage") +  # Adding labels for x-axis and y-axis
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +  # Adjusting the appearance of x-axis labels
+  ggtitle("Country-wise Distribution of Smoking Rates")  # Adding a title to the plot
+
 
 ```
 
@@ -508,27 +561,28 @@ Continued efforts and investments in comprehensive tobacco control strategies ar
 
 n1$spq1 <- ifelse(n1$spq1 %in% c("Fair", "Bad", "Very Bad"), "Bad", ifelse(n1$spq1 == "Good", "Good", "Very Good"))
 
+# Select the relevant columns for analysis
 s6 <- n1[c("q6", "ageclass", "q52", "spq1")]
 
-# Calculate the percentage of smoking by 
+# Calculate the percentage of smoking by health condition and age
 h <- s6 %>%
-  group_by(ageclass,q6,q52,spq1) %>%
-  drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  group_by(ageclass, q6, q52, spq1) %>%
+  drop_na() |>  # Drop rows with missing values
+  dplyr::summarize(count = n()) %>%  # Count the number of individuals in each combination
   ungroup() %>%
-  group_by(q6,q52,ageclass) %>%
-  dplyr::mutate(perc = count*100/sum(count)) 
-
+  group_by(q6, q52, ageclass) %>%
+  dplyr::mutate(perc = count*100/sum(count))  # Calculate the percentage within each group
 
 # Plot the results
 ggplot(h, aes(x = ageclass, y = perc, fill = spq1)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Health condition") +
-  labs(x = "Age", y = "Percentage")+
-  ggtitle("Health Condition of people who smoke and who doesnt")+
-  guides(color = guide_legend(reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_grid(~(q6)+~(q52),labeller = label_both)
+  geom_bar(stat = "identity") +  # Create a bar plot
+  scale_fill_discrete(name = "Health condition") +  # Add a legend for fill color
+  labs(x = "Age", y = "Percentage") +  # Add labels for x-axis and y-axis
+  ggtitle("Health Condition of people who smoke and who don't") +  # Add a title to the plot
+  guides(color = guide_legend(reverse = TRUE)) +  # Reverse the order of the legend
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +  # Adjust the appearance of x-axis labels
+  facet_grid(~(q6) + ~(q52), labeller = label_both)  # Create facets based on smoking status and gender
+
 
 ```
 
@@ -624,26 +678,30 @@ Overall, the analysis shows that while smoking can have negative health effects,
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+
+# Select the relevant columns for analysis
 s7 <- n1[c("q6", "q52", "ageclass", "q55")]
 
-# Calculate the percentage of alcoholic by 
+# Calculate the percentage of individuals with private health insurance by smoking status, gender, and age
 health_ins_smoke <- s7 %>%
-  group_by(q6,q52,ageclass,q55) %>%
-  drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  group_by(q6, q52, ageclass, q55) %>%
+  drop_na() |>  # Drop rows with missing values
+  dplyr::summarize(count = n()) %>%  # Count the number of individuals in each combination
   ungroup() %>%
-  group_by(q6,q52,ageclass) %>%
-  dplyr::mutate(perc = count*100/sum(count)) 
+  group_by(q6, q52, ageclass) %>%
+  dplyr::mutate(perc = count*100/sum(count))  # Calculate the percentage within each group
 
 # Plot the results
-ggplot(health_ins_smoke, aes(x = ageclass, y = perc, fill=q55)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you have private health insurance?") +
-  labs(x = "Age", y = "Percentage")+
-  ggtitle("Percentage of Individuals with Private Health Insurance by \nSmoking Status, Gender, and Age Group")+
-  guides(color=guide_legend(nrow=2, byrow=TRUE,reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 90,vjust=0,hjust=1),plot.title = element_text(lineheight = 1.1))+
-  facet_grid(~(q6)+~(q52),labeller = label_both)
+ggplot(health_ins_smoke, aes(x = ageclass, y = perc, fill = q55)) +
+  geom_bar(stat = "identity") +  # Create a bar plot
+  scale_fill_discrete(name = "Do you have private health insurance?") +  # Add a legend for fill color
+  labs(x = "Age", y = "Percentage") +  # Add labels for x-axis and y-axis
+  ggtitle("Percentage of Individuals with Private Health Insurance by \nSmoking Status, Gender, and Age Group") +  # Add a title to the plot
+  guides(color = guide_legend(nrow = 2, byrow = TRUE, reverse = TRUE)) +  # Adjust the appearance of the legend
+  theme(axis.text.x = element_text(angle = 90, vjust = 0, hjust = 1), plot.title = element_text(lineheight = 1.1)) +  # Adjust the appearance of the x-axis labels and plot title
+  facet_grid(~(q6) + ~(q52), labeller = label_both)  # Create facets based on smoking status and gender
+
 
 ```
 
@@ -715,25 +773,28 @@ Let's analyze the relationship between smoking status, gender, age group, and th
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+# Select the relevant columns for analysis
 s8 <- n1[c("q6", "ageclass", "q63b")]
 
+# Calculate the percentage of individuals by smoking status, age group, and chief income earner category
 income <- s8 %>%
-  group_by(ageclass,q63b,q6) %>%
-  drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  group_by(ageclass, q63b, q6) %>%
+  drop_na() |>  # Drop rows with missing values
+  dplyr::summarize(count = n()) %>%  # Count the number of individuals in each combination
   ungroup() %>%
-  group_by(ageclass,q63b) %>%
-  dplyr::mutate(perc = count*100/sum(count),q6=q6) 
+  group_by(ageclass, q63b) %>%
+  dplyr::mutate(perc = count*100/sum(count), q6 = q6)  # Calculate the percentage within each group
 
+# Plot the results
+ggplot(income, aes(x = ageclass, y = perc, fill = q6)) +
+  geom_bar(stat = "identity") +  # Create a bar plot
+  scale_fill_discrete(name = "Do You Smoke?") +  # Add a legend for fill color
+  labs(x = "Age", y = "Percentage") +  # Add labels for x-axis and y-axis
+  ggtitle("Percentage of Individuals by Smoking Status, Age Group, and Chief Income Earner") +  # Add a title to the plot
+  guides(color = guide_legend(reverse = TRUE)) +  # Adjust the appearance of the legend
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +  # Adjust the appearance of the x-axis labels
+  facet_wrap(~q63b, labeller = label_both)  # Create multiple plots based on chief income earner category
 
-ggplot(income, aes(x = ageclass, y = perc, fill=q6)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do You Smoke") +
-  labs(x = "Age", y = "Percentage")+
-  ggtitle("Chief Income Earner")+
-  guides(color = guide_legend(reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_wrap(~q63b,labeller = label_both)
 
 ```
 
@@ -787,18 +848,20 @@ It's important to note that being the Chief Income Earner can depend on various 
 ### 9. What percentage of the population consumes alcohol and how does this vary by age?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+# Recode values in column q14 to "Yes" or "No"
 n1$q14 <- ifelse(n1$q14 %in% c("Yes", "Have only had a few sips of alcohol in my lifetime"), "Yes", "No")
 
+# Group the data by alcohol consumption and age group, and calculate counts
 s9 <- n1 %>% 
   dplyr::group_by(q14, ageclass) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
+  dplyr::summarise(count = n()) |>  # Count the number of individuals in each combination
+  drop_na() |>  # Drop rows with missing values
   ungroup() %>%
   group_by(ageclass) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(ageclass, q14, count)
+  dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage within each age group
+  dplyr::select(ageclass, q14, count)  # Select relevant columns
 
-
+# Calculate the percentage of individuals by alcohol consumption and age group
 drinking_by_age <- 
   s9 %>% 
   group_by(ageclass, q14) %>% 
@@ -807,14 +870,16 @@ drinking_by_age <-
   group_by(ageclass) %>% 
   dplyr::summarise(perc = count*100/sum(count),
                    q14 = q14) %>% 
-  arrange(ageclass)
+  arrange(ageclass)  # Arrange the data by age group
 
 # Plot the results
 ggplot(drinking_by_age, aes(x = ageclass, y = perc, fill = q14)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Age", y = "Percentage")+
-  ggtitle ( "Alcohol consumption by age")
+  geom_bar(stat = "identity") +  # Create a bar plot
+  scale_fill_discrete(name = "Do you consume alcohol?") +  # Add a legend for fill color
+  labs(x = "Age", y = "Percentage") +  # Add labels for x-axis and y-axis
+  ggtitle("Alcohol Consumption by Age Group") +  # Add a title to the plot
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # Adjust the appearance of the x-axis labels
+
 
 ```
 
@@ -867,16 +932,18 @@ chisq.test(q5)  # Perform the chi-squared test
 ### 10. What percentage of the population consumes alcohol and how does this vary by gender?
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
+# Group the data by alcohol consumption and gender, and calculate counts
 s10 <- n1 %>% 
   dplyr::group_by(q14, q52) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
+  dplyr::summarise(count = n()) |>  # Count the number of individuals in each combination
+  drop_na() |>  # Drop rows with missing values
   ungroup() %>%
   group_by(q52) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(q52, q14, count)
+  dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage within each gender
+  dplyr::select(q52, q14, count)  # Select relevant columns
 
 
+# Calculate the percentage of individuals by alcohol consumption and gender
 drinking_by_gender <- 
   s10 %>% 
   group_by(q52, q14) %>% 
@@ -885,15 +952,17 @@ drinking_by_gender <-
   group_by(q52) %>% 
   dplyr::summarise(perc = count*100/sum(count),
                    q14 = q14) %>% 
-  arrange(q52)
+  arrange(q52)  # Arrange the data by gender
+
 
 # Plot the results
 ggplot(drinking_by_gender, aes(x = q52, y = perc, fill = q14)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Age", y = "Percentage")+
-  theme(axis.text.x = element_text(hjust=1))+
-  ggtitle ( "Alcohol consumption by gender")
+  geom_bar(stat = "identity") +  # Create a bar plot
+  scale_fill_discrete(name = "Do you consume alcohol?") +  # Add a legend for fill color
+  labs(x = "Gender", y = "Percentage") +  # Add labels for x-axis and y-axis
+  theme(axis.text.x = element_text(hjust = 1)) +  # Adjust the appearance of the x-axis labels
+  ggtitle("Alcohol Consumption by Gender")  # Add a title to the plot
+
 ```
 
 Males: Among males, a significant majority (88.88%) consume alcohol, while a relatively smaller percentage (11.12%) do not consume alcohol.
@@ -935,16 +1004,17 @@ chisq.test(q6) # Perform the chi-squared test
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
+# Group the data by alcohol consumption and socioeconomic status, and calculate counts
 s11 <- n1 %>% 
   dplyr::group_by(q14, key1) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
+  dplyr::summarise(count = n()) |>  # Count the number of individuals in each combination
+  drop_na() |>  # Drop rows with missing values
   ungroup() %>%
   group_by(key1) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(key1, q14, count)
+  dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage within each socioeconomic status
+  dplyr::select(key1, q14, count)  # Select relevant columns
 
-
+# Calculate the percentage of individuals by alcohol consumption and socioeconomic status
 drinking_by_sec <- 
   s11 %>% 
   group_by(key1, q14) %>% 
@@ -953,17 +1023,17 @@ drinking_by_sec <-
   group_by(key1) %>% 
   dplyr::summarise(perc = count*100/sum(count),
                    q14 = q14) %>% 
-  arrange(key1)
-
+  arrange(key1)  # Arrange the data by socioeconomic status
 
 # Plot the results
 ggplot(drinking_by_sec, aes(x = key1, y = perc, fill = q14)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Socioeconomic status", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 90))+scale_x_discrete(labels = function(x) 
-    stringr::str_wrap(x, width = 15))+
-  ggtitle ( "Alcohol consumption by socioeconomic status")
+  geom_bar(stat = "identity") +  # Create a bar plot
+  scale_fill_discrete(name = "Do you consume alcohol?") +  # Add a legend for fill color
+  labs(x = "Socioeconomic status", y = "Percentage") +  # Add labels for x-axis and y-axis
+  theme(axis.text.x = element_text(angle = 90)) +  # Adjust the appearance of the x-axis labels
+  scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 15)) +  # Wrap long x-axis labels
+  ggtitle("Alcohol Consumption by Socioeconomic Status")  # Add a title to the plot
+
 ```
 
 
@@ -1013,16 +1083,17 @@ chisq.test(q7) # Perform the chi-squared test
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
+# Group the data by alcohol consumption and region, and calculate counts
 s12 <- n1 %>% 
   dplyr::group_by(q14, lho) %>% 
-  dplyr::summarise(count = n()) |>
-  drop_na() |>
+  dplyr::summarise(count = n()) |>  # Count the number of individuals in each combination
+  drop_na() |>  # Drop rows with missing values
   ungroup() %>%
   group_by(lho) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(lho, q14, count)
+  dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage within each region
+  dplyr::select(lho, q14, count)  # Select relevant columns
 
-
+# Calculate the percentage of individuals by alcohol consumption and region
 drinking_by_region <- 
   s12 %>% 
   group_by(lho, q14) %>% 
@@ -1031,48 +1102,61 @@ drinking_by_region <-
   group_by(lho) %>% 
   dplyr::summarise(perc = count*100/sum(count),
                    q14 = q14) %>% 
-  arrange(lho)
- 
+  arrange(lho)  # Arrange the data by region
 
 # Plot the results
 ggplot(drinking_by_region, aes(x = lho, y = perc, fill = q14)) +
-  geom_bar(stat = "identity") +
-  scale_fill_discrete(name = "Do you consume alcohol?") +
-  labs(x = "Age", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 90,hjust=1))+
-  ggtitle ( "Alcohol consumption by region")
+  geom_bar(stat = "identity") +  # Create a bar plot
+  scale_fill_discrete(name = "Do you consume alcohol?") +  # Add a legend for fill color
+  labs(x = "Region", y = "Percentage") +  # Add labels for x-axis and y-axis
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  # Adjust the appearance of the x-axis labels
+  ggtitle("Alcohol Consumption by Region")  # Add a title to the plot
+
 ```
 
 
-The graph provides information on alcohol consumption patterns in different Local Health Offices (LHOs).
-
-1. The percentage of individuals who do not consume alcohol varies across LHOs, ranging from as low as 4.50% (Dublin South East) to as high as 27.51% (Sligo/Leitrim/West Cavan). The majority of LHOs have a lower percentage of non-alcohol consumers, indicating a higher prevalence of alcohol consumption.
-
-2. The percentage of individuals who consume alcohol also varies across LHOs, ranging from 72.49% (Sligo/Leitrim/West Cavan) to 95.50% (Dublin South East). This suggests that there are variations in alcohol consumption rates among different areas.
-
-3. Some LHOs, such as Cavan/Monaghan, Dublin North Central, Dublin West, Dun Laoghaire, Kerry, Meath, and West Cork, have a higher percentage of individuals who consume alcohol, exceeding 90%.
-
-4. LHOs like Dublin South East, Wicklow, and Louth have a relatively lower percentage of alcohol consumers, below 10%.
-
-The prevalence of alcohol consumption in LHOs can help inform public health initiatives and interventions tailored to specific areas. LHOs with higher alcohol consumption rates might benefit from targeted programs addressing alcohol-related issues and promoting responsible drinking habits.
+The table provides the percentage of individuals who consume alcohol (q14) in each region (lho). The "No" category represents individuals who do not consume alcohol, while the "Yes" category represents those who do.
 
 
-**calculating relative risk and an odds ratio (Alcohol consumption) for Dublin South East compared to Limerick**
 
-* relative risk = 0.9549/0.8544 = 1.26
+Carlow/Kilkenny, Cavan/Monaghan, Clare, and Cork are regions where a significant majority of individuals consume alcohol. The percentages of drinkers in these regions are 81.89%, 91.58%, 85.87%, and 86.74%, respectively. This suggests a prevalent drinking culture in these areas, with a higher prevalence of alcohol consumption among the population.
 
-* odds for Dublin South East = 0.9549/(1-0.9549) = 21.17
+In contrast, regions like Donegal, Kerry, Meath, and Sligo/Leitrim/West Cavan have a higher proportion of non-drinkers. In Donegal, 75.66% of individuals do not consume alcohol, highlighting a notable difference compared to other regions. These findings suggest potential cultural or lifestyle factors influencing drinking behaviors in these areas.
+
+Dublin, as the capital city, stands out with a higher percentage of drinkers (88.84%). This indicates a prevalent drinking culture in the city, potentially influenced by factors such as social activities, nightlife, and urban lifestyle.
+
+Examining the regional variations in alcohol consumption is essential for public health officials and policymakers. It allows them to better understand the unique challenges and needs of each region regarding alcohol-related issues. By recognizing areas with higher rates of alcohol consumption, targeted interventions and educational campaigns can be developed to address harmful drinking patterns and promote responsible alcohol use.
+
+Moreover, the regions with a higher proportion of non-drinkers, such as Donegal and Sligo/Leitrim/West Cavan, may offer opportunities to explore factors contributing to lower alcohol consumption rates. Understanding the cultural, socioeconomic, and environmental influences that contribute to these patterns can help inform interventions aimed at reducing alcohol-related harms and promoting healthier behaviors.
+
+In conclusion, the findings indicate significant regional variations in alcohol consumption across Ireland. The results can guide policymakers, public health officials, and community leaders in tailoring strategies and interventions to address alcohol-related challenges specific to each region. By promoting responsible drinking behaviors and fostering a better understanding of alcohol's impact on health and well-being, efforts can be made to create a safer and healthier drinking culture throughout the country.
+
+
+
+**calculating relative risk and an odds ratio (Alcohol consumption) for Galway compared to Limerick**
+
+* relative risk = 0.8912/0.8544 = 1.04
+
+* odds for Galway = 0.8912/(1-0.8912) = 8.19
 
 * odds for Limerick = 0.8544/(1-0.8544) = 5.86
 
-* odds ratio = 21.17/5.86 = 3.61
+* odds ratio = 8.19/5.86 = 1.39
 
 
-The relative risk of 1.26 indicates that individuals in Dublin South East have a 1.26 times higher risk of consuming alcohol compared to those in Limerick. This suggests a slightly higher prevalence of alcohol consumption in Dublin South East.
+The relative risk compares the likelihood of alcohol consumption between two groups. In this case, the relative risk of Galway compared to Limerick is calculated by dividing the percentage of drinkers in Galway (89.12%) by the percentage of drinkers in Limerick (85.44%). The result is 1.04, indicating that individuals in Galway have a slightly higher risk of alcohol consumption compared to those in Limerick.
 
-The odds ratio of 3.61 indicates that individuals in Dublin South East have 3.61 times higher odds of consuming alcohol compared to those in Limerick. This suggests a moderate association between the region and alcohol consumption, with Dublin South East having higher odds of alcohol consumption compared to Limerick.
 
-Based on the data, it can be concluded that there is a moderate association between the geographic regions of Dublin South East and Limerick and alcohol consumption. Dublin South East has a slightly higher prevalence and significantly higher odds of alcohol consumption compared to Limerick. These findings highlight the importance of considering regional variations in alcohol consumption patterns and tailoring interventions and policies to address the specific needs and challenges of different areas. It is essential to promote responsible drinking behaviors and provide support and resources for individuals in both Dublin South East and Limerick to ensure the well-being and health of the population.
+The odds for alcohol consumption in Galway can be calculated by dividing the percentage of drinkers (89.12%) by the percentage of non-drinkers (100% - 89.12% = 10.88%). This gives us an odds value of 8.19, meaning that individuals in Galway are approximately 8.19 times more likely to consume alcohol than to not consume it. Similarly, the odds for alcohol consumption in Limerick can be calculated using the percentage of drinkers (85.44%) and the percentage of non-drinkers (100% - 85.44% = 14.56%). The odds value for Limerick is approximately 5.86, indicating that individuals in Limerick are about 5.86 times more likely to consume alcohol than to not consume it. 
+
+
+The odds ratio compares the odds of an event occurring between two groups. In this case, the odds ratio for Galway compared to Limerick is calculated by dividing the odds for Galway (8.19) by the odds for Limerick (5.86). The result is approximately 1.39, suggesting that individuals in Galway have 1.39 times higher odds of consuming alcohol compared to those in Limerick.
+
+
+These calculations provide insights into the differences in alcohol consumption between Galway and Limerick. While Galway has a slightly higher relative risk and higher odds of alcohol consumption compared to Limerick, the differences are relatively small. 
+
+
+These findings highlight the importance of considering regional variations in alcohol consumption patterns and tailoring interventions and policies to address the specific needs and challenges of different areas. It is essential to promote responsible drinking behaviors and provide support and resources for individuals in both Dublin South East and Limerick to ensure the well-being and health of the population.
 
 
 #### Chi-squared test
@@ -1089,6 +1173,8 @@ chisq.test(q8) # Perform the chi-squared test
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+# Group the data by alcohol consumption and country of birth, and calculate counts
 s13 <- n1 %>% 
   dplyr::group_by(q14, countbirth) %>% 
   dplyr::summarise(count = n()) |>
@@ -1099,6 +1185,7 @@ s13 <- n1 %>%
   dplyr::select(countbirth, q14, count)
 
 
+# Calculate the percentage of individuals by alcohol consumption
 drinking_by_country <- 
   s13 %>% 
   group_by(countbirth, q14) %>% 
@@ -1157,28 +1244,32 @@ Understanding the factors influencing alcohol consumption behaviors is essential
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+# Select the columns related to alcohol consumption, age group, gender, and health condition from the dataset and assign them to "s14"
+
 s14 <- n1[c("q14", "ageclass", "q52", "spq1")]
 
+# Calculate the percentage of smoking by age, gender, and health condition
 
-# Calculate the percentage of smoking by 
 h1 <- s14 %>%
-  group_by(q14,ageclass,q52,spq1) %>%
-  drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  group_by(q14,ageclass,q52,spq1) %>% # Group the dataframe by alcohol consumption, age group, gender, and health condition
+
+  drop_na() |> # Remove rows with missing values
+  dplyr::summarize(count = n()) %>% # Calculate the count of individuals in each combination
   ungroup() %>%
-  group_by(q14,q52,ageclass) %>%
-  dplyr::mutate(perc = count*100/sum(count),q14=q14) 
+  group_by(q14,q52,ageclass) %>% # Group the dataframe again by alcohol consumption, gender, and age group
+  dplyr::mutate(perc = count*100/sum(count),q14=q14)  # Calculate the percentage of individuals in each combination
 
 
 # Plot the results
-ggplot(h1, aes(x = ageclass, y = perc, fill = spq1)) +
+ggplot(h1, aes(x = ageclass, y = perc, fill = spq1)) + # Create a bar plot with age group on the x-axis, percentage on the y-axis, and health condition as fill color
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Health condition") +
   labs(x = "Age", y = "Percentage")+
   ggtitle("Distribution of Health Conditions and Alcohol Consumption by Age and Gender")+
-  guides(color = guide_legend(reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_grid(~(q14)+ ~(q52),labeller = label_both)
+  guides(color = guide_legend(reverse = TRUE))+  # Reverse the order of the legend
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+  # Adjust the angle of x-axis labels for better readability
+  facet_grid(~(q14)+ ~(q52),labeller = label_both) # Facet the plot by alcohol consumption and gender
 
 ```
 
@@ -1266,27 +1357,30 @@ Overall, the analysis shows that while alcohol consumption can lead to some nega
 ### 15. In the last 12 months, how often have you consumed alcoholic beverages and have a private health insurance?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+# Select the columns related to alcohol consumption, gender, age group, and private health insurance from the dataset and assign them to "s15"
+
 s15 <- n1[c("q14", "q52", "ageclass", "q55")]
 
-# Calculate the percentage of alcoholic by 
+
 health_ins_al <- s15 %>%
-  group_by(q14,q52,ageclass,q55) %>%
+  group_by(q14,q52,ageclass,q55) %>% # Group the dataframe by alcohol consumption, gender, age group, and private health insurance 
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  dplyr::summarize(count = n()) %>% # Calculate the count of individuals in each combination
   ungroup() %>%
   group_by(q14,q52,ageclass) %>%
-  dplyr::mutate(perc = count*100/sum(count)) 
+  dplyr::mutate(perc = count*100/sum(count))  # Calculate the percentage of individuals in each combination
 
 
 # Plot the results
 ggplot(health_ins_al, aes(x = ageclass, y = perc, fill=q55)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you have private health insurance?") +
-  labs(x = "Age", y = "Percentage")+
+  labs(x = "Age", y = "Percentage")+ # Set the x-axis label to "Age" and y-axis label to "Percentage"
   ggtitle("Health Insurance for People consume alcohol")+
-  guides(color = guide_legend(reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 90,hjust=1))+
-  facet_grid(~q14+q52,labeller = label_both)
+  guides(color = guide_legend(reverse = TRUE))+ # Reverse the order of the legend
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+ # Adjust the angle of x-axis labels for better readability
+  facet_grid(~q14+q52,labeller = label_both) # Facet the plot by alcohol consumption and gender
 
 ```
 
@@ -1356,25 +1450,28 @@ The breakdown of the consumption of alcohol (q14), private health insurance (q55
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+# Select the columns related to alcohol consumption, age group, and chief income earner from the dataset and assign them to "s16"
+
 s16 <- n1[c("q14", "ageclass", "q63b")]
 
 income1 <- s16 %>%
-  group_by(ageclass,q63b,q14) %>%
+  group_by(ageclass,q63b,q14) %>% # Group the dataframe by age group, chief income earner, and alcohol consumption
   drop_na() |>
-  dplyr::summarize(count = n()) %>%
+  dplyr::summarize(count = n()) %>% # Calculate the count of individuals in each combination
   ungroup() %>%
   group_by(ageclass,q63b) %>%
-  dplyr::mutate(perc = count*100/sum(count),q14=q14) 
+  dplyr::mutate(perc = count*100/sum(count),q14=q14) # Calculate the percentage of individuals in each combination
 
 
-ggplot(income1, aes(x = ageclass, y = perc, fill=q14)) +
+ggplot(income1, aes(x = ageclass, y = perc, fill=q14)) + # Create a bar plot with age group on the x-axis, percentage on the y-axis, and fill color based on alcohol consumption
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do You consume alcohol") +
   labs(x = "Age", y = "Percentage")+
   ggtitle("Chief Income Earner")+
-  guides(color = guide_legend(reverse = TRUE))+
-  theme(axis.text.x = element_text(angle = 30,hjust=1))+
-  facet_wrap(~q63b,labeller = label_both)
+  guides(color = guide_legend(reverse = TRUE))+ # Reverse the order of the legend
+  theme(axis.text.x = element_text(angle = 30,hjust=1))+ # Adjust the angle of x-axis labels for better readability
+  facet_wrap(~q63b,labeller = label_both) # Facet the plot by chief income earner
 
 ```
 
@@ -1425,7 +1522,11 @@ It's important to note that alcohol consumption can have various implications on
 ### 17. How does folic acid consumption vary across different regions in terms of percentages?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+# Select the columns related to region and folic acid supplement consumption from the dataset and assign them to the dataframe "s17"
+
 s17 <- n1[c("lho","q120")]
+
 
 # Calculate the percentage by region
 suppl <- s17 %>%
@@ -1434,20 +1535,23 @@ suppl <- s17 %>%
   drop_na() |>
   ungroup() %>%
   group_by(lho) %>%
-  dplyr::mutate(perc = count/sum(count)*100) %>%
+  dplyr::mutate(perc = count/sum(count)*100) %>%  # Calculate the percentage of individuals in each combination
   dplyr::select(lho, q120, count)
 
+
+# Recode the values in the "q120" column to combine "No", "Don’t know/refused" as "No" and keep the rest as "Yes"
 suppl$q120 <- ifelse(suppl$q120 %in% c("No", "Don’t know/refused"), "No", "Yes")
+
 
 
 folic <- 
   suppl %>% 
   group_by(lho, q120) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
+  dplyr::summarise(count = sum(count)) %>%  # Summarize the count of individuals in each combination
   ungroup() %>% 
   group_by(lho) %>% 
   dplyr::summarise(perc = count*100/sum(count),
-                   q120 = q120) %>% 
+                   q120 = q120) %>%  # Calculate the percentage of individuals in each combination
   arrange(lho)
 
 
@@ -1456,7 +1560,7 @@ ggplot(folic, aes(x = lho, y = perc, fill = q120)) +
   geom_bar(stat = "identity") +
   scale_fill_discrete(name = "Do you take folicacid suppliments?") +
   labs(x = "Age", y = "Percentage")+
-  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+ # Adjust the angle of x-axis labels for better readability
   ggtitle ( "Folic acid consumption by region")
 ```
 
@@ -1501,452 +1605,196 @@ In conclusion, the calculations suggest that there is a higher prevalence of fol
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
 s18 <- n1 %>% 
-  dplyr::group_by(spq1, q52, lho) %>% 
+  dplyr::group_by(spq1, q52, lho) %>%  # Group the dataframe by self-perceived health (spq1), gender (q52), and local health office (lho)
   dplyr::summarise(count = n()) |>
   drop_na() |>
   ungroup() %>%
   group_by(spq1) %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
-  dplyr::select(spq1, q52, lho, count)
+  dplyr::select(spq1, q52, lho, count) 
 
 
 health <- 
   s18 %>% 
-  group_by(spq1, q52,lho) %>% 
-  dplyr::summarise(count = sum(count)) %>% 
-  ungroup() %>% 
-  group_by(lho,q52) %>% 
-  dplyr::summarise(spq1=spq1,
-                   perc = count*100/sum(count)) %>% 
-  arrange(lho)
+  group_by(spq1, q52, lho) %>%  # Group the dataframe by self-perceived health (spq1), gender (q52), and local health office (lho)
+  dplyr::summarise(count = sum(count)) %>%  # Calculate the total count for each combination of spq1, q52, and lho
+  ungroup() %>%
+  group_by(lho, q52) %>%  # Regroup the dataframe by local health office (lho) and gender (q52)
+  dplyr::summarise(spq1 = spq1, perc = count*100/sum(count)) %>%  # Calculate the percentage 
+  arrange(lho)  # Arrange the dataframe in ascending order based on local health office (lho)
 
 
 # Plot the results
-ggplot(health, aes(x = q52, y = perc, fill = spq1)) +
-  geom_bar(stat = "identity")  +
-  labs(x = "Gender", y = "Proportion", fill = "Health Status")+
-  ggtitle("Proportion of Individuals Rating Their Health by Gender in various Counties")+
-  facet_wrap(~lho)
+ggplot(health, aes(x = q52, y = perc, fill = spq1)) +  # Set the x-axis as gender (q52), y-axis as percentage (perc), and fill color based on self-perceived health (spq1)
+  geom_bar(stat = "identity") +  # Create a bar plot with actual values
+  labs(x = "Gender", y = "Proportion", fill = "Health Status") +  # Set the labels for x-axis, y-axis, and fill legend
+  ggtitle("Proportion of Individuals Rating Their Health by Gender in various Counties") +  # Set the title of the plot
+  facet_wrap(~lho)  # Create separate panels for each local health office (lho) in the plot
 
 ```
 
 
-Based on the breakdown of self-perceived health (spq1) by age class (AGECLASS), gender (q52), and the corresponding percentages, a detailed explanation is provided below:
+Based on the breakdown of self-perceived health (spq1) by local health office (lho), gender (q52), and the corresponding percentages, the detailed explanation is as follows:
 
-1. **Age Class: 15-24 years**:
-   
-   * Among individuals aged 15-24 years, the majority of males (62.15%) and females (66.67%) perceive their health as "Very Good."
+**Local Health Office: Carlow/Kilkenny**
+
+ * Among males, 18.37% perceive their health as "Bad," 38.78% perceive it as "Good," and 42.86% perceive it as "Very Good."
  
-   * A smaller percentage of males (31.69%) and females (27.27%) perceive their health as "Good."
+ * Among females, 16.67% perceive their health as "Bad," 25.64% perceive it as "Good," and 57.69% perceive it as "Very Good."
+
+
+**Local Health Office: Cavan/Monaghan**
+
+ * Among males, 20% perceive their health as "Bad," 28.42% perceive it as "Good," and 51.58% perceive it as "Very Good."
  
-   * A minority of males (6.15%) and females (6.06%) perceive their health as "Bad."
+ * Among females, 15.89% perceive their health as "Bad," 34.58% perceive it as "Good," and 49.53% perceive it as "Very Good."
 
 
-2. **Age Class: 25-44 years**:
+**Local Health Office: Clare**
 
-   * In the age group of 25-44 years, a significant portion of males (60.27%) and females (59.24%) perceive their health as "Very Good."
-  
-   * A considerable percentage of males (30.76%) and females (32.40%) perceive their health as "Good."
-  
-   * A smaller proportion of males (8.97%) and females (8.36%) perceive their health as "Bad."
-
-
-3. **Age Class: 45-64 years**:
-
-   * Among individuals aged 45-64 years, a notable percentage of males (42.28%) and females (43.98%) perceive their health as "Very Good."
+ * Among males, 26.44% perceive their health as "Bad," 49.43% perceive it as "Good," and 24.14% perceive it as "Very Good."
  
-   * A considerable portion of males (36.31%) and females (39.83%) perceive their health as "Good."
-  
-   * A significant proportion of males (21.41%) and females (16.19%) perceive their health as "Bad."
+ * Among females, 17.53% perceive their health as "Bad," 45.36% perceive it as "Good," and 37.11% perceive it as "Very Good."
 
 
-4. **Age Class: 65 and over**:
+**Local Health Office: Cork**
 
-   * In the age group of 65 and over, a significant portion of males (47.79%) and females (46.79%) perceive their health as "Good."
-  
-   * A notable percentage of males (32.62%) and females (28.90%) perceive their health as "Bad."
-  
-   * A smaller proportion of males (19.59%) and females (24.31%) perceive their health as "Very Good."
+ * Among males, 15.68% perceive their health as "Bad," 43.94% perceive it as "Good," and 40.38% perceive it as "Very Good."
+ 
+ * Among females, 14.52% perceive their health as "Bad," 38.60% perceive it as "Good," and 46.88% perceive it as "Very Good."
 
 
-Overall, the data suggests that there is a trend of higher perceived health as individuals age, with a higher percentage of individuals perceiving their health as "Very Good" in older age groups. Additionally, the data indicates that females tend to have slightly higher percentages of perceiving their health as "Good" and "Very Good" compared to males across most age groups. Further analysis and exploration can provide insights into the factors influencing self-rated health, such as underlying health conditions, lifestyle factors, and access to healthcare.
+**Local Health Office: Donegal**
 
+ * Among males, 28.43% perceive their health as "Bad," 44.16% perceive it as "Good," and 27.41% perceive it as "Very Good."
+ 
+ * Among females, 22.02% perceive their health as "Bad," 49.54% perceive it as "Good," and 28.44% perceive it as "Very Good."
 
 
-### Models
+**Local Health Office: Dublin**
 
-```{r}
-library(dplyr)
-library(caret)
-library(randomForest)
+ * Among males, 17.49% perceive their health as "Bad," 41.98% perceive it as "Good," and 40.52% perceive it as "Very Good."
+ 
+ * Among females, 16.29% perceive their health as "Bad," 40.99% perceive it as "Good," and 42.72% perceive it as "Very Good."
 
-example_dat <- n1 %>% dplyr::select(q6, ageclass, q52)
-example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = (as.factor(q6)), ageclass = as.factor(ageclass))
 
-# Convert q6_binary to a factor
-example_dat$q6_binary <- factor(example_dat$q6_binary, levels = c("No", "Yes"))
+**Local Health Office: Galway**
 
-# Create a training and testing dataset
-set.seed(123)
-trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
-train_data <- example_dat[trainIndex, ]
-test_data <- example_dat[-trainIndex, ]
+ * Among males, 14.98% perceive their health as "Bad," 32.60% perceive it as "Good," and 52.42% perceive it as "Very Good."
+ 
+ * Among females, 9.92% perceive their health as "Bad," 39.26% perceive it as "Good," and 50.83% perceive it as "Very Good."
 
-# Handle missing values in the training and testing data
-train_data <- na.omit(train_data)
-test_data <- na.omit(test_data)
 
-# Fit the Random Forest model
-random_forest <- randomForest(q6_binary ~ ageclass + q52, data = train_data, ntree = 100)
-random_forest
-# Predict using the Random Forest model
-predicted_classes <- predict(random_forest, newdata = test_data)
+**Local Health Office: Kerry**
 
-# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
-predicted_classes <- factor(predicted_classes, levels = c("No", "Yes"))
+ * Among males, 18.84% perceive their health as "Bad," 50.72% perceive it as "Good," and 30.43% perceive it as "Very Good."
+ 
+ * Among females, 18.07% perceive their health as "Bad," 33.73% perceive it as "Good," and 48.19% perceive it as "Very Good."
 
-# Create the confusion matrix
-confusion_matrix <- table(predicted_classes, test_data$q6_binary)
 
-# Calculate accuracy
-accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+**Local Health Office: Kildare/West Wicklow**
 
-# Print accuracy
-print(paste("Accuracy:", round(accuracy * 100, 2), "%"))
+ * Among males, 23.85% perceive their health as "Bad," 30.28% perceive it as "Good," and 45.87% perceive it as "Very Good."
 
-```
+ * Among females, 18.31% perceive their health as "Bad," 30.28% perceive it as "Good," and 51.41% perceive it as "Very Good."
 
 
+**Local Health Office: Laois/Offaly**
 
+ * Among males, 20.93% perceive their health as "Bad," 33.33% perceive it as "Good," and 45.74% perceive it as "Very Good."
+ 
+ * Among females, 17.58% perceive their health as "Bad," 35.15% perceive it as "Good," and 47.27% perceive it as "Very Good."
 
-### 1. Logistic Regression
-```{r}
-example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
-  
-  
-#example_dat$q6 <-   ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No") 
 
-example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
-#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = (as.factor(q6)), ageclass = as.factor(ageclass))
+**Local Health Office: Limerick**
 
-logistic_mod <- glm(q6_binary ~ ageclass + q52, data = example_dat, family = "binomial")
-logistic_mod
+ * Among males, 22.54% perceive their health as "Bad," 45.07% perceive it as "Good," and 32.39% perceive it as "Very Good."
 
+ * Among females, 16.09% perceive their health as "Bad," 40.80% perceive it as "Good," and 43.10% perceive it as "Very Good."
 
-```
 
+**Local Health Office: Longford/Westmeath**
 
+ * Among males, 13.82% perceive their health as "Bad," 35.53% perceive it as "Good," and 50.66% perceive it as "Very Good."
+ 
+ * Among females, 18.59% perceive their health as "Bad," 38.46% perceive it as "Good," and 42.95% perceive it as "Very Good."
 
 
-```{r}
-example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
+**Local Health Office: Louth**
 
-  
-example_dat$q6 <-   ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No") 
+ * Among males, 19.30% perceive their health as "Bad," 33.33% perceive it as "Good," and 47.37% perceive it as "Very Good."
+ 
+ * Among females, 12.84% perceive their health as "Bad," 28.38% perceive it as "Good," and 58.78% perceive it as "Very Good."
 
-#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
 
-### making the predictors characters first and then factors preserves the labels when running the logistic regression
-example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.factor(q6), 
-                                                      ageclass = as.factor(as.character(ageclass)),
-                                                      q52 = as.factor(as.character(q52))) 
+**Local Health Office: Mayo**
 
+ * Among males, 23.42% perceive their health as "Bad," 41.14% perceive it as "Good," and 35.44% perceive it as "Very Good."
+ 
+ * Among females, 19.49% perceive their health as "Bad," 36.92% perceive it as "Good," and 43.59% perceive it as "Very Good."
 
-logistic_mod <- glm(q6_binary ~ ageclass + q52, data = example_dat, family = "binomial")
-logistic_mod
-```
 
+**Local Health Office: Meath**
 
+ * Among males, 20.00% perceive their health as "Bad," 32.63% perceive it as "Good," and 47.37% perceive it as "Very Good."
+ 
+ * Among females, 9.21% perceive their health as "Bad," 30.26% perceive it as "Good," and 60.53% perceive it as "Very Good."
 
-```{r}
-# Load required libraries
-library(dplyr)
-library(caret)
 
-# Load the dataset and select relevant variables
-example_dat <- n1 %>% dplyr::select(q6, ageclass, q52)
+**Local Health Office: Roscommon**
 
-# Preprocess the data
-example_dat <- example_dat  %>% mutate(q6_binary = 1*(q6 == "Yes") + 0)
+ * Among males, 20.75% perceive their health as "Bad," 37.74% perceive it as "Good," and 41.51% perceive it as "Very Good."
+ 
+ * Among females, 20.72% perceive their health as "Bad," 49.55% perceive it as "Good," and 29.73% perceive it as "Very Good."
 
 
-example_dat <- example_dat %>% drop_na(q6) %>% mutate(                                                      ageclass = as.factor(as.character(ageclass)),
-                                                      q52 = as.factor(as.character(q52)))
+**Local Health Office: Sligo/Leitrim/West Cavan**
 
-# Create a training and testing dataset
-set.seed(123)
-trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.6, list = FALSE,times=1)
-train_data <- example_dat[trainIndex, ]
-test_data <- example_dat[-trainIndex, ]
+ * Among males, 20.37% perceive their health as "Bad," 39.81% perceive it as "Good," and 39.81% perceive it as "Very Good."
+ 
+ * Among females, 17.36% perceive their health as "Bad," 45.45% perceive it as "Good," and 37.19% perceive it as "Very Good."
 
 
-# Fit the logistic regression model
-logistic_mod <- glm(q6_binary ~ ageclass + q52, data = train_data, family = "binomial")
+**Local Health Office: Tipperary**
 
-# Evaluate the model on the test dataset
-predicted_classes <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
+ * Among males, 23.97% perceive their health as "Bad," 41.78% perceive it as "Good," and 34.25% perceive it as "Very Good."
+ 
+ * Among females, 13.92% perceive their health as "Bad," 44.94% perceive it as "Good," and 41.14% perceive it as "Very Good."
 
-# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
-test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
 
-# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
-predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
+**Local Health Office: Waterford**
 
-# Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+ * Among males, 15.38% perceive their health as "Bad," 38.46% perceive it as "Good," and 46.15% perceive it as "Very Good."
+ 
+ * Among females, 15.76% perceive their health as "Bad," 31.52% perceive it as "Good," and 52.73% perceive it as "Very Good."
 
-# Calculate accuracy
-accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
 
-# Print the model summary, accuracy, and confusion matrix
-summary(logistic_mod)
+ **Local Health Office: Wexford**
 
-print(paste("Accuracy:", accuracy * 100))
-print(confusion_matrix)
+ * Among males, 18.60% perceive their health as "Bad," 37.21% perceive it as "Good," and 44.19% perceive it as "Very Good."
 
-```
+ * Among females, 15.83% perceive their health as "Bad," 33.81% perceive it as "Good," and 50.36% perceive it as "Very Good."
 
 
+**Local Health Office: Wicklow**
 
+ * Among males, 21.30% perceive their health as "Bad," 30.56% perceive it as "Good," and 48.15% perceive it as "Very Good."
 
-#### Smoking
-```{r}
-library(dplyr)
-library(caret)
+ * Among females, 15.67% perceive their health as "Bad," 23.13% perceive it as "Good," and 61.19% perceive it as "Very Good."
 
 
-example_dat <- n1 %>% dplyr::select(q6,ageclass,q52)
+Overall, the analysis reveals variations in self-perceived health across different Local Health Offices. While the majority of individuals perceive their health as "Very Good" across most LHOs, there are variations in the percentages of individuals perceiving their health as "Good" or "Bad" across different gender groups and regions. These findings provide valuable insights into the distribution of self-perceived health, highlighting potential variations in health outcomes and the importance of considering regional and gender differences when addressing public health concerns.
 
-#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
 
-# Convert q6 to binary variable
-#example_dat$q6 <- ifelse(example_dat$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
-# Convert variables to factors
-example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.factor(q6),
-                                                      ageclass = as.factor(as.character(ageclass)),
-                                                      q52 = as.factor(as.character(q52)))
 
 
-# Create a training and testing dataset
-set.seed(1234)
-trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
-train_data <- example_dat[trainIndex, ]
-test_data <- example_dat[-trainIndex, ]
-
-# Fit the logistic regression model
-logistic_mod <- glm(q6_binary ~ ageclass + q52, data = train_data, family = "binomial")
-
-# Evaluate the model on the test dataset
-predicted_classes <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
-
-
-# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
-test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
-
-# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
-predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
-
-
-# Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
-
-accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
-
-# Print the model summary, accuracy, and confusion matrix
-(logistic_mod)
-print(paste("Accuracy:", accuracy*100))
-print(confusion_matrix)
-
-```
-
-
-
-
-#### Alcohol
-```{r}
-
-example_dat <- n1 %>% dplyr::select(q14,ageclass,q52)
-
-#example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = as.numeric(as.factor(q6)) -1)
-
-example_dat <- example_dat %>% drop_na(q14) %>% mutate(q14_binary = (as.factor(q14)), ageclass = as.factor(ageclass))
-
-# Create a training and testing dataset
-set.seed(123)
-trainIndex <- createDataPartition(example_dat$q14_binary, p = 0.65, list = FALSE)
-train_data <- example_dat[trainIndex, ]
-test_data <- example_dat[-trainIndex, ]
-
-# Fit the logistic regression model
-logistic_mod1 <- glm(q14_binary ~ ageclass + q52, data = train_data, family = "binomial")
-
-# Evaluate the model on the test dataset
-
-predicted_classes <- ifelse(predict(logistic_mod1, newdata = test_data, type = "response") > 0.5, "Yes", "No")
-
-
-# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
-test_data$q14_binary <- factor(test_data$q14_binary, levels = c("Yes", "No"))
-
-# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
-predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
-
-# Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes, test_data$q14_binary)
-
-accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
-
-
-# Print the model summary, accuracy, and confusion matrix
-logistic_mod1
-print(paste("Accuracy:", accuracy*100))
-print(confusion_matrix)
-
-
-```
-
-
-
-### 2. Decision Trees
-
-#### Smoking
-```{r}
-library(rpart)
-
-# Fit the decision tree model
-#decision_tree <- rpart(q6_binary ~ ageclass + q52, data = train_data, method = "class")
-
-# Predict the classes using the decision tree model
-#predicted_classes_tree <- predict(decision_tree, newdata = test_data, type = "class")
-
-# Create the confusion matrix
-#confusion_matrix_tree <- confusionMatrix(predicted_classes_tree, test_data$q6_binary)
-
-# Calculate accuracy
-#accuracy_tree <- round(confusion_matrix_tree$overall["Accuracy"], digits = 4)
-
-# Print the decision tree model, accuracy, and confusion matrix
-#print(decision_tree)
-#print(paste("Accuracy:", accuracy_tree * 100))
-#print(confusion_matrix_tree)
-
-```
-
-
-
-#### Alcohol
-
-```{r}
-library(rpart)
-
-set.seed(123)
-trainIndex1 <- createDataPartition(example_dat$q14_binary, p = 0.7, list = FALSE)
-train_data1 <- example_dat[trainIndex, ]
-test_data1 <- example_dat[-trainIndex, ]
-
-
-# Fit the decision tree model
-decision_tree1 <- rpart(q14_binary ~ ageclass + q52, data = train_data, method = "class",control = rpart.control(cp = 0))
-
-# Predict the classes using the decision tree model
-predicted_classes_tree <- predict(decision_tree1, newdata = test_data, type = "class")
-
-# Create the confusion matrix
-confusion_matrix_tree <- confusionMatrix(predicted_classes_tree, test_data$q14_binary)
-
-# Calculate accuracy
-accuracy_tree <- round(confusion_matrix_tree$overall["Accuracy"], digits = 4)
-
-# Print the decision tree model, accuracy, and confusion matrix
-print(decision_tree1)
-print(paste("Accuracy:", accuracy_tree * 100))
-print(confusion_matrix_tree)
-
-```
+### Heatmap
 
 
 ```{r}
-library(rpart.plot)
-rpart.plot(decision_tree1,extra= 106)
-```
-```{r}
-train_data1$q14|> table()
-```
-
-
-
-```{r}
-library(dplyr)
-library(caret)
-library(randomForest)
-
-example_dat <- n1 %>% dplyr::select(q6, ageclass, q52)
-
-example_dat <- example_dat %>% drop_na(q6) %>% mutate(q6_binary = (as.factor(q6)), ageclass = as.factor(ageclass))
-
-# Create a training and testing dataset
-set.seed(123)
-trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
-train_data <- example_dat[trainIndex, ]
-test_data <- example_dat[-trainIndex, ]
-
-# Fit the logistic regression model
-logistic_mod <- glm(q6_binary ~ ageclass + q52, data = train_data, family = "binomial")
-
-# Evaluate the logistic regression model on the test dataset
-predicted_classes_logistic <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
-
-# Convert test_data$q6_binary to a factor with the same levels as predicted_classes_logistic
-test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
-
-# Convert predicted_classes_logistic to a factor with the same levels as test_data$q6_binary
-predicted_classes_logistic <- factor(predicted_classes_logistic, levels = c("Yes", "No"))
-
-# Create the confusion matrix for logistic regression
-confusion_matrix_logistic <- confusionMatrix(predicted_classes_logistic, test_data$q6_binary)
-
-# Calculate accuracy for logistic regression
-accuracy_logistic <- round(confusion_matrix_logistic$overall["Accuracy"], digits = 4)
-
-# Print the logistic regression model summary, accuracy, and confusion matrix
-print(logistic_mod)
-print(paste("Logistic Regression Accuracy:", accuracy_logistic * 100))
-print(confusion_matrix_logistic)
-
-# Preprocess the data for Random Forest (handle missing values)
-train_data_rf <- na.omit(train_data)
-test_data_rf <- na.omit(test_data)
-
-# Fit the Random Forest model
-random_forest <- randomForest(q6_binary ~ ageclass + q52, data = train_data_rf, ntree = 100)
-
-# Predict the classes using the Random Forest model
-predicted_classes_forest <- predict(random_forest, newdata = test_data_rf, type = "class")
-
-# Create the confusion matrix for Random Forest
-confusion_matrix_forest <- confusionMatrix(predicted_classes_forest, test_data_rf$q6_binary)
-
-# Calculate accuracy for Random Forest
-accuracy_forest <- round(confusion_matrix_forest$overall["Accuracy"], digits = 4)
-
-# Print the Random Forest model, accuracy, and confusion matrix
-print(random_forest)
-print(paste("Random Forest Accuracy:", accuracy_forest * 100))
-print(confusion_matrix_forest)
-
-```
-
-
-
-
-### heatmap
-
-
-```{r}
-library(sf)
-
 ireland_counties <- st_read("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
 
 
@@ -1959,292 +1807,23 @@ plot(ireland_counties)
 ```
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 ireland_counties_final = subset(ireland_counties, select = c(OSM_ID,NAME_TAG,LATITUDE,LONGITUDE) )
 ```
 
 
-```{r}
-ireland_counties <- st_read("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
-st_layers("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
-
-```
-
-
-```{r}
-library(sf)
-library(dplyr)
-library(ggplot2)
-
-ireland_counties <- st_read("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
-
-# Join the smoking rates data with the spatial data
-ireland_counties <- left_join(ireland_counties, smoking_by_region, by = c("COUNTY" = "lho"))
-
-
-# Plot the map
-ggplot() +
-  geom_sf(data = ireland_counties, aes(fill = perc), color = "white") +
-  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Percentage") +
-  labs(title = "Smoking Rates in Various Regions", x = "Longitude", y = "Latitude") +
-  theme_minimal()
-
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+ireland_counties <- st_read("counties.shx")
+st_layers("counties.shx")
 
 ```
 
 
 
+### Models - smoking
 
-
-```{r}
-library(tidyverse)
-library(rjags)
-library(R2jags)
-library(tidybayes)
-library(bayesplot)
-library(maps)
-library(maptools)
-
-## Get the data
-library(SpatialEpi)
-
-data(scotland)
-
-lip_cancer_dat <- scotland$data
-lip_cancer_dat <- lip_cancer_dat %>% mutate(SMR = cases/expected)
-
-## JAGs model spec
-bhpoismodel = "
-model{
-for(i in 1:n) {
-# Poisson likelihood (data model)
-y.i[i] ~ dpois(lambda.i[i])
-lambda.i[i] <- theta.i[i]*e.i[i]
-
-# prior for theta
-theta.i[i] ~ dgamma(alpha,beta)
-# Shrinkage factor
-w.i[i] <- beta/(beta + e.i[i])
-}
-# Prior distributions for hyper parameters
-alpha ~ dexp(0.1)
-beta ~ dexp(0.1)
-# store group mean and across-group variance
-mtheta <- alpha/beta
-sdtheta <- sqrt(alpha/(beta^2))
-}
-"
-jags.data <- list(y.i = lip_cancer_dat$cases,
-                  e.i = lip_cancer_dat$expected,
-                  n = nrow(lip_cancer_dat))
-
-parnames <- c("alpha","beta","mtheta","sdtheta","w.i","theta.i")
-
-mod <- jags(data = jags.data, 
-            parameters.to.save = parnames, 
-            model.file = textConnection(bhpoismodel),
-            n.iter = 6000,
-            n.burnin = 2000,
-            n.thin = 4)
-
-m <- mod$BUGSoutput$sims.matrix
-
-## summary for theta and shrinkage
-index <- 1:nrow(lip_cancer_dat)
-par_summary <- m %>% 
-  gather_rvars(w.i[index],theta.i[index]) %>% 
-  median_qi(.value)
-
-## format for plotting
-par_wide <- par_summary %>% 
-  select(index, .variable, .value) %>% 
-  pivot_wider(id_cols = index, 
-              values_from = .value,
-              names_from = .variable) %>% 
-  mutate(SMR = lip_cancer_dat$SMR,
-         expected = ifelse(lip_cancer_dat$expected<5,"< 5",">/= 5"))
-
-prior_mean <- mod$BUGSoutput$mean$mtheta
-
-p1 <- ggplot(par_wide, aes(x = SMR, y = theta.i)) +
-  geom_point(aes(colour = expected)) +
-  geom_line(aes(x = SMR, y = SMR)) +
-  geom_segment(aes(x = 1.3, y = prior_mean, xend = 0, yend = prior_mean),
-               arrow = arrow(length = unit(0.6, "cm"))) +
-  annotate("text", x = 0.7, y = prior_mean + 0.4, label = "prior mean = 1.4")
-
-p2 <- ggplot(par_wide, aes(x = lip_cancer_dat$expected, y = w.i)) +
-  geom_point(aes(colour = expected)) +
-  ylab("Shrinkage factor (w.i)") +
-  xlab("Expected")
-
-ggpubr::ggarrange(p1,p2, common.legend = T)
-
-## MAPS
-shapefile <- scotland$spatial.polygon
-
-shapefile <- ireland_counties_final
-
-#Reshape for ggplot2 using the Broom package
-mapdata <- broom::tidy(shapefile) #This might take a few minutes
-lip_cancer_dat <- lip_cancer_dat %>% 
-  mutate(id =  mapdata$id %>% unique(),
-         theta.i = mod$BUGSoutput$mean$theta.i)
-
-#Join mydata with mapdata
-df <- plyr::join(mapdata, lip_cancer_dat, by="id")
-
-
-#Create the heatmap for observed SMR
-gg1 <- ggplot() + 
-        geom_polygon(data = df, 
-                     aes(x = long, y = lat, group = group, fill = SMR), 
-                     color = "#FFFFFF", size = 0.25) + 
-        scale_fill_gradient(low = "yellow", high = "red", na.value = "white",limits = c(0,7))+
-        coord_fixed(1)+
-        theme_minimal() +
-        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-        theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
-        theme(axis.title.y=element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
-
-#Create the heatmap for model estimates
-gg2 <- ggplot() + 
-        geom_polygon(data = df, 
-                     aes(x = long, y = lat, group = group, fill = theta.i), 
-                     color = "#FFFFFF", size = 0.25)+ 
-        scale_fill_gradient(low = "yellow", high = "red", na.value = "white",limits = c(0,7))+
-        coord_fixed(1)+
-        theme_minimal() +
-        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-        theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
-        theme(axis.title.y=element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
-
-ggpubr::ggarrange(gg1 + ggtitle("Raw SMR Estimates") ,gg2 + ggtitle("Model Estimates"))
-
-
-
-# Model with predictor ----------------------------------------------------
-
-bhpoismodel2 = "
-model{
-for(i in 1:n) {
-# Poisson likelihood (data model)
-y.i[i] ~ dpois(lambda.i[i])
-lambda.i[i] <- theta.i[i]*e.i[i]
-
-# prior for theta
-#log(theta.i[i]) <- ltheta.i[i]
-
-theta.i[i] <- exp(alpha.i[i] + beta*(x.i[i]-mean(x.i)))
-alpha.i[i] ~ dnorm(mu_alpha, sigma_alpha^-2)
-
-}
-# Prior distributions for hyper parameters
-mu_alpha ~ dnorm(0,10^-2)
-beta ~ dnorm(0,10^-2)
-sigma_alpha ~ dt(0,2^-2,1)T(0,)
-}
-"
-
-jags.data <- list(y.i = lip_cancer_dat$cases,
-                  e.i = lip_cancer_dat$expected,
-                  n = nrow(lip_cancer_dat),
-                  x.i = lip_cancer_dat$AFF)
-
-parnames <- c("alpha.i","beta","mu_alpha","sigma_alpha","theta.i")
-
-mod2 <- jags(data = jags.data, 
-            parameters.to.save = parnames, 
-            model.file = textConnection(bhpoismodel2),
-            n.iter = 10000,
-            n.burnin = 2000,
-            n.thin = 4)
-
-m2 <- mod2$BUGSoutput$sims.matrix
-
-## Look at alpha
-alpha_ind <- 1:jags.data$n
-alpha_samps2 <- m2 %>% spread_draws(alpha.i[alpha_ind]) %>% 
-  dplyr::select(alpha_ind, alpha.i) %>% dplyr::ungroup() %>% 
-  dplyr::mutate(alpha_ind = factor(alpha_ind, labels = lip_cancer_dat$county.names),
-                exp_alpha.i = exp(alpha.i))
-
-colour_e <- ifelse(lip_cancer_dat$expected<5,"red","yellow")
-
-ggplot(alpha_samps2, aes(x = alpha_ind, y = exp_alpha.i)) +
-  geom_boxplot(colour = colour_e,outlier.shape = NA) +
-  geom_hline(yintercept = exp(mod2$BUGSoutput$mean$mu_alpha))+
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 1)) +
-  xlab("") +
-  ylab("exp(alpha.i)")
-
-## Look at theta
-theta_ind <- 1:jags.data$n
-theta_samps2 <- m2 %>% spread_draws(theta.i[theta_ind]) %>% 
-  dplyr::select(theta_ind, theta.i) %>% dplyr::ungroup() %>% 
-  dplyr::mutate(theta_ind = factor(theta_ind, labels = lip_cancer_dat$county.names))
-
-ggplot(theta_samps2, aes(x = theta_ind, y = theta.i)) +
-  geom_boxplot(colour = colour_e,outlier.shape = NA) +
-  geom_point(data = lip_cancer_dat, aes(x = theta_ind, y = SMR, colour = "observed SMR")) +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 1)) +
-  xlab("") +
-  labs(colour = "") +
-  ylab("theta.i")
-
-### MAP
-
-#Reshape for ggplot2 using the Broom package
-mapdata <- broom::tidy(shapefile) #This might take a few minutes
-lip_cancer_dat <- lip_cancer_dat %>% 
-  mutate(theta.i_mod2 = mod2$BUGSoutput$mean$theta.i)
-
-#Join mydata with mapdata
-df <- plyr::join(mapdata, lip_cancer_dat, by="id")
-
-#Create the heatmap using the ggplot2 package
-gg3 <- ggplot() + geom_polygon(data = df, aes(x = long, y = lat, group = group, fill = theta.i_mod2), color = "#FFFFFF", size = 0.25)+ 
-  scale_fill_gradient(low = "yellow", high = "red", na.value = "white",limits = c(0,7))+
-  coord_fixed(1)+
-  theme_minimal() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
-  theme(axis.title.y=element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
-  ggtitle("with predictor")
-
-#Create the heatmap using the ggplot2 package
-gg4 <- ggplot() + geom_polygon(data = df, aes(x = long, y = lat, group = group, fill = AFF), color = "#FFFFFF", size = 0.25)+ 
-  scale_fill_gradient(low = "green", high = "blue", na.value = "white",limits = c(0,0.3))+
-  coord_fixed(1)+
-  theme_minimal() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
-  theme(axis.title.y=element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) 
-
-
-ggpubr::ggarrange(gg1 + ggtitle("Raw SMR"),gg2 + ggtitle("w/o predictor"),gg3, gg4)
-
-```
-
-
-
-### model - new
-
-
-```{r}
-library(tidyverse)
-library(dplyr)
-library(caret)
-library(naivebayes)
-library(dplyr)
-library(ggplot2)
-library(psych)
-library(e1071)
-library(xgboost)
-
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Select relevant variables
 example_dat <- n1 %>% dplyr::select(q6, ageclass, q52,key1)
@@ -2260,7 +1839,7 @@ example_dat <- example_dat %>% mutate(q6_binary = as.factor(q6),
 
 # Create a training and testing dataset
 set.seed(123)
-trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.7, list = FALSE)
+trainIndex <- createDataPartition(example_dat$q6_binary, p = 0.65, list = FALSE)
 train_data <- example_dat[trainIndex, ]
 test_data <- example_dat[-trainIndex, ]
 
@@ -2281,9 +1860,9 @@ svm_model <- svm(q6_binary ~ ageclass + q52+key1, data = train_data, kernel = "l
 
 ```
 
-#### naive bayes
-```{r}
-library(e1071)
+
+#### Naive bayes - Accuracy
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Predict the classes using the Naive Bayes model
 predicted_classes <- predict(naive_bayes, newdata = test_data)
@@ -2302,9 +1881,9 @@ summary(naive_bayes)
 ```
 
 
-#### svm
-```{r}
-library(e1071)
+
+#### SVM - Accuracy
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Predict the classes using the SVM model
 predicted_classes <- predict(svm_model, newdata = test_data)
@@ -2322,8 +1901,10 @@ summary(svm_model)
 ```
 
 
-#### logistic 
-```{r}
+
+#### Logistic Regression - Accuracy
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 # Evaluate the model on the test dataset
 predicted_classes <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
 
@@ -2347,13 +1928,9 @@ print(confusion_matrix)
 ```
 
 
-#### decision tree
+#### Decision tree - Accuracy
 
-```{r}
-library(rpart)
-library(rpart.plot)
-library(caret)
-
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Predict the classes using the decision tree model
 predicted_classes <- predict(decision_tree, newdata = test_data, type = "class")
@@ -2369,5 +1946,146 @@ print(paste("Accuracy:", accuracy * 100))
 print(confusion_matrix)
 
 ```
+
+
+
+
+### Models - Alcohol
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
+example_dat1 <- n1 %>% dplyr::select(q14,ageclass,q52,key1)
+
+# Drop rows with missing values
+example_dat1 <- example_dat1 %>% drop_na()
+
+# Convert variables to appropriate data types
+example_dat1 <- example_dat1 %>% mutate(q14_binary = as.factor(q14),
+                                      ageclass = as.factor(as.character(ageclass)),
+                                      q52 = as.factor(as.character(q52)),
+                                      key1 = as.factor((as.character(key1))))
+
+
+
+# Create a training and testing dataset
+set.seed(123)
+trainIndex1 <- createDataPartition(example_dat1$q14_binary, p = 0.65, list = FALSE)
+train_data1 <- example_dat1[trainIndex1, ]
+test_data1 <- example_dat1[-trainIndex1, ]
+
+
+# Fit the logistic regression model
+logistic_mod1 <- glm(q14_binary ~ ageclass + q52+key1, data = train_data1, family = "binomial")
+
+
+# Fit random forest model
+random_forest1 <- randomForest(q14_binary ~ ageclass + q52+key1, data = train_data1, ntree = 100)
+
+
+# Fit decision tree model
+decision_tree1 <- rpart(q14_binary ~ ageclass + q52+key1, data = train_data1, method = "class")
+
+
+# Fit Naive Bayes model
+naive_bayes1 <- naive_bayes(q14_binary ~ ageclass + q52+key1, data = train_data1)
+
+
+# Fit SVM model
+svm_model1 <- svm(q14_binary ~ ageclass + q52+key1, data = train_data1, kernel = "linear")
+
+```
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+train_data1$q14|> table()
+```
+
+
+
+#### Naive bayes - Accuracy
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+# Predict the classes using the Naive Bayes model
+predicted_classes1 <- predict(naive_bayes1, newdata = test_data1)
+
+# Create the confusion matrix
+confusion_matrix1 <- confusionMatrix(predicted_classes1, test_data1$q14_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
+
+# Print the accuracy and confusion matrix
+print(paste("Accuracy:", accuracy * 100))
+print(confusion_matrix1)
+
+# Summarize the Naive Bayes model
+summary(naive_bayes1)
+
+```
+
+
+
+#### SVM - Accuracy
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+# Predict the classes using the SVM model
+predicted_classes1 <- predict(svm_model1, newdata = test_data1)
+
+# Create the confusion matrix
+confusion_matrix1 <- confusionMatrix(predicted_classes1, test_data1$q14_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
+
+# Print the accuracy and confusion matrix
+print(paste("Accuracy:", accuracy * 100))
+print(confusion_matrix1)
+
+
+```
+
+
+
+#### Logistic Regression - Accuracy
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
+# Evaluate the model on the test dataset
+predicted_classes1 <- ifelse(predict(logistic_mod1, newdata = test_data1, type = "response") > 0.5, "Yes", "No")
+
+# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
+test_data1$q14_binary <- factor(test_data1$q14_binary, levels = c("Yes", "No"))
+
+# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
+predicted_classes1 <- factor(predicted_classes1, levels = c("Yes", "No"))
+
+# Create the confusion matrix
+confusion_matrix <- confusionMatrix(predicted_classes, test_data1$q14_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+
+# Print the model summary, accuracy, and confusion matrix
+summary(logistic_mod1)
+
+print(paste("Accuracy:", accuracy * 100))
+print(confusion_matrix)
+
+```
+
+
+
+#### Decision tree - Accuracy
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+# Predict the classes using the decision tree model
+predicted_classes1 <- predict(decision_tree1, newdata = test_data1, type = "class")
+
+# Create the confusion matrix
+confusion_matrix1 <- confusionMatrix(predicted_classes1, test_data1$q14_binary)
+
+# Calculate accuracy
+accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
+
+# Print the accuracy and confusion matrix
+print(paste("Accuracy (Decision Tree):", accuracy * 100))
+print(confusion_matrix1)
+
 ```
 
