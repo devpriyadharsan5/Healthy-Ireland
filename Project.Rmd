@@ -88,6 +88,11 @@ n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
 ```
 
 
+
+```{r}
+table(n1$q120,exclude = NULL)
+```
+
 ###  1. What percentage of the population smokes and how does this vary by age?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
@@ -353,6 +358,14 @@ chisq.test(q3) # Perform the chi-squared test
 ### 4. What are the observed variations in smoking rates across different local health offices (LHOs) in various counties?
 
 
+```{r}
+n1$lho[n1$lho == "Carlow/Kilkenny"] <- "Carlow"
+n1 <- rbind(n1, n1[n1$lho == "Carlow", ])
+n1$lho[n1$lho == "Carlow"] <- "Kilkenny"
+
+```
+
+
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Recode the values in the lho variable to match the corresponding county names
@@ -363,7 +376,7 @@ n1$lho <- ifelse(n1$lho %in% c("Carlow/Kilkenny"), "Carlow/Kilkenny",
                  ifelse(n1$lho %in% c("Dublin North", "Dublin North Central", "Dublin North West", "Dublin South City", "Dublin South East", "Dublin South West", "Dublin West", "Dun Laoghaire"), "Dublin",
                  ifelse(n1$lho %in% c("Galway"), "Galway",
                  ifelse(n1$lho %in% c("Kerry"), "Kerry",
-                 ifelse(n1$lho %in% c("Kildare/West Wicklow"), "Kildare/West Wicklow",
+                 ifelse(n1$lho %in% c("Kildare/West Wicklow"), "Kildare",
                  ifelse(n1$lho %in% c("Laois/Offaly"), "Laois/Offaly",
                  ifelse(n1$lho %in% c("Limerick"), "Limerick",
                  ifelse(n1$lho %in% c("Longford/Westmeath"), "Longford/Westmeath",
@@ -376,8 +389,8 @@ n1$lho <- ifelse(n1$lho %in% c("Carlow/Kilkenny"), "Carlow/Kilkenny",
                  ifelse(n1$lho %in% c("Tipp/East Limerick", "Tipperary South"), "Tipperary",
                  ifelse(n1$lho %in% c("Waterford"), "Waterford",
                  ifelse(n1$lho %in% c("Wexford"), "Wexford",
-                 ifelse(n1$lho %in% c("Wicklow"), "Wicklow",
-                 n1$lho)))))))))))))))))))))
+                 ifelse(n1$lho %in% c("Wicklow"), "Wicklow", 
+                        n1$lho)))))))))))))))))))))
 
 # Group the data by smoking status (q6) and county (lho), then calculate the count of individuals in each combination
 
@@ -1539,6 +1552,11 @@ suppl <- s17 %>%
   dplyr::select(lho, q120, count)
 
 
+# Filter out the records with "Don’t know/refused" in the "q120" column
+suppl <- suppl %>%
+  filter(q120 != "Don’t know/refused")
+
+
 # Recode the values in the "q120" column to combine "No", "Don’t know/refused" as "No" and keep the rest as "Yes"
 suppl$q120 <- ifelse(suppl$q120 %in% c("No", "Don’t know/refused"), "No", "Yes")
 
@@ -1826,7 +1844,7 @@ st_layers("counties.shx")
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Select relevant variables
-example_dat <- n1 %>% dplyr::select(q6, ageclass, q52,key1)
+example_dat <- n1 %>% dplyr::select(q6, ageclass, q52,key1,lho)
 
 # Drop rows with missing values
 example_dat <- example_dat %>% drop_na()
@@ -1835,7 +1853,8 @@ example_dat <- example_dat %>% drop_na()
 example_dat <- example_dat %>% mutate(q6_binary = as.factor(q6),
                                       ageclass = as.factor(as.character(ageclass)),
                                       q52 = as.factor(as.character(q52)),
-                                      key1 = as.factor((as.character(key1))))
+                                      key1 = as.factor(as.character(key1)),
+                                      lho = as.factor(as.character(lho)))
 
 # Create a training and testing dataset
 set.seed(123)
@@ -1844,19 +1863,16 @@ train_data <- example_dat[trainIndex, ]
 test_data <- example_dat[-trainIndex, ]
 
 # Fit logistic regression model
-logistic_mod <- glm(q6_binary ~ ageclass + q52+key1, data = train_data, family = "binomial")
-
-# Fit random forest model
-random_forest <- randomForest(q6_binary ~ ageclass + q52+key1, data = train_data, ntree = 100)
+logistic_mod <- glm(q6_binary ~ ageclass + q52+key1+lho, data = train_data, family = "binomial")
 
 # Fit decision tree model
-decision_tree <- rpart(q6_binary ~ ageclass + q52+key1, data = train_data, method = "class")
+decision_tree <- rpart(q6_binary ~ ageclass + q52+key1+lho, data = train_data, method = "class")
 
 # Fit Naive Bayes model
-naive_bayes <- naive_bayes(q6_binary ~ ageclass + q52+key1, data = train_data)
+naive_bayes <- naive_bayes(q6_binary ~ ageclass + q52+key1+lho, data = train_data)
 
 # Fit SVM model
-svm_model <- svm(q6_binary ~ ageclass + q52+key1, data = train_data, kernel = "linear")
+svm_model <- svm(q6_binary ~ ageclass + q52+key1+lho, data = train_data, kernel = "linear")
 
 ```
 
@@ -1954,7 +1970,7 @@ print(confusion_matrix)
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
-example_dat1 <- n1 %>% dplyr::select(q14,ageclass,q52,key1)
+example_dat1 <- n1 %>% dplyr::select(q14,ageclass,q52,key1,lho)
 
 # Drop rows with missing values
 example_dat1 <- example_dat1 %>% drop_na()
@@ -1963,7 +1979,8 @@ example_dat1 <- example_dat1 %>% drop_na()
 example_dat1 <- example_dat1 %>% mutate(q14_binary = as.factor(q14),
                                       ageclass = as.factor(as.character(ageclass)),
                                       q52 = as.factor(as.character(q52)),
-                                      key1 = as.factor((as.character(key1))))
+                                      key1 = as.factor((as.character(key1))),
+                                      lho = as.factor(as.character(lho)))
 
 
 
@@ -1975,23 +1992,16 @@ test_data1 <- example_dat1[-trainIndex1, ]
 
 
 # Fit the logistic regression model
-logistic_mod1 <- glm(q14_binary ~ ageclass + q52+key1, data = train_data1, family = "binomial")
-
-
-# Fit random forest model
-random_forest1 <- randomForest(q14_binary ~ ageclass + q52+key1, data = train_data1, ntree = 100)
-
+logistic_mod1 <- glm(q14_binary ~ ageclass + q52+key1+lho, data = train_data1, family = "binomial")
 
 # Fit decision tree model
-decision_tree1 <- rpart(q14_binary ~ ageclass + q52+key1, data = train_data1, method = "class")
-
+decision_tree1 <- rpart(q14_binary ~ ageclass + q52+key1+lho, data = train_data1, method = "class")
 
 # Fit Naive Bayes model
-naive_bayes1 <- naive_bayes(q14_binary ~ ageclass + q52+key1, data = train_data1)
-
+naive_bayes1 <- naive_bayes(q14_binary ~ ageclass + q52+key1+lho, data = train_data1)
 
 # Fit SVM model
-svm_model1 <- svm(q14_binary ~ ageclass + q52+key1, data = train_data1, kernel = "linear")
+svm_model1 <- svm(q14_binary ~ ageclass + q52+key1+lho, data = train_data1, kernel = "linear")
 
 ```
 
