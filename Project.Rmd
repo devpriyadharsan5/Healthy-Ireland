@@ -8,29 +8,28 @@ output:
 ---
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
-suppressWarnings(library(haven))
-suppressWarnings(library(dplyr))
-suppressWarnings(library(magrittr))
-suppressWarnings(library(knitr))
-suppressWarnings(library(tidyverse))
-suppressWarnings(library(ggplot2))
-suppressWarnings(library(here))
-suppressWarnings(library(dplyr))
-suppressWarnings(library(labelled))
-suppressWarnings(library(foreign))
-suppressWarnings(library(tibble))
-suppressWarnings(library(psych)) 
-suppressWarnings(library(GGally)) 
-suppressWarnings(library(plyr))
-suppressWarnings(library(e1071))
-suppressWarnings(library(sf))
 suppressWarnings(library(caret))
-suppressWarnings(library(naivebayes))
+suppressWarnings(library(dplyr))
 suppressWarnings(library(e1071))
-suppressWarnings(library(xgboost))
-suppressWarnings(library(rpart))
+suppressWarnings(library(e1071))
+suppressWarnings(library(foreign))
+suppressWarnings(library(GGally)) 
+suppressWarnings(library(ggplot2))
+suppressWarnings(library(haven))
+suppressWarnings(library(here))
+suppressWarnings(library(knitr))
+suppressWarnings(library(labelled))
+suppressWarnings(library(magrittr))
+suppressWarnings(library(naivebayes))
+suppressWarnings(library(plyr))
+suppressWarnings(library(psych)) 
 suppressWarnings(library(randomForest))
+suppressWarnings(library(rpart))
 suppressWarnings(library(rpart.plot))
+suppressWarnings(library(sf))
+suppressWarnings(library(tibble))
+suppressWarnings(library(tidyverse))
+suppressWarnings(library(xgboost))
 ```
 
 
@@ -89,13 +88,17 @@ n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
 
 
 
-```{r}
-table(n1$q120,exclude = NULL)
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+table(n1$q6,exclude = NULL)
 ```
 
 ###  1. What percentage of the population smokes and how does this vary by age?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
+
+# Re-code smoking variable to combine "Yes, daily" and "Yes, occasionally"
+n1$q6 <- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
+
 
 s1 <- n1 %>% 
   dplyr::group_by(q6, ageclass) %>%  # Group the data by smoking status (q6) and age group (ageclass)
@@ -106,9 +109,6 @@ s1 <- n1 %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%  # Calculate the percentage within each age group
   dplyr::select(ageclass, q6, count)  # Select only the relevant columns for further analysis
 
-
-# Re-code smoking variable to combine "Yes, daily" and "Yes, occasionally"
-n1$q6 <- ifelse(n1$q6 %in% c("Yes, daily", "Yes, occasionally"), "Yes", "No")
 
 
 # Calculate the percentage of individuals in each group ## Code modified by NC
@@ -357,13 +357,6 @@ chisq.test(q3) # Perform the chi-squared test
 ### 4. What are the observed variations in smoking rates across different local health offices (LHOs) in various counties?
 
 
-```{r}
-n1$lho[n1$lho == "Carlow/Kilkenny"] <- "Carlow"
-n1 <- rbind(n1, n1[n1$lho == "Carlow", ])
-n1$lho[n1$lho == "Carlow"] <- "Kilkenny"
-
-```
-
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
@@ -384,12 +377,13 @@ n1$lho <- ifelse(n1$lho %in% c("Carlow/Kilkenny"), "Carlow/Kilkenny",
                  ifelse(n1$lho %in% c("Meath"), "Meath",
                  ifelse(n1$lho %in% c("North Cork", "North Lee", "South Lee", "West Cork"), "Cork",
                  ifelse(n1$lho %in% c("Roscommon"), "Roscommon",
-                 ifelse(n1$lho %in% c("Sligo/Leitrim/West Cavan"), "Sligo/Leitrim/West Cavan",
+                 ifelse(n1$lho %in% c("Sligo/Leitrim/West Cavan"), "Sligo/Leitrim",
                  ifelse(n1$lho %in% c("Tipp/East Limerick", "Tipperary South"), "Tipperary",
                  ifelse(n1$lho %in% c("Waterford"), "Waterford",
                  ifelse(n1$lho %in% c("Wexford"), "Wexford",
                  ifelse(n1$lho %in% c("Wicklow"), "Wicklow", 
                         n1$lho)))))))))))))))))))))
+
 
 # Group the data by smoking status (q6) and county (lho), then calculate the count of individuals in each combination
 
@@ -425,6 +419,10 @@ ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
 ```
 
 
+```{r}
+write.csv(smoking_by_region, "smoking_by_region.csv", row.names=FALSE)
+```
+
 
 The provided table displays the smoking rates in different local health offices (LHOs) across various counties. It includes the LHO names (lho), the percentage of smokers or non-smokers (perc), and the smoking status (q6: "Yes" indicates smokers, "No" indicates non-smokers).
 
@@ -454,7 +452,7 @@ The provided table displays the smoking rates in different local health offices 
 
 Conclusion:
 
-The data provides insights into the smoking rates across various local health offices in Ireland. It shows that the percentage of smokers varies across different regions, ranging from around 14% to 86%. Some areas have higher percentages of non-smokers, while others have relatively higher proportions of smokers
+The data provides insights into the smoking rates across various local health offices in Ireland. It shows that the percentage of smokers varies across different regions, ranging from around 14% to 86%. Some areas have higher percentages of non-smokers, while others have relatively higher proportions of smokers.
 
 By understanding the smoking patterns at the regional level, public health authorities can develop targeted strategies to reduce smoking prevalence in specific areas. These may include awareness campaigns, smoking cessation programs, and policy interventions aimed at creating smoke-free environments and providing support for individuals to quit smoking. Additionally, the data can inform resource allocation and help prioritize interventions based on the identified areas with higher smoking rates.
 
@@ -1808,37 +1806,8 @@ Overall, the analysis reveals variations in self-perceived health across differe
 
 
 
-### Heatmap
 
-
-```{r}
-ireland_counties <- st_read("C:/Users/User/Music/Final Project/Healthy-Ireland/counties/counties.shx")
-
-
-# Print attribute table
-print(ireland_counties)
-
-# Plot the counties
-plot(ireland_counties)
-
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-
-ireland_counties_final = subset(ireland_counties, select = c(OSM_ID,NAME_TAG,LATITUDE,LONGITUDE) )
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-ireland_counties <- st_read("counties.shx")
-st_layers("counties.shx")
-
-```
-
-
-
-### Models - smoking
+### Models - Smoking
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
@@ -1879,20 +1848,48 @@ svm_model <- svm(q6_binary ~ ageclass + q52+key1+lho+q120, data = train_data, ke
 
 
 
+```{r}
+# Generate predicted probabilities
+predicted_probs <- predict(logistic_mod, newdata = train_data, type = "response")
+
+# Create a data frame with age class and predicted probabilities
+plot_data <- data.frame(ageclass = train_data$ageclass, predicted_prob = predicted_probs*100)
+
+# Sort the data frame by age class
+plot_data <- plot_data[order(plot_data$ageclass), ]
+
+# Plot the predicted probabilities
+plot(plot_data$ageclass, plot_data$predicted_prob, type = "l", 
+     xlab = "Age Class", ylab = "Probability of Yes (in %)", 
+     main = "Logistic Regression: Predicted Probabilities")
+
+# Add points for observed data
+points(train_data$ageclass, train_data$q6_binary, pch = 16, col = "blue")
+
+# Add a legend
+legend("topright", legend = c("Observed Data"), 
+       pch = c(16, NA), col = c("blue", "black"), bty = "n")
+
+
+```
+
+
 #### Logistic Regression - Accuracy
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 # Evaluate the model on the test dataset
-predicted_classes <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
+predicted_classes_logistic <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
 
 # Convert test_data$q6_binary to a factor with the same levels as predicted_classes
 test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
 
 # Convert predicted_classes to a factor with the same levels as test_data$q6_binary
-predicted_classes <- factor(predicted_classes, levels = c("Yes", "No"))
+predicted_classes_logistic <- factor(predicted_classes_logistic, levels = c("Yes", "No"))
 
 # Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+confusion_matrix <- confusionMatrix(predicted_classes_logistic, test_data$q6_binary)
+
 
 # Calculate accuracy
 accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
@@ -1905,19 +1902,162 @@ print(confusion_matrix)
 ```
 
 
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+anova(logistic_mod, test="Chisq")
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+library(pscl)
+pscl::pR2(logistic_mod)["McFadden"]
+
+
+pR2(logistic_mod)
+
+
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+caret::varImp(logistic_mod)
+
+car::vif(logistic_mod)
+
+```
+
+
+
+
+
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+# Load the required libraries
+library(pROC)
+
+# Predict probabilities for the test data
+predicted_probs <- predict(logistic_mod, newdata = test_data, type = "response")
+
+# Create ROC curve
+roc_curve <- roc(test_data$q6_binary, predicted_probs)
+
+# Plot ROC curve
+plot(roc_curve, main = "ROC Curve for Logistic Regression Model",
+     col = "blue", lwd = 2)
+
+# Add 45-degree diagonal line for reference (random classifier)
+abline(a = 0, b = 1, lty = 2)
+
+# Add text with AUC (Area Under the Curve) value
+auc_val <- auc(roc_curve)
+text(0.7, 0.3, paste("AUC =", round(auc_val, 2)), col = "blue", cex = 1.2)
+
+# Add legend
+legend("bottomright", legend = c("Logistic Model", "Random Classifier"),
+       col = c("blue", "black"), lty = c(1, 2), lwd = c(2, 1),
+       cex = 0.8, bty = "n")
+
+```
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+hist(residuals(logistic_mod), col = "steelblue")
+```
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+#create fitted value vs residual plot
+plot(fitted(logistic_mod), residuals(logistic_mod))
+
+#add horizontal line at 0
+abline(h = 0, lty = 2)
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+library(mice)
+library(lattice)
+library(reshape2)
+
+#install.packages("DataExplorer") 
+library(DataExplorer)
+```
+
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
+str(example_dat)
+summary(example_dat)
+
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
+#data_new[, 1:6] <- scale(example_dat[, 1:6])
+
+
+#create a list of random number ranging from 1 to number of rows from actual data 
+#and 70% of the data into training data  
+
+data2 = sort(sample(nrow(example_dat), nrow(example_dat)*.8))
+
+#creating training data set by selecting the output row values
+train <- example_dat[data2,]
+
+#creating test data set by not selecting the output row values
+test <- example_dat[-data2,]
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+dim(train)
+dim(test)
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+## fit a logistic regression model with the training dataset
+log.model <- glm(q6_binary ~., data = example_dat, family = binomial(link = "logit"))
+summary(log.model)
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+log.predictions <- predict(log.model, test, type="response")
+
+## Look at probability output
+head(log.predictions)
+
+log.prediction.rd <- ifelse(log.predictions > 0.5, 1, 0)
+head(log.prediction.rd, 10)
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+table(log.prediction.rd, test[,7])
+
+
+accuracy <- table(log.prediction.rd, test[,7])
+sum(diag(accuracy))/sum(accuracy)
+```
+
+
 #### Decision tree - Accuracy
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Predict the classes using the decision tree model
-predicted_classes <- predict(decision_tree, newdata = test_data, type = "class")
+predicted_classes_dt <- predict(decision_tree, newdata = test_data, type = "class")
 
 # Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+confusion_matrix <- confusionMatrix(predicted_classes_logistic, test_data$q6_binary)
 
 # Calculate accuracy
 accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
 
+
+summary(decision_tree)
 # Print the accuracy and confusion matrix
 print(paste("Accuracy:", accuracy * 100))
 print(confusion_matrix)
@@ -1931,10 +2071,10 @@ print(confusion_matrix)
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Predict the classes using the Naive Bayes model
-predicted_classes <- predict(naive_bayes, newdata = test_data)
+predicted_classes_nb <- predict(naive_bayes, newdata = test_data)
 
 # Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+confusion_matrix <- confusionMatrix(predicted_classes_nb, test_data$q6_binary)
 
 # Calculate accuracy
 accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
@@ -1952,10 +2092,10 @@ summary(naive_bayes)
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Predict the classes using the SVM model
-predicted_classes <- predict(svm_model, newdata = test_data)
+predicted_classes_svm <- predict(svm_model, newdata = test_data)
 
 # Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes, test_data$q6_binary)
+confusion_matrix <- confusionMatrix(predicted_classes_svm, test_data$q6_binary)
 
 # Calculate accuracy
 accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
@@ -2022,16 +2162,16 @@ train_data1$q14|> table()
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Evaluate the model on the test dataset
-predicted_classes1 <- ifelse(predict(logistic_mod1, newdata = test_data1, type = "response") > 0.5, "Yes", "No")
+predicted_classeslog1 <- ifelse(predict(logistic_mod1, newdata = test_data1, type = "response") > 0.5, "Yes", "No")
 
 # Convert test_data$q6_binary to a factor with the same levels as predicted_classes
 test_data1$q14_binary <- factor(test_data1$q14_binary, levels = c("Yes", "No"))
 
 # Convert predicted_classes to a factor with the same levels as test_data$q6_binary
-predicted_classes1 <- factor(predicted_classes1, levels = c("Yes", "No"))
+predicted_classeslog1 <- factor(predicted_classeslog1, levels = c("Yes", "No"))
 
 # Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes1, test_data1$q14_binary)
+confusion_matrix <- confusionMatrix(predicted_classeslog1, test_data1$q14_binary)
 
 # Calculate accuracy
 accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
@@ -2050,10 +2190,10 @@ print(confusion_matrix)
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 # Predict the classes using the decision tree model
-predicted_classes1 <- predict(decision_tree1, newdata = test_data1, type = "class")
+predicted_classesdt1 <- predict(decision_tree1, newdata = test_data1, type = "class")
 
 # Create the confusion matrix
-confusion_matrix1 <- confusionMatrix(predicted_classes1, test_data1$q14_binary)
+confusion_matrix1 <- confusionMatrix(predicted_classesdt1, test_data1$q14_binary)
 
 # Calculate accuracy
 accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
@@ -2070,10 +2210,10 @@ print(confusion_matrix1)
 #### Naive bayes - Accuracy
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 # Predict the classes using the Naive Bayes model
-predicted_classes1 <- predict(naive_bayes1, newdata = test_data1)
+predicted_classesnb1 <- predict(naive_bayes1, newdata = test_data1)
 
 # Create the confusion matrix
-confusion_matrix1 <- confusionMatrix(predicted_classes1, test_data1$q14_binary)
+confusion_matrix1 <- confusionMatrix(predicted_classesnb1, test_data1$q14_binary)
 
 # Calculate accuracy
 accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
@@ -2092,10 +2232,10 @@ summary(naive_bayes1)
 #### SVM - Accuracy
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 # Predict the classes using the SVM model
-predicted_classes1 <- predict(svm_model1, newdata = test_data1)
+predicted_classessvm1 <- predict(svm_model1, newdata = test_data1)
 
 # Create the confusion matrix
-confusion_matrix1 <- confusionMatrix(predicted_classes1, test_data1$q14_binary)
+confusion_matrix1 <- confusionMatrix(predicted_classessvm1, test_data1$q14_binary)
 
 # Calculate accuracy
 accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
