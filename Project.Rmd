@@ -11,7 +11,6 @@ output:
 suppressWarnings(library(caret))
 suppressWarnings(library(dplyr))
 suppressWarnings(library(e1071))
-suppressWarnings(library(e1071))
 suppressWarnings(library(foreign))
 suppressWarnings(library(GGally)) 
 suppressWarnings(library(ggplot2))
@@ -21,11 +20,9 @@ suppressWarnings(library(knitr))
 suppressWarnings(library(labelled))
 suppressWarnings(library(magrittr))
 suppressWarnings(library(naivebayes))
+suppressWarnings(library(performance))
 suppressWarnings(library(plyr))
 suppressWarnings(library(psych)) 
-suppressWarnings(library(randomForest))
-suppressWarnings(library(rpart))
-suppressWarnings(library(rpart.plot))
 suppressWarnings(library(sf))
 suppressWarnings(library(tibble))
 suppressWarnings(library(tidyverse))
@@ -384,6 +381,19 @@ n1$lho <- ifelse(n1$lho %in% c("Carlow/Kilkenny"), "Carlow/Kilkenny",
                  ifelse(n1$lho %in% c("Wicklow"), "Wicklow", 
                         n1$lho)))))))))))))))))))))
 
+# The code is creating a broader category called "Dublin" that includes various specific locations within Dublin (e.g., Dublin North, Dublin South, Dun Laoghaire, etc.). 
+
+#All rows in the lho column that match any of the specified locations will be recoded as "Dublin," while rows with other locations will keep their original values. 
+
+# The code is also recoding specific location names in the lho column into broader regional categories. For example, if a row in the lho column matches "Kildare/West Wicklow," it will be recoded as "Kildare." 
+
+#Similarly, rows matching "North Cork," "North Lee," "South Lee," or "West Cork" will be recoded as "Cork." 
+
+#Additionally, rows matching "Sligo/Leitrim/West Cavan" will be recoded as "Sligo/Leitrim."
+
+#Rows matching "Tipp/East Limerick" or "Tipperary South" will be recoded as "Tipperary." This process simplifies the location information and allows for easier regional analysis.
+
+
 
 # Group the data by smoking status (q6) and county (lho), then calculate the count of individuals in each combination
 
@@ -419,8 +429,10 @@ ggplot(smoking_by_region, aes(x = lho, y = perc, fill = q6)) +
 ```
 
 
-```{r}
-write.csv(smoking_by_region, "smoking_by_region.csv", row.names=FALSE)
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+# for heatmaps
+
+#write.csv(smoking_by_region, "smoking_by_region.csv", row.names=FALSE)
 ```
 
 
@@ -1805,9 +1817,8 @@ Overall, the analysis reveals variations in self-perceived health across differe
 
 
 
-
-
 ### Models - Smoking
+
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
@@ -1834,14 +1845,8 @@ test_data <- example_dat[-trainIndex, ]
 # Fit logistic regression model
 logistic_mod <- glm(q6_binary ~ ageclass + q52+key1+lho+q120, data = train_data, family = "binomial")
 
-# Fit decision tree model
-decision_tree <- rpart(q6_binary ~ ageclass + q52+key1+lho+q120, data = train_data, method = "class")
-
 # Fit Naive Bayes model
 naive_bayes <- naive_bayes(q6_binary ~ ageclass + q52+key1+lho+q120, data = train_data)
-
-# Fit SVM model
-svm_model <- svm(q6_binary ~ ageclass + q52+key1+lho+q120, data = train_data, kernel = "linear")
 
 ```
 
@@ -1874,239 +1879,134 @@ legend("topright", legend = c("Observed Data"),
 ```
 
 
+```{r}
+pred <- predict(logistic_mod, newdata = test_data, type = "response")
+
+range(pred)
+```
+
+
+
+
 #### Logistic Regression - Accuracy
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
-# Evaluate the model on the test dataset
-predicted_classes_logistic <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.5, "Yes", "No")
+# Evaluate the logistic regression model on the test dataset using a threshold of 0.25 for classification.
+# Predicted_classes_logistic variable stores the predicted classes based on the logistic regression model.
 
-# Convert test_data$q6_binary to a factor with the same levels as predicted_classes
+predicted_classes_logistic <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.25, "Yes", "No")
+
+# Convert the original test_data$q6_binary variable to a factor with the same levels as predicted_classes_logistic.
+# This step ensures that both the observed and predicted classes have the same factor levels for comparison.
+
 test_data$q6_binary <- factor(test_data$q6_binary, levels = c("Yes", "No"))
 
-# Convert predicted_classes to a factor with the same levels as test_data$q6_binary
+# Convert the predicted_classes_logistic variable to a factor with the same levels as test_data$q6_binary.
+# This is necessary for creating the confusion matrix to compare the predicted and observed classes.
+
 predicted_classes_logistic <- factor(predicted_classes_logistic, levels = c("Yes", "No"))
 
-# Create the confusion matrix
+# Create the confusion matrix using the predicted classes and the actual classes.
+# The confusion matrix helps assess the model's performance in classifying instances into true positive, true negative, false positive, and false negative.
+
 confusion_matrix <- confusionMatrix(predicted_classes_logistic, test_data$q6_binary)
 
-
-# Calculate accuracy
-accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
-
-# Print the model summary, accuracy, and confusion matrix
-summary(logistic_mod)
-
-print(paste("Accuracy:", accuracy * 100))
-print(confusion_matrix)
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-anova(logistic_mod, test="Chisq")
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-library(pscl)
-pscl::pR2(logistic_mod)["McFadden"]
-
-
-pR2(logistic_mod)
-
-
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-caret::varImp(logistic_mod)
-
-car::vif(logistic_mod)
-
-```
-
-
-
-
-
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-# Load the required libraries
-library(pROC)
-
-# Predict probabilities for the test data
-predicted_probs <- predict(logistic_mod, newdata = test_data, type = "response")
-
-# Create ROC curve
-roc_curve <- roc(test_data$q6_binary, predicted_probs)
-
-# Plot ROC curve
-plot(roc_curve, main = "ROC Curve for Logistic Regression Model",
-     col = "blue", lwd = 2)
-
-# Add 45-degree diagonal line for reference (random classifier)
-abline(a = 0, b = 1, lty = 2)
-
-# Add text with AUC (Area Under the Curve) value
-auc_val <- auc(roc_curve)
-text(0.7, 0.3, paste("AUC =", round(auc_val, 2)), col = "blue", cex = 1.2)
-
-# Add legend
-legend("bottomright", legend = c("Logistic Model", "Random Classifier"),
-       col = c("blue", "black"), lty = c(1, 2), lwd = c(2, 1),
-       cex = 0.8, bty = "n")
-
-```
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-hist(residuals(logistic_mod), col = "steelblue")
-```
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-#create fitted value vs residual plot
-plot(fitted(logistic_mod), residuals(logistic_mod))
-
-#add horizontal line at 0
-abline(h = 0, lty = 2)
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-library(knitr)
-library(tidyverse)
-library(ggplot2)
-library(mice)
-library(lattice)
-library(reshape2)
-
-#install.packages("DataExplorer") 
-library(DataExplorer)
-```
-
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-
-str(example_dat)
-summary(example_dat)
-
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-
-#data_new[, 1:6] <- scale(example_dat[, 1:6])
-
-
-#create a list of random number ranging from 1 to number of rows from actual data 
-#and 70% of the data into training data  
-
-data2 = sort(sample(nrow(example_dat), nrow(example_dat)*.8))
-
-#creating training data set by selecting the output row values
-train <- example_dat[data2,]
-
-#creating test data set by not selecting the output row values
-test <- example_dat[-data2,]
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-dim(train)
-dim(test)
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-## fit a logistic regression model with the training dataset
-log.model <- glm(q6_binary ~., data = example_dat, family = binomial(link = "logit"))
-summary(log.model)
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-log.predictions <- predict(log.model, test, type="response")
-
-## Look at probability output
-head(log.predictions)
-
-log.prediction.rd <- ifelse(log.predictions > 0.5, 1, 0)
-head(log.prediction.rd, 10)
-```
-
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-table(log.prediction.rd, test[,7])
-
-
-accuracy <- table(log.prediction.rd, test[,7])
-sum(diag(accuracy))/sum(accuracy)
-```
-
-
-#### Decision tree - Accuracy
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-
-# Predict the classes using the decision tree model
-predicted_classes_dt <- predict(decision_tree, newdata = test_data, type = "class")
-
-# Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes_logistic, test_data$q6_binary)
-
-# Calculate accuracy
-accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
-
-
-summary(decision_tree)
-# Print the accuracy and confusion matrix
-print(paste("Accuracy:", accuracy * 100))
+# Print the confusion matrix, which includes the counts of true positives, true negatives, false positives, and false negatives.
 print(confusion_matrix)
 
+# Calculate and print the model's accuracy, precision, and F1-Score from the confusion matrix.
+
+accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+precision <- confusion_matrix$byClass["Precision"]
+f1_score <- confusion_matrix$byClass["F1"]
+
+print(paste("Accuracy:", accuracy * 100))
+print(paste("Precision:", round(precision, 4) * 100))
+print(paste("F1-Score:", round(f1_score, 4) * 100))
+
 ```
 
 
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
+# Evaluate the goodness-of-fit of the logistic regression model using the Hosmer-Lemeshow test with 10 bins.
+# The performance_hosmer function assesses how well the model's predicted probabilities match the observed outcomes.
+
+performance_hosmer(logistic_mod, n_bins = 10)
+
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+# Perform an analysis of deviance (ANOVA) using the Chi-squared test on the logistic regression model.
+
+anova(logistic_mod, test = "Chisq")
+
+```
+
+
+
+```{r}
+
+# Calculate AIC (Akaike Information Criterion) for the logistic regression model.
+# AIC is a measure of the model's goodness of fit, considering both the model's accuracy and complexity. 
+# Lower AIC values indicate a better fit, balancing the trade-off between model performance and simplicity.
+
+aic_value <- AIC(logistic_mod)
+
+# Calculate BIC (Bayesian Information Criterion) for the logistic regression model.
+# BIC is similar to AIC but penalizes more for model complexity, making it suitable for model selection.
+# Like AIC, lower BIC values indicate a better fit with a balance between accuracy and model simplicity.
+
+bic_value <- BIC(logistic_mod)
+
+# Print the AIC and BIC values rounded to two decimal places.
+
+print(paste("AIC Value:", round(aic_value, 2)))
+
+print(paste("BIC Value:", round(bic_value, 2)))
+
+```
 
 
 #### Naive bayes - Accuracy
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
-# Predict the classes using the Naive Bayes model
-predicted_classes_nb <- predict(naive_bayes, newdata = test_data)
+# Predict the probabilities of each class using the Naive Bayes model
+predicted_probs_nb <- predict(naive_bayes, newdata = test_data, type = "prob")
 
-# Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes_nb, test_data$q6_binary)
 
-# Calculate accuracy
-accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
+# Convert the probabilities to class predictions using the threshold
+predicted_classes_nb_threshold <- ifelse(predicted_probs_nb[, "Yes"] > 0.2, "Yes", "No")
 
-# Print the accuracy and confusion matrix
-print(paste("Accuracy:", accuracy * 100))
-print(confusion_matrix)
+# Convert the predicted classes to factor with the same levels as the test data
+predicted_classes_nb_threshold <- factor(predicted_classes_nb_threshold, levels = levels(test_data$q6_binary))
 
-summary(naive_bayes)
+
+# Create the confusion matrix with threshold
+confusion_matrix_nb_threshold <- confusionMatrix(predicted_classes_nb_threshold, test_data$q6_binary)
+
+# Print the confusion matrix, which includes the counts of true positives, true negatives, false positives, and false negatives.
+print(confusion_matrix_nb_threshold)
+
+
+# Calculate and print the model's accuracy, precision, and F1-Score from the confusion matrix.
+
+accuracy_nb_threshold <- round(confusion_matrix_nb_threshold$overall["Accuracy"], digits = 4)
+
+precision <- confusion_matrix_nb_threshold$byClass["Precision"]
+
+f1_score <- confusion_matrix_nb_threshold$byClass["F1"]
+
+
+print(paste("Accuracy:", accuracy_nb_threshold * 100))
+
+print(paste("Precision:", round(precision, 4) * 100))
+
+print(paste("F1-Score:", round(f1_score, 4) * 100))
+
 ```
-
-
-
-#### SVM - Accuracy
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-
-# Predict the classes using the SVM model
-predicted_classes_svm <- predict(svm_model, newdata = test_data)
-
-# Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classes_svm, test_data$q6_binary)
-
-# Calculate accuracy
-accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
-
-# Print the accuracy and confusion matrix
-print(paste("Accuracy:", accuracy * 100))
-print(confusion_matrix)
-summary(svm_model)
-```
-
-
 
 
 
@@ -2115,12 +2015,13 @@ summary(svm_model)
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
+# Prepare the dataset by selecting specific columns for analysis
 example_dat1 <- n1 %>% dplyr::select(q14,ageclass,q52,key1,lho,q330_1,q330_2)
 
 # Drop rows with missing values
 example_dat1 <- example_dat1 %>% drop_na()
 
-# Convert variables to appropriate data types
+# Convert variables to appropriate data types for modeling
 example_dat1 <- example_dat1 %>% mutate(q14_binary = as.factor(q14),
                                       ageclass = as.factor(as.character(ageclass)),
                                       q52 = as.factor(as.character(q52)),
@@ -2131,29 +2032,20 @@ example_dat1 <- example_dat1 %>% mutate(q14_binary = as.factor(q14),
 
 
 
-# Create a training and testing dataset
+# Create a training and testing dataset using 80-20 split
+
 set.seed(123)
 trainIndex1 <- createDataPartition(example_dat1$q14_binary, p = 0.8, list = FALSE)
 train_data1 <- example_dat1[trainIndex1, ]
 test_data1 <- example_dat1[-trainIndex1, ]
 
 
-# Fit the logistic regression model
-logistic_mod1 <- glm(q14_binary ~ ageclass + q52+key1+lho+q330_1+q330_2, data = train_data1, family = "binomial")
+# Fit the logistic regression model with specified predictors
+logistic_mod1 <- glm(q14_binary ~ ageclass + q52 + key1 + lho + q330_1 + q330_2, data = train_data1, family = "binomial")
 
-# Fit decision tree model
-decision_tree1 <- rpart(q14_binary ~ ageclass + q52+key1+lho+q330_1+q330_2, data = train_data1, method = "class")
+# Fit the Naive Bayes model with the same predictors as logistic regression
+naive_bayes1 <- naive_bayes(q14_binary ~ ageclass + q52 + key1 + lho + q330_1 + q330_2, data = train_data1)
 
-# Fit Naive Bayes model
-naive_bayes1 <- naive_bayes(q14_binary ~ ageclass + q52+key1+lho+q330_1+q330_2, data = train_data1)
-
-# Fit SVM model
-svm_model1 <- svm(q14_binary ~ ageclass + q52+key1+lho+q330_1+q330_2, data = train_data1, kernel = "linear")
-
-```
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-train_data1$q14|> table()
 ```
 
 
@@ -2162,7 +2054,7 @@ train_data1$q14|> table()
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Evaluate the model on the test dataset
-predicted_classeslog1 <- ifelse(predict(logistic_mod1, newdata = test_data1, type = "response") > 0.5, "Yes", "No")
+predicted_classeslog1 <- ifelse(predict(logistic_mod1, newdata = test_data1, type = "response") > 0.7, "Yes", "No")
 
 # Convert test_data$q6_binary to a factor with the same levels as predicted_classes
 test_data1$q14_binary <- factor(test_data1$q14_binary, levels = c("Yes", "No"))
@@ -2171,83 +2063,100 @@ test_data1$q14_binary <- factor(test_data1$q14_binary, levels = c("Yes", "No"))
 predicted_classeslog1 <- factor(predicted_classeslog1, levels = c("Yes", "No"))
 
 # Create the confusion matrix
-confusion_matrix <- confusionMatrix(predicted_classeslog1, test_data1$q14_binary)
-
-# Calculate accuracy
-accuracy <- round(confusion_matrix$overall["Accuracy"], digits = 4)
-
-# Print the model summary, accuracy, and confusion matrix
-summary(logistic_mod1)
-
-print(paste("Accuracy:", accuracy * 100))
-print(confusion_matrix)
-
-```
+confusion_matrix1 <- confusionMatrix(predicted_classeslog1, test_data1$q14_binary)
 
 
+# Print the model summary
+#summary(logistic_mod1)
 
-#### Decision tree - Accuracy
-
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-# Predict the classes using the decision tree model
-predicted_classesdt1 <- predict(decision_tree1, newdata = test_data1, type = "class")
-
-# Create the confusion matrix
-confusion_matrix1 <- confusionMatrix(predicted_classesdt1, test_data1$q14_binary)
-
-# Calculate accuracy
-accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
-
-# Print the accuracy and confusion matrix
-print(paste("Accuracy (Decision Tree):", accuracy * 100))
+# Print the confusion matrix, which includes the counts of true positives, true negatives, false positives, and false negatives.
 print(confusion_matrix1)
 
+
+# Calculate and print the model's accuracy, precision, and F1-Score from the confusion matrix.
+
+accuracy1 <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
+
+precision1 <- confusion_matrix1$byClass["Precision"]
+
+f1_score1<- confusion_matrix1$byClass["F1"]
+
+
+print(paste("Accuracy:", accuracy1 * 100))
+print(paste("Precision:", round(precision1, 4) * 100))
+print(paste("F1-Score:", round(f1_score1, 4) * 100))
+
 ```
 
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+# Evaluate the goodness-of-fit of the logistic regression model using the Hosmer-Lemeshow test with 10 bins.
+
+performance_hosmer(logistic_mod1, n_bins = 10)
+
+```
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+# Perform an analysis of deviance (ANOVA) using the Chi-squared test on the logistic regression model.
+anova(logistic_mod1, test="Chisq")
+```
+
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
+# Calculate AIC (Akaike Information Criterion) for the logistic regression model.
+# AIC is a measure of the model's goodness of fit, considering both the model's accuracy and complexity. 
+# Lower AIC values indicate a better fit, balancing the trade-off between model performance and simplicity.
+
+aic_value <- AIC(logistic_mod1)
+
+
+# Calculate BIC (Bayesian Information Criterion) for the logistic regression model.
+# BIC is similar to AIC but penalizes more for model complexity, making it suitable for model selection.
+# Like AIC, lower BIC values indicate a better fit with a balance between accuracy and model simplicity.
+bic_value <- BIC(logistic_mod1)
+
+
+# Print the AIC and BIC values rounded to two decimal places.
+print(paste("AIC Value:", round(aic_value, 2)))
+
+print(paste("BIC Value:", round(bic_value, 2)))
+
+```
 
 
 
 #### Naive bayes - Accuracy
+
+
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
-# Predict the classes using the Naive Bayes model
-predicted_classesnb1 <- predict(naive_bayes1, newdata = test_data1)
+# Predict the class probabilities using the Naive Bayes model
+predicted_probs_nb1 <- predict(naive_bayes1, newdata = test_data1, type = "prob")
 
-# Create the confusion matrix
-confusion_matrix1 <- confusionMatrix(predicted_classesnb1, test_data1$q14_binary)
 
-# Calculate accuracy
-accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
+# Create a vector to store the predicted classes based on the threshold
+predicted_classes_nb1_threshold <- ifelse(predicted_probs_nb1[, "Yes"] > 0.75, "Yes", "No")
 
-# Print the accuracy and confusion matrix
-print(paste("Accuracy:", accuracy * 100))
-print(confusion_matrix1)
+# Ensure both predicted classes and test_data1$q14_binary have the same levels
+predicted_classes_nb1_threshold <- factor(predicted_classes_nb1_threshold, levels = levels(test_data1$q14_binary))
 
-# Summarize the Naive Bayes model
-summary(naive_bayes1)
+# Create the confusion matrix with threshold
+confusion_matrix_nb1_threshold <- confusionMatrix(predicted_classes_nb1_threshold, test_data1$q14_binary)
+
+
+# Print confusion matrix with threshold
+print(confusion_matrix_nb1_threshold)
+
+
+# Calculate and print the model's accuracy, precision, and F1-Score from the confusion matrix.
+accuracy_nb1_threshold <- round(confusion_matrix_nb1_threshold$overall["Accuracy"], digits = 4)
+precision <- confusion_matrix_nb1_threshold$byClass["Precision"]
+f1_score <- confusion_matrix_nb1_threshold$byClass["F1"]
+
+
+print(paste("Accuracy:", accuracy_nb1_threshold * 100))
+print(paste("Precision:", round(precision, 4) * 100))
+print(paste("F1-Score:", round(f1_score, 4) * 100))
 
 ```
-
-
-
-#### SVM - Accuracy
-```{r,echo = FALSE, warning=FALSE,message=FALSE}
-# Predict the classes using the SVM model
-predicted_classessvm1 <- predict(svm_model1, newdata = test_data1)
-
-# Create the confusion matrix
-confusion_matrix1 <- confusionMatrix(predicted_classessvm1, test_data1$q14_binary)
-
-# Calculate accuracy
-accuracy <- round(confusion_matrix1$overall["Accuracy"], digits = 4)
-
-# Print the accuracy and confusion matrix
-print(paste("Accuracy:", accuracy * 100))
-print(confusion_matrix1)
-
-
-```
-
-
-
-
 
