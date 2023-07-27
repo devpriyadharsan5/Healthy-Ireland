@@ -2108,19 +2108,19 @@ anova(logistic_mod1, test="Chisq")
 # AIC is a measure of the model's goodness of fit, considering both the model's accuracy and complexity. 
 # Lower AIC values indicate a better fit, balancing the trade-off between model performance and simplicity.
 
-aic_value <- AIC(logistic_mod1)
+aic_value1 <- AIC(logistic_mod1)
 
 
 # Calculate BIC (Bayesian Information Criterion) for the logistic regression model.
 # BIC is similar to AIC but penalizes more for model complexity, making it suitable for model selection.
 # Like AIC, lower BIC values indicate a better fit with a balance between accuracy and model simplicity.
-bic_value <- BIC(logistic_mod1)
+bic_value1 <- BIC(logistic_mod1)
 
 
 # Print the AIC and BIC values rounded to two decimal places.
-print(paste("AIC Value:", round(aic_value, 2)))
+print(paste("AIC Value:", round(aic_value1, 2)))
 
-print(paste("BIC Value:", round(bic_value, 2)))
+print(paste("BIC Value:", round(bic_value1, 2)))
 
 ```
 
