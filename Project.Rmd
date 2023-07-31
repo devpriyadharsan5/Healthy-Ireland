@@ -22,6 +22,7 @@ suppressWarnings(library(magrittr))
 suppressWarnings(library(naivebayes))
 suppressWarnings(library(performance))
 suppressWarnings(library(plyr))
+suppressWarnings(library(pROC))
 suppressWarnings(library(psych)) 
 suppressWarnings(library(sf))
 suppressWarnings(library(tibble))
@@ -1819,7 +1820,6 @@ Overall, the analysis reveals variations in self-perceived health across differe
 
 ### Models - Smoking
 
-
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Select relevant variables
@@ -1853,7 +1853,8 @@ naive_bayes <- naive_bayes(q6_binary ~ ageclass + q52+key1+lho+q120, data = trai
 
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 # Generate predicted probabilities
 predicted_probs <- predict(logistic_mod, newdata = train_data, type = "response")
 
@@ -1879,12 +1880,31 @@ legend("topright", legend = c("Observed Data"),
 ```
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 pred <- predict(logistic_mod, newdata = test_data, type = "response")
 
 range(pred)
 ```
 
+
+
+#### Finding the Optimal Threshold for Logistic Regression using ROC Curve and Youden's J Statistic
+
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
+# Get the predicted probabilities from the logistic regression model
+predicted_probabilities <- predict(logistic_mod, newdata = test_data, type = "response")
+
+# Create an ROC curve object
+roc_curve <- roc(test_data$q6_binary, predicted_probabilities)
+
+# Find the optimal threshold that maximizes the Youden Index (J) or Youden's J statistic
+optimal_threshold <- coords(roc_curve, "best", ret = "threshold")
+
+# Print the optimal threshold
+print(paste("Optimal Threshold:", round(optimal_threshold, 2)))
+
+```
 
 
 
@@ -1895,7 +1915,7 @@ range(pred)
 # Evaluate the logistic regression model on the test dataset using a threshold of 0.25 for classification.
 # Predicted_classes_logistic variable stores the predicted classes based on the logistic regression model.
 
-predicted_classes_logistic <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.25, "Yes", "No")
+predicted_classes_logistic <- ifelse(predict(logistic_mod, newdata = test_data, type = "response") > 0.2, "Yes", "No")
 
 # Convert the original test_data$q6_binary variable to a factor with the same levels as predicted_classes_logistic.
 # This step ensures that both the observed and predicted classes have the same factor levels for comparison.
@@ -1968,6 +1988,8 @@ print(paste("AIC Value:", round(aic_value, 2)))
 print(paste("BIC Value:", round(bic_value, 2)))
 
 ```
+
+
 
 
 #### Naive bayes - Accuracy
@@ -2049,12 +2071,28 @@ naive_bayes1 <- naive_bayes(q14_binary ~ ageclass + q52 + key1 + lho + q330_1 + 
 ```
 
 
+#### Finding the Optimal Threshold for Logistic Regression using ROC Curve and Youden's J Statistic
+
+```{r}
+# Get the predicted probabilities from the logistic regression model
+predicted_probabilities1 <- predict(logistic_mod1, newdata = test_data1, type = "response")
+
+# Create an ROC curve object
+roc_curve1 <- roc(test_data1$q14_binary, predicted_probabilities1)
+
+# Find the optimal threshold that maximizes the Youden Index (J) or Youden's J statistic
+optimal_threshold1 <- coords(roc_curve1, "best", ret = "threshold")
+
+# Print the optimal threshold
+print(paste("Optimal Threshold:", round(optimal_threshold1, 2)))
+```
+
 
 #### Logistic Regression - Accuracy
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Evaluate the model on the test dataset
-predicted_classeslog1 <- ifelse(predict(logistic_mod1, newdata = test_data1, type = "response") > 0.7, "Yes", "No")
+predicted_classeslog1 <- ifelse(predict(logistic_mod1, newdata = test_data1, type = "response") > 0.82, "Yes", "No")
 
 # Convert test_data$q6_binary to a factor with the same levels as predicted_classes
 test_data1$q14_binary <- factor(test_data1$q14_binary, levels = c("Yes", "No"))
@@ -2135,7 +2173,7 @@ predicted_probs_nb1 <- predict(naive_bayes1, newdata = test_data1, type = "prob"
 
 
 # Create a vector to store the predicted classes based on the threshold
-predicted_classes_nb1_threshold <- ifelse(predicted_probs_nb1[, "Yes"] > 0.75, "Yes", "No")
+predicted_classes_nb1_threshold <- ifelse(predicted_probs_nb1[, "Yes"] > 0.82, "Yes", "No")
 
 # Ensure both predicted classes and test_data1$q14_binary have the same levels
 predicted_classes_nb1_threshold <- factor(predicted_classes_nb1_threshold, levels = levels(test_data1$q14_binary))
