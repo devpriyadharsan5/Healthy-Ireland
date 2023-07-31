@@ -1,9 +1,8 @@
 ---
 title: "Exploring the Relationship between Smoking, Alcohol Consumption, and Demographic Factors: A Survey-Based Analysis"
-
 author: "Devpriyadharsan Balan Saravanan - 22250355"
-
 output:
+  pdf_document: default
   html_document: default
 ---
 
@@ -87,7 +86,7 @@ n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
 
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
-table(n1$q6,exclude = NULL)
+#table(n1$q6,exclude = NULL)
 ```
 
 ###  1. What percentage of the population smokes and how does this vary by age?
@@ -1967,7 +1966,7 @@ anova(logistic_mod, test = "Chisq")
 
 
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Calculate AIC (Akaike Information Criterion) for the logistic regression model.
 # AIC is a measure of the model's goodness of fit, considering both the model's accuracy and complexity. 
@@ -2073,7 +2072,7 @@ naive_bayes1 <- naive_bayes(q14_binary ~ ageclass + q52 + key1 + lho + q330_1 + 
 
 #### Finding the Optimal Threshold for Logistic Regression using ROC Curve and Youden's J Statistic
 
-```{r}
+```{r,echo = FALSE, warning=FALSE,message=FALSE}
 # Get the predicted probabilities from the logistic regression model
 predicted_probabilities1 <- predict(logistic_mod1, newdata = test_data1, type = "response")
 
