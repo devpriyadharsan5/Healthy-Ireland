@@ -32,34 +32,42 @@ suppressWarnings(library(xgboost))
 
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 # Read the data from the SPSS file
 data <- read_sav("0021-04_healthy_ireland_2018.sav")
 ```
 
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
-df1 <- data[c("q6", "q7", "q8", "slq9b", "q10", "q11", "q13", "q340", "q348", "q349")]
+
 # Select columns "q6", "q7", "q8", "slq9b", "q10", "q11", "q13", "q340", "q348", "q349" from the original data frame and assign it to df1.
+df1 <- data[c("q6", "q7", "q8", "slq9b", "q10", "q11", "q13", "q340", "q348", "q349")]
 
-df2 <- data[c("q14", "exq15", "exq18")]
+
 # Select columns "q14", "exq15", "exq18" from the original data frame and assign it to df2.
+df2 <- data[c("q14", "exq15", "exq18")]
 
-df3 <- data[c("spq1", "q52", "q55", "q58", "q120", "q205", "q208", "q308")]
+
 # Select columns "spq1", "q52", "q55", "q58", "q120", "q205", "q208", "q308" from the original data frame and assign it to df3.
+df3 <- data[c("spq1", "q52", "q55", "q58", "q120", "q205", "q208", "q308")]
 
-df4 <- data[c("q229", "q230", "q231", "q232", "q233", "q330_1", "q330_2", "q330_3")]
+
 # Select columns "q229", "q230", "q231", "q232", "q233", "q330_1", "q330_2", "q330_3" from the original data frame and assign it to df4.
+df4 <- data[c("q229", "q230", "q231", "q232", "q233", "q330_1", "q330_2", "q330_3")]
 
-df5 <- data[c("q63b", "lho", "key1", "ageclass", "countbirth")]
+
 # Select columns "q63b", "lho", "key1", "ageclass", "countbirth" from the original data frame and assign it to df5.
+df5 <- data[c("q63b", "lho", "key1", "ageclass", "countbirth")]
 
 ```
 
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 #combines the previously created data frames
 newdata <- cbind(df1, df2,df3,df4,df5) 
 
+# Write the 'newdata' data frame to an SPSS SAV file named "newdata.sav"
 #write_sav(newdata, "newdata.sav") 
 ```
 
@@ -76,18 +84,19 @@ newdata <- cbind(df1, df2,df3,df4,df5)
 
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 #converting to factors
 
 n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
 
-#table(n1$q6,exclude = NULL)
 ```
-
 
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 #table(n1$q6,exclude = NULL)
 ```
+
+
 
 ###  1. What percentage of the population smokes and how does this vary by age?
 
@@ -108,7 +117,7 @@ s1 <- n1 %>%
 
 
 
-# Calculate the percentage of individuals in each group ## Code modified by NC
+# Calculate the percentage of individuals in each group 
 smoking_by_age <- 
   s1 %>% 
   group_by(ageclass, q6) %>%  # Group the data by age group and smoking status
@@ -118,6 +127,7 @@ smoking_by_age <-
   dplyr::summarise(perc = count*100/sum(count),  # Calculate the percentage within each age group
                    q6 = q6) %>%  # Keep the smoking status variable for plotting purposes
   arrange(ageclass)  # Arrange the data by age group in ascending order
+
 
 
 # Plot the results
@@ -185,7 +195,6 @@ q1 <- n1 %>%
 
 chisq.test(q1)  # Perform the chi-squared test
 
-
 ```
 
 
@@ -205,10 +214,10 @@ s2 <- n1 %>%
 
 
 
-# Calculate the percentage of smokers by gender
+# Calculate the percentage of smokers and non-smokers for each gender
 smoking_by_gender <- 
   s2 %>%
-  group_by(q52, q6) %>%
+  group_by(q52, q6) %>% # Group the data by 'q52' (gender) and 'q6' (smoking status)
   dplyr::summarise(count = sum(count)) %>%
   ungroup() %>%
   group_by(q52) %>%
@@ -258,6 +267,7 @@ Efforts to reduce smoking rates should consider the gender-specific factors that
 
 #### Chi-squared test
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 q2<- n1 |> dplyr::select(q6,q52)|> # Select the variables of interest
   table() # Create a contingency table
 
@@ -278,6 +288,7 @@ s3 <- n1 %>%
   dplyr::mutate(perc = count/sum(count)*100) %>%
   dplyr::select(key1, q6, count)  # Create a summary table with counts and percentages of smokers by socioeconomic status (key1)
 
+
 smoking_by_ses <- 
   s3 %>% 
   group_by(key1, q6) %>% 
@@ -287,6 +298,7 @@ smoking_by_ses <-
   dplyr::summarise(perc = count*100/sum(count),
                    q6 = q6) %>%   # Calculate the percentage of smokers within each socioeconomic status category
   arrange(key1)  
+
 
 # Plot the results
 ggplot(smoking_by_ses, aes(x = key1, y = perc, fill = q6)) +
@@ -498,6 +510,7 @@ It is important to address these regional disparities in smoking rates to promot
 
 #### Chi-squared test
 ```{r,echo = FALSE, warning=FALSE,message=FALSE} 
+
 q4<- n1 |> dplyr::select(q6,lho)|> # Select the variables of interest
   table() # Create a contingency table
 
@@ -701,9 +714,9 @@ Overall, the analysis shows that while smoking can have negative health effects,
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
 
-
 # Select the relevant columns for analysis
 s7 <- n1[c("q6", "q52", "ageclass", "q55")]
+
 
 # Calculate the percentage of individuals with private health insurance by smoking status, gender, and age
 health_ins_smoke <- s7 %>%
@@ -714,6 +727,7 @@ health_ins_smoke <- s7 %>%
   group_by(q6, q52, ageclass) %>%
   dplyr::mutate(perc = count*100/sum(count))  # Calculate the percentage within each group
 
+
 # Plot the results
 ggplot(health_ins_smoke, aes(x = ageclass, y = perc, fill = q55)) +
   geom_bar(stat = "identity") +  # Create a bar plot
@@ -723,7 +737,6 @@ ggplot(health_ins_smoke, aes(x = ageclass, y = perc, fill = q55)) +
   guides(color = guide_legend(nrow = 2, byrow = TRUE, reverse = TRUE)) +  # Adjust the appearance of the legend
   theme(axis.text.x = element_text(angle = 90, vjust = 0, hjust = 1), plot.title = element_text(lineheight = 1.1)) +  # Adjust the appearance of the x-axis labels and plot title
   facet_grid(~(q6) + ~(q52), labeller = label_both)  # Create facets based on smoking status and gender
-
 
 ```
 
@@ -795,8 +808,10 @@ Let's analyze the relationship between smoking status, gender, age group, and th
 
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-# Select the relevant columns for analysis
+
+# Select the relevant variabels for analysis
 s8 <- n1[c("q6", "ageclass", "q63b")]
+
 
 # Calculate the percentage of individuals by smoking status, age group, and chief income earner category
 income <- s8 %>%
@@ -806,6 +821,7 @@ income <- s8 %>%
   ungroup() %>%
   group_by(ageclass, q63b) %>%
   dplyr::mutate(perc = count*100/sum(count), q6 = q6)  # Calculate the percentage within each group
+
 
 # Plot the results
 ggplot(income, aes(x = ageclass, y = perc, fill = q6)) +
@@ -870,8 +886,10 @@ It's important to note that being the Chief Income Earner can depend on various 
 ### 9. What percentage of the population consumes alcohol and how does this vary by age?
 
 ```{r, echo = FALSE, warning=FALSE,message=FALSE}
-# Recode values in column q14 to "Yes" or "No"
+
+# Recode values in column q14 to "Yes" and "No"
 n1$q14 <- ifelse(n1$q14 %in% c("Yes", "Have only had a few sips of alcohol in my lifetime"), "Yes", "No")
+
 
 # Group the data by alcohol consumption and age group, and calculate counts
 s9 <- n1 %>% 
@@ -882,6 +900,7 @@ s9 <- n1 %>%
   group_by(ageclass) %>%
   dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage within each age group
   dplyr::select(ageclass, q14, count)  # Select relevant columns
+
 
 # Calculate the percentage of individuals by alcohol consumption and age group
 drinking_by_age <- 
@@ -894,6 +913,7 @@ drinking_by_age <-
                    q14 = q14) %>% 
   arrange(ageclass)  # Arrange the data by age group
 
+
 # Plot the results
 ggplot(drinking_by_age, aes(x = ageclass, y = perc, fill = q14)) +
   geom_bar(stat = "identity") +  # Create a bar plot
@@ -901,7 +921,6 @@ ggplot(drinking_by_age, aes(x = ageclass, y = perc, fill = q14)) +
   labs(x = "Age", y = "Percentage") +  # Add labels for x-axis and y-axis
   ggtitle("Alcohol Consumption by Age Group") +  # Add a title to the plot
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # Adjust the appearance of the x-axis labels
-
 
 ```
 
@@ -939,12 +958,12 @@ These findings align with general trends in alcohol consumption, where younger i
 
 #### Chi-squared test
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 q5 <- n1 %>%
   dplyr::select(q14, ageclass) |>  # Select the variables of interest
   table()  # Create a contingency table
 
 chisq.test(q5)  # Perform the chi-squared test
-
 
 ```
 
@@ -1014,6 +1033,7 @@ Based on the data, it can be concluded that there is a moderate association betw
 
 #### Chi-squared test
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 q6<- n1 |> dplyr::select(q14,q52)|> # Select the variables of interest
   table() # Create a contingency table
 
@@ -1036,6 +1056,7 @@ s11 <- n1 %>%
   dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage within each socioeconomic status
   dplyr::select(key1, q14, count)  # Select relevant columns
 
+
 # Calculate the percentage of individuals by alcohol consumption and socioeconomic status
 drinking_by_sec <- 
   s11 %>% 
@@ -1046,6 +1067,7 @@ drinking_by_sec <-
   dplyr::summarise(perc = count*100/sum(count),
                    q14 = q14) %>% 
   arrange(key1)  # Arrange the data by socioeconomic status
+
 
 # Plot the results
 ggplot(drinking_by_sec, aes(x = key1, y = perc, fill = q14)) +
@@ -1093,6 +1115,7 @@ Based on the data, it can be concluded that there is a moderate association betw
 
 #### Chi-squared test
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 q7<- n1 |> dplyr::select(q14,key1)|> # Select the variables of interest
   table() # Create a contingency table
 
@@ -1115,6 +1138,7 @@ s12 <- n1 %>%
   dplyr::mutate(perc = count/sum(count)*100) |>  # Calculate the percentage within each region
   dplyr::select(lho, q14, count)  # Select relevant columns
 
+
 # Calculate the percentage of individuals by alcohol consumption and region
 drinking_by_region <- 
   s12 %>% 
@@ -1125,6 +1149,7 @@ drinking_by_region <-
   dplyr::summarise(perc = count*100/sum(count),
                    q14 = q14) %>% 
   arrange(lho)  # Arrange the data by region
+
 
 # Plot the results
 ggplot(drinking_by_region, aes(x = lho, y = perc, fill = q14)) +
@@ -1183,6 +1208,7 @@ These findings highlight the importance of considering regional variations in al
 
 #### Chi-squared test
 ```{r,echo = FALSE, warning=FALSE,message=FALSE} 
+
 q8<- n1 |> dplyr::select(q14,lho)|> # Select the variables of interest
   table() # Create a contingency table
 
@@ -1226,6 +1252,7 @@ ggplot(drinking_by_country, aes(x = countbirth, y = perc, fill = q14)) +
   labs(x = "County", y = "Percentage")+
   theme(axis.text.x = element_text(angle = 30,hjust=1))+
   ggtitle ("Variations in Alcohol Consumption Based on Country of Birth")
+
 ```
 
 
@@ -1271,8 +1298,8 @@ Understanding the factors influencing alcohol consumption behaviors is essential
 
 s14 <- n1[c("q14", "ageclass", "q52", "spq1")]
 
-# Calculate the percentage of smoking by age, gender, and health condition
 
+# Calculate the percentage of smoking by age, gender, and health condition
 h1 <- s14 %>%
   group_by(q14,ageclass,q52,spq1) %>% # Group the dataframe by alcohol consumption, age group, gender, and health condition
 
@@ -1564,11 +1591,6 @@ suppl <- s17 %>%
 # Filter out the records with "Don’t know/refused" in the "q120" column
 suppl <- suppl %>%
   filter(q120 != "Don’t know/refused")
-
-
-# Recode the values in the "q120" column to combine "No", "Don’t know/refused" as "No" and keep the rest as "Yes"
-suppl$q120 <- ifelse(suppl$q120 %in% c("No", "Don’t know/refused"), "No", "Yes")
-
 
 
 folic <- 
@@ -1897,6 +1919,9 @@ predicted_probabilities <- predict(logistic_mod, newdata = test_data, type = "re
 # Create an ROC curve object
 roc_curve <- roc(test_data$q6_binary, predicted_probabilities)
 
+# Print the AUC Value
+print(roc_curve)
+
 # Find the optimal threshold that maximizes the Youden Index (J) or Youden's J statistic
 optimal_threshold <- coords(roc_curve, "best", ret = "threshold")
 
@@ -1904,6 +1929,7 @@ optimal_threshold <- coords(roc_curve, "best", ret = "threshold")
 print(paste("Optimal Threshold:", round(optimal_threshold, 2)))
 
 ```
+
 
 
 
@@ -2073,11 +2099,15 @@ naive_bayes1 <- naive_bayes(q14_binary ~ ageclass + q52 + key1 + lho + q330_1 + 
 #### Finding the Optimal Threshold for Logistic Regression using ROC Curve and Youden's J Statistic
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 # Get the predicted probabilities from the logistic regression model
 predicted_probabilities1 <- predict(logistic_mod1, newdata = test_data1, type = "response")
 
 # Create an ROC curve object
 roc_curve1 <- roc(test_data1$q14_binary, predicted_probabilities1)
+
+# Print the AUC Value
+print(roc_curve1)
 
 # Find the optimal threshold that maximizes the Youden Index (J) or Youden's J statistic
 optimal_threshold1 <- coords(roc_curve1, "best", ret = "threshold")
