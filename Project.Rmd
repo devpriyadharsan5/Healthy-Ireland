@@ -1,6 +1,8 @@
 ---
 title: "Exploring the Relationship between Smoking, Alcohol Consumption, and Demographic Factors: A Survey-Based Analysis"
+
 author: "Devpriyadharsan Balan Saravanan - 22250355"
+
 output:
   pdf_document: default
   html_document: default
@@ -88,7 +90,6 @@ newdata <- cbind(df1, df2,df3,df4,df5)
 #converting to factors
 
 n1<- to_factor((newdata), drop_unused_labels=TRUE, ordered=TRUE) #always use n1
-
 ```
 
 
@@ -137,7 +138,6 @@ ggplot(smoking_by_age, aes(x = ageclass, y = perc, fill = q6)) +
   scale_fill_discrete(name = "Do you Smoke?") +
   ggtitle("Smoking by Age") +
   theme(plot.title = element_text(hjust = 0.5))
-
 
 ```
 
@@ -189,6 +189,7 @@ This finding highlights the importance of targeted interventions and prevention 
 
 #### Chi-squared test
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 q1 <- n1 %>%
   dplyr::select(q6, ageclass) |>  # Select the variables of interest
   table()  # Create a contingency table
@@ -355,6 +356,7 @@ It is important to address health disparities and provide support and resources 
 
 #### Chi-squared test
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 q3<- n1 |> dplyr::select(q6,key1)|> # Select the variables of interest
   table() # Create a contingency table
 
@@ -1902,9 +1904,9 @@ legend("topright", legend = c("Observed Data"),
 
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
-pred <- predict(logistic_mod, newdata = test_data, type = "response")
+#pred <- predict(logistic_mod, newdata = test_data, type = "response")
 
-range(pred)
+#range(pred)
 ```
 
 
@@ -1995,16 +1997,13 @@ anova(logistic_mod, test = "Chisq")
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Calculate AIC (Akaike Information Criterion) for the logistic regression model.
-# AIC is a measure of the model's goodness of fit, considering both the model's accuracy and complexity. 
-# Lower AIC values indicate a better fit, balancing the trade-off between model performance and simplicity.
 
 aic_value <- AIC(logistic_mod)
 
 # Calculate BIC (Bayesian Information Criterion) for the logistic regression model.
-# BIC is similar to AIC but penalizes more for model complexity, making it suitable for model selection.
-# Like AIC, lower BIC values indicate a better fit with a balance between accuracy and model simplicity.
 
 bic_value <- BIC(logistic_mod)
+
 
 # Print the AIC and BIC values rounded to two decimal places.
 
@@ -2164,7 +2163,9 @@ performance_hosmer(logistic_mod1, n_bins = 10)
 ```
 
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
+
 # Perform an analysis of deviance (ANOVA) using the Chi-squared test on the logistic regression model.
+
 anova(logistic_mod1, test="Chisq")
 ```
 
@@ -2172,21 +2173,15 @@ anova(logistic_mod1, test="Chisq")
 ```{r,echo = FALSE, warning=FALSE,message=FALSE}
 
 # Calculate AIC (Akaike Information Criterion) for the logistic regression model.
-# AIC is a measure of the model's goodness of fit, considering both the model's accuracy and complexity. 
-# Lower AIC values indicate a better fit, balancing the trade-off between model performance and simplicity.
-
 aic_value1 <- AIC(logistic_mod1)
 
 
 # Calculate BIC (Bayesian Information Criterion) for the logistic regression model.
-# BIC is similar to AIC but penalizes more for model complexity, making it suitable for model selection.
-# Like AIC, lower BIC values indicate a better fit with a balance between accuracy and model simplicity.
 bic_value1 <- BIC(logistic_mod1)
 
 
 # Print the AIC and BIC values rounded to two decimal places.
 print(paste("AIC Value:", round(aic_value1, 2)))
-
 print(paste("BIC Value:", round(bic_value1, 2)))
 
 ```
